@@ -21,7 +21,7 @@ class StreetSweepHandler(xml.sax.handler.ContentHandler):
  
   def reset(self):
 
-    self.data = {"id" : "", "name" : ""}
+    self.data = {"kml_id" : "", "name" : ""}
     for k in self.fields:
       self.data[k] = ""
 
@@ -32,7 +32,7 @@ class StreetSweepHandler(xml.sax.handler.ContentHandler):
   def startElement(self, name, attributes):
 
     if name == "Placemark":
-      self.id = attributes["id"]
+      self.kml_id = attributes["id"]
 
     elif name == "name":
       self.inField = "name"
@@ -83,10 +83,17 @@ class StreetSweepHandler(xml.sax.handler.ContentHandler):
 def convertData(fromKml, toSqlite, append):
     conn = sqlite3.connect(toSqlite)
     c = conn.cursor()
+
+    # Android metadata
+    c.execute("""DROP TABLE IF EXISTS android_metadata""")
+    c.execute("""CREATE TABLE "android_metadata" ("locale" TEXT DEFAULT 'en_US')""")
+    c.execute("""INSERT INTO "android_metadata" VALUES ('en_US')""")
+
     if not append:
         c.execute("""DROP TABLE IF EXISTS street_sweeper_data""")
     c.execute("""CREATE TABLE street_sweeper_data (
-              id text,
+              Id integer PRIMARY KEY AUTOINCREMENT,
+              kml_id text,
               name text, 
               latitude numeric, 
               longitude numeric, 

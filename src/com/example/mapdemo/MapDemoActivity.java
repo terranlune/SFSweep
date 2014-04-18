@@ -1,5 +1,7 @@
 package com.example.mapdemo;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -11,6 +13,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.activeandroid.query.Select;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -20,6 +23,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapDemoActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
@@ -45,6 +49,17 @@ public class MapDemoActivity extends FragmentActivity implements
 			if (map != null) {
 				Toast.makeText(this, "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
 				map.setMyLocationEnabled(true);
+				
+				Log.e("blah", "Loading data from db");
+				List<StreetSweeperData> l = new Select().from(StreetSweeperData.class).limit(1000).execute();
+				Log.e("blah", "Adding data to map");
+				for (StreetSweeperData d : l) {
+
+			        map.addPolyline(new PolylineOptions()
+			        		.add(new LatLng(d.latitude, d.longitude))
+			        		.add(new LatLng(d.end_latitude, d.end_longitude)));
+				}
+				
 			} else {
 				Toast.makeText(this, "Error - Map was null!!", Toast.LENGTH_SHORT).show();
 			}
