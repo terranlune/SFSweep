@@ -1,4 +1,4 @@
-package com.example.mapdemo;
+package com.sfsweep.android;
 
 import java.util.List;
 
@@ -21,13 +21,15 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-public class MapDemoActivity extends FragmentActivity implements
+public class SfSweepActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
-		GooglePlayServicesClient.OnConnectionFailedListener {
+		GooglePlayServicesClient.OnConnectionFailedListener, OnCameraChangeListener {
 
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
@@ -49,6 +51,9 @@ public class MapDemoActivity extends FragmentActivity implements
 			if (map != null) {
 				Toast.makeText(this, "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
 				map.setMyLocationEnabled(true);
+				map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+				
+				map.setOnCameraChangeListener(this);
 				
 				Log.e("blah", "Loading data from db");
 				List<StreetSweeperData> l = new Select().from(StreetSweeperData.class).limit(1000).execute();
@@ -218,6 +223,11 @@ public class MapDemoActivity extends FragmentActivity implements
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			return mDialog;
 		}
+	}
+
+	@Override
+	public void onCameraChange(CameraPosition pos) {
+//		pos.
 	}
 
 }

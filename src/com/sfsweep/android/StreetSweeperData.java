@@ -1,4 +1,4 @@
-package com.example.mapdemo;
+package com.sfsweep.android;
 
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
