@@ -1,5 +1,6 @@
 package com.sfsweep.android;
 
+import java.util.Arrays;
 import java.util.List;
 
 import android.app.Activity;
@@ -13,6 +14,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.activeandroid.query.From;
 import com.activeandroid.query.Select;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -25,6 +27,7 @@ import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class SfSweepActivity extends FragmentActivity implements
@@ -51,19 +54,8 @@ public class SfSweepActivity extends FragmentActivity implements
 			if (map != null) {
 				Toast.makeText(this, "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
 				map.setMyLocationEnabled(true);
-				map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-				
+				map.getUiSettings().setZoomControlsEnabled(false);
 				map.setOnCameraChangeListener(this);
-				
-				Log.e("blah", "Loading data from db");
-				List<StreetSweeperData> l = new Select().from(StreetSweeperData.class).limit(1000).execute();
-				Log.e("blah", "Adding data to map");
-				for (StreetSweeperData d : l) {
-
-			        map.addPolyline(new PolylineOptions()
-			        		.add(new LatLng(d.latitude, d.longitude))
-			        		.add(new LatLng(d.end_latitude, d.end_longitude)));
-				}
 				
 			} else {
 				Toast.makeText(this, "Error - Map was null!!", Toast.LENGTH_SHORT).show();
@@ -155,7 +147,7 @@ public class SfSweepActivity extends FragmentActivity implements
 		if (location != null) {
 			Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT).show();
 			LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18);
 			map.animateCamera(cameraUpdate);
 		} else {
 			Toast.makeText(this, "Current location was null, enable GPS on emulator!", Toast.LENGTH_SHORT).show();
@@ -227,7 +219,33 @@ public class SfSweepActivity extends FragmentActivity implements
 
 	@Override
 	public void onCameraChange(CameraPosition pos) {
-//		pos.
+		LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
+		Log.e("onCameraChange", bounds.toString());
+        fetchData(bounds);
+	}
+	
+	public void fetchData(LatLngBounds bounds) {
+		
+		Object[] args = {bounds.southwest.latitude, bounds.northeast.latitude, 
+							bounds.southwest.longitude, bounds.northeast.longitude,
+							bounds.southwest.latitude, bounds.northeast.latitude, 
+							bounds.southwest.longitude, bounds.northeast.longitude};
+		From query = new Select()
+			.from(StreetSweeperData.class)
+			.where("(latitude BETWEEN ? and ? and longitude BETWEEN ? and ?) OR " +
+				   "(end_latitude BETWEEN ? and ? and end_longitude BETWEEN ? and ?)", args);
+		Log.e("query",query.toSql());
+		Log.e("query", Arrays.toString(args));
+		List<StreetSweeperData> l = query.execute();
+		
+		Log.e("blah", "Adding " + l.size() + " records to map");
+		
+		map.clear();
+		for (StreetSweeperData d : l) {
+	        map.addPolyline(new PolylineOptions()
+	        		.add(new LatLng(d.latitude, d.longitude))
+	        		.add(new LatLng(d.end_latitude, d.end_longitude)));
+		}
 	}
 
 }
