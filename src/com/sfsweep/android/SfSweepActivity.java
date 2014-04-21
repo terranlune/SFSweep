@@ -1,12 +1,14 @@
 package com.sfsweep.android;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -44,6 +46,9 @@ public class SfSweepActivity extends FragmentActivity implements
 	 */
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
+
+	long PARKING_DURATION_MILLIS = 1000 * 60 * 60 * 24 * 7;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -259,15 +264,25 @@ public class SfSweepActivity extends FragmentActivity implements
 				.where("((min_latitude BETWEEN ?1 AND ?2 OR max_latitude BETWEEN ?1 AND ?2)"
 						+ " AND (min_longitude BETWEEN ?3 AND ?4 OR max_longitude BETWEEN ?3 AND ?4))",
 						args);
-		Log.e("query", query.toSql());
-		Log.e("query", Arrays.toString(args));
 		List<StreetSweeperData> l = query.execute();
 
-		Log.e("blah", "Adding " + l.size() + " records to map");
+		Log.e("fetchData", "Adding " + l.size() + " records to map");
 
 		map.clear();
+		Date now = new Date();
 		for (StreetSweeperData d : l) {
 			PolylineOptions opts = new PolylineOptions();
+
+			Date nextSweeping = d.nextSweeping();
+			if (nextSweeping != null) {
+				long diff = d.nextSweeping().getTime() - now.getTime();
+				double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
+				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)), 0);
+				opts.color(color);
+			}else{
+				opts.color(Color.MAGENTA);
+			}
+			
 			opts.addAll(d.getCoordinates());
 			map.addPolyline(opts);
 		}
