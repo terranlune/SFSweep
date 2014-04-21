@@ -58,15 +58,26 @@ class StreetSweepHandler(xml.sax.handler.ContentHandler):
       self.inField = None
 
     elif name == "coordinates":
-      coordinates = self.coordinatesBuffer.split(" ")
 
-      begin = coordinates[0].split(",")
-      self.data["latitude"] = begin[1]
-      self.data["longitude"] = begin[0]
+      self.coordinatesBuffer = self.coordinatesBuffer.strip()
+      raw_coordinates = self.coordinatesBuffer.split(" ")
 
-      end = coordinates[1].split(",")
-      self.data["end_latitude"] = end[1]
-      self.data["end_longitude"] = end[0]
+      coordinates = []
+      for raw_coordinate in self.coordinatesBuffer.split(" "):
+        x = raw_coordinate.split(",")
+
+        # Note we're reordering to have lat before lng
+        coordinates.append((float(x[1]), float(x[0])))
+
+      maxLatLng = map(max, zip(*coordinates))
+      minLatLng = map(min, zip(*coordinates))
+
+      self.data["min_latitude"] = minLatLng[0]
+      self.data["max_latitude"] = maxLatLng[0]
+      self.data["min_longitude"] = minLatLng[1]
+      self.data["max_longitude"] = maxLatLng[1]
+
+      self.data["coordinates"] = " ".join(["%s,%s" % (i[0], i[1]) for i in coordinates])
 
       self.coordinatesBuffer = None
 
@@ -95,10 +106,11 @@ def convertData(fromKml, toSqlite, append):
               Id integer PRIMARY KEY AUTOINCREMENT,
               kml_id text,
               name text, 
-              latitude numeric, 
-              longitude numeric, 
-              end_latitude numeric, 
-              end_longitude numeric, %s text)""" % " text, ".join(StreetSweepHandler.fields))
+              coordinates text,
+              min_latitude numeric, 
+              min_longitude numeric, 
+              max_latitude numeric, 
+              max_longitude numeric, %s text)""" % " text, ".join(StreetSweepHandler.fields))
     parser = xml.sax.make_parser(  )
     handler = StreetSweepHandler(c)
     parser.setContentHandler(handler)

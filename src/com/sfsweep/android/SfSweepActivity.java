@@ -32,7 +32,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 public class SfSweepActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
-		GooglePlayServicesClient.OnConnectionFailedListener, OnCameraChangeListener {
+		GooglePlayServicesClient.OnConnectionFailedListener,
+		OnCameraChangeListener {
 
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
@@ -44,24 +45,28 @@ public class SfSweepActivity extends FragmentActivity implements
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) { 
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_demo_activity);
 		mLocationClient = new LocationClient(this, this, this);
-		mapFragment = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
+		mapFragment = ((SupportMapFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.map));
 		if (mapFragment != null) {
 			map = mapFragment.getMap();
 			if (map != null) {
-				Toast.makeText(this, "Map Fragment was loaded properly!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Map Fragment was loaded properly!",
+						Toast.LENGTH_SHORT).show();
 				map.setMyLocationEnabled(true);
 				map.getUiSettings().setZoomControlsEnabled(false);
 				map.setOnCameraChangeListener(this);
-				
+
 			} else {
-				Toast.makeText(this, "Error - Map was null!!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "Error - Map was null!!",
+						Toast.LENGTH_SHORT).show();
 			}
 		} else {
-			Toast.makeText(this, "Error - Map Fragment was null!!", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error - Map Fragment was null!!",
+					Toast.LENGTH_SHORT).show();
 		}
 
 	}
@@ -112,7 +117,8 @@ public class SfSweepActivity extends FragmentActivity implements
 
 	private boolean isGooglePlayServicesAvailable() {
 		// Check that Google Play services is available
-		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		int resultCode = GooglePlayServicesUtil
+				.isGooglePlayServicesAvailable(this);
 		// If Google Play services is available
 		if (ConnectionResult.SUCCESS == resultCode) {
 			// In debug mode, log the status
@@ -120,15 +126,16 @@ public class SfSweepActivity extends FragmentActivity implements
 			return true;
 		} else {
 			// Get the error dialog from Google Play services
-			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-					CONNECTION_FAILURE_RESOLUTION_REQUEST);
+			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
+					resultCode, this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
 
 			// If Google Play services can provide an error dialog
 			if (errorDialog != null) {
 				// Create a new DialogFragment for the error dialog
 				ErrorDialogFragment errorFragment = new ErrorDialogFragment();
 				errorFragment.setDialog(errorDialog);
-				errorFragment.show(getSupportFragmentManager(), "Location Updates");
+				errorFragment.show(getSupportFragmentManager(),
+						"Location Updates");
 			}
 
 			return false;
@@ -145,12 +152,17 @@ public class SfSweepActivity extends FragmentActivity implements
 		// Display the connection status
 		Location location = mLocationClient.getLastLocation();
 		if (location != null) {
-			Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT).show();
-			LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 18);
+			Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT)
+					.show();
+			LatLng latLng = new LatLng(location.getLatitude(),
+					location.getLongitude());
+			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+					latLng, 18);
 			map.animateCamera(cameraUpdate);
 		} else {
-			Toast.makeText(this, "Current location was null, enable GPS on emulator!", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this,
+					"Current location was null, enable GPS on emulator!",
+					Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -161,7 +173,8 @@ public class SfSweepActivity extends FragmentActivity implements
 	@Override
 	public void onDisconnected() {
 		// Display the connection status
-		Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Disconnected. Please re-connect.",
+				Toast.LENGTH_SHORT).show();
 	}
 
 	/*
@@ -189,7 +202,8 @@ public class SfSweepActivity extends FragmentActivity implements
 			}
 		} else {
 			Toast.makeText(getApplicationContext(),
-					"Sorry. Location services not available to you", Toast.LENGTH_LONG).show();
+					"Sorry. Location services not available to you",
+					Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -221,30 +235,41 @@ public class SfSweepActivity extends FragmentActivity implements
 	public void onCameraChange(CameraPosition pos) {
 		LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
 		Log.e("onCameraChange", bounds.toString());
-        fetchData(bounds);
+		fetchData(bounds);
 	}
-	
+
 	public void fetchData(LatLngBounds bounds) {
-		
-		Object[] args = {bounds.southwest.latitude, bounds.northeast.latitude, 
-							bounds.southwest.longitude, bounds.northeast.longitude,
-							bounds.southwest.latitude, bounds.northeast.latitude, 
-							bounds.southwest.longitude, bounds.northeast.longitude};
+
+		double min_latitude = bounds.southwest.latitude;
+		double max_latitude = bounds.northeast.latitude;
+		double min_longitude = bounds.southwest.longitude;
+		double max_longitude = bounds.northeast.longitude;
+
+		double buffer_latitude = (max_latitude - min_latitude) / 2;
+		double buffer_longitude = (max_longitude - min_longitude) / 2;
+
+		Object[] args = {
+				min_latitude - buffer_latitude,
+				max_latitude + buffer_latitude,
+				min_longitude - buffer_longitude,
+				max_longitude + buffer_longitude };
+
 		From query = new Select()
-			.from(StreetSweeperData.class)
-			.where("(latitude BETWEEN ? and ? and longitude BETWEEN ? and ?) OR " +
-				   "(end_latitude BETWEEN ? and ? and end_longitude BETWEEN ? and ?)", args);
-		Log.e("query",query.toSql());
+				.from(StreetSweeperData.class)
+				.where("((min_latitude BETWEEN ?1 AND ?2 OR max_latitude BETWEEN ?1 AND ?2)"
+						+ " AND (min_longitude BETWEEN ?3 AND ?4 OR max_longitude BETWEEN ?3 AND ?4))",
+						args);
+		Log.e("query", query.toSql());
 		Log.e("query", Arrays.toString(args));
 		List<StreetSweeperData> l = query.execute();
-		
+
 		Log.e("blah", "Adding " + l.size() + " records to map");
-		
+
 		map.clear();
 		for (StreetSweeperData d : l) {
-	        map.addPolyline(new PolylineOptions()
-	        		.add(new LatLng(d.latitude, d.longitude))
-	        		.add(new LatLng(d.end_latitude, d.end_longitude)));
+			PolylineOptions opts = new PolylineOptions();
+			opts.addAll(d.getCoordinates());
+			map.addPolyline(opts);
 		}
 	}
 
