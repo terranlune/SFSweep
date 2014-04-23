@@ -171,4 +171,56 @@ public class StreetSweeperData extends Model {
 
 		return result;
 	}
+
+	public LatLng nearestPoint(LatLng point) {
+		double nearestDistance = Double.MAX_VALUE;
+		LatLng nearestPoint = null;
+		LatLng start = null;
+		for (LatLng end : getCoordinates()) {
+			if (start != null) {
+				LatLng p = nearestPointOnLine(start, end, point, true);
+				double d = distance(point, p);
+				if (d < nearestDistance) {
+					nearestDistance = d;
+					nearestPoint = p;
+				}
+			}
+			start = end;
+		}
+		return nearestPoint;
+	}
+
+	static double distance(LatLng a, LatLng b) {
+		return Math.sqrt((a.latitude - b.latitude) * (a.latitude - b.latitude)
+				+ (a.longitude - b.longitude) * (a.longitude - b.longitude));
+	}
+
+	private static LatLng nearestPointOnLine(LatLng a, LatLng b, LatLng p, boolean clampToSegment) {
+
+		double apx = p.latitude - a.latitude;
+		double apy = p.longitude - a.longitude;
+		double abx = b.latitude - a.latitude;
+		double aby = b.longitude - a.longitude;
+
+		double ab2 = abx * abx + aby * aby;
+		double ap_ab = apx * abx + apy * aby;
+		double t = ap_ab / ab2;
+		if (clampToSegment) {
+			if (t < 0) {
+				t = 0;
+			} else if (t > 1) {
+				t = 1;
+			}
+		}
+		return new LatLng(a.latitude + abx * t, a.longitude + aby * t);
+	}
+
+	private double pointToLineDistance(LatLng A, LatLng B, LatLng P) {
+		double normalLength = Math.sqrt((B.latitude - A.latitude)
+				* (B.latitude - A.latitude) + (B.longitude - A.longitude)
+				* (B.longitude - A.longitude));
+		return Math.abs((P.latitude - A.latitude) * (B.longitude - A.longitude)
+				- (P.longitude - A.longitude) * (B.latitude - A.latitude))
+				/ normalLength;
+	}
 }

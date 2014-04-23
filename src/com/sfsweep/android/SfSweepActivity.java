@@ -5,8 +5,9 @@ package com.sfsweep.android;
 
 
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
@@ -19,6 +20,10 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.util.Pair;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.Toast;
 
 import com.activeandroid.query.From;
@@ -31,29 +36,38 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class SfSweepActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
-		OnCameraChangeListener {
+		OnCameraChangeListener, OnMapClickListener {
+
+	private static final LatLng SF = new LatLng(37.7577,-122.4376);
 
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
 	private LocationClient mLocationClient;
+	private HashMap<StreetSweeperData, Polyline> cache;
 	/*
 	 * Define a request code to send to Google Play services This code is
 	 * returned in Activity.onActivityResult
 	 */
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
-
 	long PARKING_DURATION_MILLIS = 1000 * 60 * 60 * 24 * 7;
-	
+	private boolean expanded = false;
+	private int animDuration;
+	private Marker marker;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -68,7 +82,11 @@ public class SfSweepActivity extends FragmentActivity implements
 						Toast.LENGTH_SHORT).show();
 				map.setMyLocationEnabled(true);
 				map.getUiSettings().setZoomControlsEnabled(false);
+
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(SF, 18));
+
 				map.setOnCameraChangeListener(this);
+				map.setOnMapClickListener(this);
 
 			} else {
 				Toast.makeText(this, "Error - Map was null!!",
@@ -79,6 +97,9 @@ public class SfSweepActivity extends FragmentActivity implements
 					Toast.LENGTH_SHORT).show();
 		}
 
+		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
+
+		cache = new HashMap<StreetSweeperData, Polyline>();
 	}
 
 	/*
@@ -249,7 +270,61 @@ public class SfSweepActivity extends FragmentActivity implements
 	}
 
 	public void fetchData(LatLngBounds bounds) {
+		List<StreetSweeperData> l = getDataFromDb(bounds);
+		updateCache(l);
+		stylePolylines();
+	}
 
+	private void stylePolylines() {
+		// Apply the new colors
+		Date now = new Date();
+		for (StreetSweeperData d : cache.keySet()) {
+			Polyline line = cache.get(d);
+
+			// Heatmap mode
+			Date nextSweeping = d.nextSweeping();
+			if (nextSweeping != null) {
+				long diff = d.nextSweeping().getTime() - now.getTime();
+				double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
+				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)),
+						0);
+				line.setColor(color);
+			} else {
+				line.setColor(Color.MAGENTA);
+			}
+		}
+	}
+
+	private void updateCache(List<StreetSweeperData> l) {
+		HashMap<StreetSweeperData, Polyline> newCache = new HashMap<StreetSweeperData, Polyline>();
+
+		int addCount = 0;
+		for (StreetSweeperData d : l) {
+			if (cache.containsKey(d)) {
+				newCache.put(d, cache.get(d));
+				cache.remove(d);
+			} else {
+				PolylineOptions opts = new PolylineOptions();
+				opts.addAll(d.getCoordinates());
+				Polyline line = map.addPolyline(opts);
+				newCache.put(d, line);
+				addCount++;
+			}
+		}
+
+		Log.e("fetchData", String.format("Cache size: %s (+%s,-%s)",
+				newCache.size(), addCount, cache.size()));
+
+		// Remove offscreen data
+		for (Polyline p : cache.values()) {
+			p.remove();
+		}
+
+		// Save the new cache
+		cache = newCache;
+	}
+
+	private List<StreetSweeperData> getDataFromDb(LatLngBounds bounds) {
 		double min_latitude = bounds.southwest.latitude;
 		double max_latitude = bounds.northeast.latitude;
 		double min_longitude = bounds.southwest.longitude;
@@ -258,8 +333,7 @@ public class SfSweepActivity extends FragmentActivity implements
 		double buffer_latitude = (max_latitude - min_latitude) / 2;
 		double buffer_longitude = (max_longitude - min_longitude) / 2;
 
-		Object[] args = {
-				min_latitude - buffer_latitude,
+		Object[] args = { min_latitude - buffer_latitude,
 				max_latitude + buffer_latitude,
 				min_longitude - buffer_longitude,
 				max_longitude + buffer_longitude };
@@ -270,26 +344,95 @@ public class SfSweepActivity extends FragmentActivity implements
 						+ " AND (min_longitude BETWEEN ?3 AND ?4 OR max_longitude BETWEEN ?3 AND ?4))",
 						args);
 		List<StreetSweeperData> l = query.execute();
+		return l;
+	}
 
-		Log.e("fetchData", "Adding " + l.size() + " records to map");
+	public Pair<StreetSweeperData, LatLng> findNearestData(LatLng point) {
+		double nearestDistance = Double.MAX_VALUE;
+		LatLng nearestPoint = null;
+		StreetSweeperData nearestData = null;
+		for (StreetSweeperData d : cache.keySet()) {
 
-		map.clear();
-		Date now = new Date();
-		for (StreetSweeperData d : l) {
-			PolylineOptions opts = new PolylineOptions();
-
-			Date nextSweeping = d.nextSweeping();
-			if (nextSweeping != null) {
-				long diff = d.nextSweeping().getTime() - now.getTime();
-				double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
-				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)), 0);
-				opts.color(color);
-			}else{
-				opts.color(Color.MAGENTA);
+			LatLng p = d.nearestPoint(point);
+			double distance = StreetSweeperData.distance(point, p);
+			if (distance < nearestDistance) {
+				nearestDistance = distance;
+				nearestPoint = p;
+				nearestData = d;
 			}
-			
-			opts.addAll(d.getCoordinates());
-			map.addPolyline(opts);
+		}
+		return new Pair<StreetSweeperData, LatLng>(nearestData, nearestPoint);
+	}
+
+	@Override
+	public void onMapClick(LatLng point) {
+
+		Pair<StreetSweeperData, LatLng> p = findNearestData(point);
+		point = p.second;
+
+		if (expanded) {
+			// Remove the marker
+			if (marker != null)
+				marker.remove();
+
+			// Re-enable controls
+			map.setMyLocationEnabled(true);
+		} else {
+			// Set the marker
+			marker = map.addMarker(new MarkerOptions().position(point));
+
+			// Disable controls
+			map.setMyLocationEnabled(false);
+
+			// Zoom to the click
+			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(point);
+			map.animateCamera(cameraUpdate, animDuration, null);
+		}
+
+		View v = findViewById(R.id.container);
+		HeightAnimation a;
+		if (expanded) {
+			a = new HeightAnimation(v, 0);
+		} else {
+			int height = Math
+					.round(this.getWindow().getDecorView().getBottom() * 0.6f);
+			a = new HeightAnimation(v, height);
+		}
+		a.setDuration(animDuration);
+		v.startAnimation(a);
+		expanded = !expanded;
+	}
+
+	public class HeightAnimation extends Animation {
+		private final int targetHeight;
+		private final int originalHeight;
+		private final View view;
+
+		public HeightAnimation(View view, int targetHeight) {
+			this.view = view;
+			this.targetHeight = targetHeight;
+			this.originalHeight = view.getLayoutParams().height;
+		}
+
+		@Override
+		protected void applyTransformation(float interpolatedTime,
+				Transformation t) {
+			int diff = targetHeight - originalHeight;
+			int newHeight = Math.round(interpolatedTime * diff)
+					+ originalHeight;
+			view.getLayoutParams().height = newHeight;
+			view.requestLayout();
+		}
+
+		@Override
+		public void initialize(int width, int height, int parentWidth,
+				int parentHeight) {
+			super.initialize(width, height, parentWidth, parentHeight);
+		}
+
+		@Override
+		public boolean willChangeBounds() {
+			return true;
 		}
 	}
 
