@@ -1,9 +1,4 @@
 package com.sfsweep.android;
-// Remember to commit ot git through eclipse first.
-//never forget!! ********GIT! Did you COMMIT!!??
-//HIIII
-
-
 
 import java.util.Date;
 import java.util.HashMap;
@@ -44,6 +39,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.sfsweep.android.StreetSweeperData.DateInterval;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
 
 public class SfSweepActivity extends FragmentActivity implements
@@ -51,7 +47,8 @@ public class SfSweepActivity extends FragmentActivity implements
 		GooglePlayServicesClient.OnConnectionFailedListener,
 		OnCameraChangeListener, OnMapClickListener {
 
-	private static final LatLng SF = new LatLng(37.7577,-122.4376);
+//	private static final LatLng SF = new LatLng(37.7577, -122.4376);
+	private static final LatLng SF = new LatLng(37.7799584833508,-122.507891878245);
 
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
@@ -98,9 +95,9 @@ public class SfSweepActivity extends FragmentActivity implements
 			Toast.makeText(this, "Error - Map Fragment was null!!",
 					Toast.LENGTH_SHORT).show();
 		}
-		
 
-		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager().findFragmentById(R.id.sweepDetail);
+		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.sweepDetail);
 
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
 
@@ -287,9 +284,20 @@ public class SfSweepActivity extends FragmentActivity implements
 			Polyline line = cache.get(d);
 
 			// Heatmap mode
-			Date nextSweeping = d.nextSweeping();
+			List<DateInterval> upcomingSweepings = d.upcomingSweepings();
+
+			DateInterval nextSweeping;
+			try {
+				nextSweeping = upcomingSweepings.get(0);
+				if (nextSweeping.start.before(new Date())) {
+					// Sweeping in progress
+					nextSweeping = upcomingSweepings.get(1);
+				}
+			} catch (IndexOutOfBoundsException e) {
+				nextSweeping = null;
+			}
 			if (nextSweeping != null) {
-				long diff = d.nextSweeping().getTime() - now.getTime();
+				long diff = nextSweeping.start.getTime() - now.getTime();
 				double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
 				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)),
 						0);
@@ -375,8 +383,10 @@ public class SfSweepActivity extends FragmentActivity implements
 		Pair<StreetSweeperData, LatLng> p = findNearestData(point);
 		point = p.second;
 
+		if (p.second == null)
+			return;
 		sweepDataDetailFragment.updateUi(p.first);
-		
+
 		if (expanded) {
 			// Remove the marker
 			if (marker != null)

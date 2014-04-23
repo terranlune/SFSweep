@@ -132,18 +132,24 @@ public class StreetSweeperData extends Model implements Serializable {
 		return result;
 	}
 
-	private List<Date> getSweepingsInMonth(Calendar cal) {
-		List<Date> result = new ArrayList<Date>();
+	private List<DateInterval> getSweepingsInMonth(Calendar cal) {
+		List<DateInterval> result = new ArrayList<DateInterval>();
 		SimpleDateFormat sdf = new SimpleDateFormat("F EEEE MM yyyy HH:mm",
 				Locale.ENGLISH);
 		for (int i : getSweptWeeksOfMonth()) {
 			String weekDay = this.WeekDay.replace("Tues", "Tue");
-			String s = String.format("%s %s %s %s %s", i, weekDay,
-					cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),
-					this.FromHour);
 			try {
-				Date date = sdf.parse(s);
-				result.add(date);
+				String sStart = String.format("%s %s %s %s %s", i, weekDay,
+						cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),
+						this.FromHour);
+				Date start = sdf.parse(sStart);
+
+				String sEnd = String.format("%s %s %s %s %s", i, weekDay,
+						cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),
+						this.ToHour);
+				Date end = sdf.parse(sEnd);
+				
+				result.add(new DateInterval(start, end));
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -151,24 +157,32 @@ public class StreetSweeperData extends Model implements Serializable {
 		return result;
 	}
 	
-	public Date nextSweeping() {
+	public class DateInterval {
+		public Date start;
+		public Date end;
+		DateInterval(Date start, Date end) {
+			this.start = start;
+			this.end = end;
+		}
+	}
+	
+	public List<DateInterval> upcomingSweepings() {
 		Calendar now = Calendar.getInstance();
 		Calendar nextMonth = Calendar.getInstance();
 		nextMonth.add(Calendar.MONTH, 1);
 
-		Date result = null;
+		List<DateInterval> result = new ArrayList<DateInterval>();
 
 		if (this.WeekDay.equals("Holiday")) {
 			// TODO: Support Holidays
 		} else {
-			List<Date> sweepings = getSweepingsInMonth(now);
-			sweepings.addAll(getSweepingsInMonth(nextMonth));
-			for (Date date : sweepings) {
-				if (date.after(now.getTime())) {
-					if (result == null || date.before(result)) {
-						result = date;
-					}
-				}
+			for (DateInterval i : getSweepingsInMonth(now)) {
+				if (i.end.after(now.getTime()))
+					result.add(i);
+			}
+			for (DateInterval i : getSweepingsInMonth(nextMonth)) {
+				if (i.end.after(now.getTime()))
+					result.add(i);
 			}
 		}
 

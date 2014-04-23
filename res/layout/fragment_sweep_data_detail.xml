@@ -16,11 +16,21 @@
         android:textSize="24sp" />
 
     <TextView
+        android:id="@+id/tvSweepingInProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sweeping in progress! (ends in 2h)"
+        android:layout_below="@+id/tvStreetName"
+        android:textSize="20sp"
+        android:textColor="@color/sweepingInProgress"
+        android:visibility="gone" />
+    
+    <TextView
         android:id="@+id/tvNextSweeping"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/tvStreetName"
+        android:layout_below="@+id/tvSweepingInProgress"
         android:text="Wednesday 8am-10am (in 3 days)"
         android:textSize="20sp" />
 
