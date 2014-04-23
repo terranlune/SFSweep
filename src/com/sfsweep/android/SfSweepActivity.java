@@ -1,6 +1,8 @@
 package com.sfsweep.android;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
@@ -13,6 +15,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -34,6 +37,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class SfSweepActivity extends FragmentActivity implements
@@ -44,6 +48,7 @@ public class SfSweepActivity extends FragmentActivity implements
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
 	private LocationClient mLocationClient;
+	private HashMap<StreetSweeperData, Polyline> cache;
 	/*
 	 * Define a request code to send to Google Play services This code is
 	 * returned in Activity.onActivityResult
@@ -80,8 +85,9 @@ public class SfSweepActivity extends FragmentActivity implements
 					Toast.LENGTH_SHORT).show();
 		}
 
-		animDuration = (int) (1000 / getResources()
-				.getDisplayMetrics().density);
+		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
+
+		cache = new HashMap<StreetSweeperData, Polyline>();
 	}
 
 	/*
@@ -272,33 +278,55 @@ public class SfSweepActivity extends FragmentActivity implements
 						+ " AND (min_longitude BETWEEN ?3 AND ?4 OR max_longitude BETWEEN ?3 AND ?4))",
 						args);
 		List<StreetSweeperData> l = query.execute();
+		
+		HashMap<StreetSweeperData, Polyline> newCache = new HashMap<StreetSweeperData, Polyline>();
 
-		Log.e("fetchData", "Adding " + l.size() + " records to map");
-
-		map.clear();
-		Date now = new Date();
+		int addCount = 0;
 		for (StreetSweeperData d : l) {
-			PolylineOptions opts = new PolylineOptions();
+			if (cache.containsKey(d)) {
+				newCache.put(d, cache.get(d));
+				cache.remove(d);
+			}else{
+				PolylineOptions opts = new PolylineOptions();
+				opts.addAll(d.getCoordinates());
+				Polyline line = map.addPolyline(opts);
+				newCache.put(d, line);
+				addCount++;
+			}
+		}
 
+		Log.e("fetchData", String.format("Cache size: %s (+%s,-%s)", newCache.size(), addCount, cache.size()));
+		
+		// Remove offscreen data
+		for (Polyline p : cache.values()) {
+			p.remove();
+		}
+		
+		// Save the new cache
+		cache = newCache;
+
+		// Apply the new colors
+		Date now = new Date();
+		for (StreetSweeperData d : cache.keySet()) {
+			Polyline line = cache.get(d);
+
+			// Heatmap mode
 			Date nextSweeping = d.nextSweeping();
 			if (nextSweeping != null) {
 				long diff = d.nextSweeping().getTime() - now.getTime();
 				double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
 				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)),
 						0);
-				opts.color(color);
+				line.setColor(color);
 			} else {
-				opts.color(Color.MAGENTA);
+				line.setColor(Color.MAGENTA);
 			}
-
-			opts.addAll(d.getCoordinates());
-			map.addPolyline(opts);
 		}
 	}
 
 	@Override
 	public void onMapClick(LatLng latLng) {
-				
+
 		if (expanded) {
 			// Re-enable controls
 			map.setMyLocationEnabled(true);
