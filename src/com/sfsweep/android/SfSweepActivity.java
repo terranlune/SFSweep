@@ -36,6 +36,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -58,6 +59,7 @@ public class SfSweepActivity extends FragmentActivity implements
 	long PARKING_DURATION_MILLIS = 1000 * 60 * 60 * 24 * 7;
 	private boolean expanded = false;
 	private int animDuration;
+	private Marker marker;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -291,7 +293,7 @@ public class SfSweepActivity extends FragmentActivity implements
 			if (cache.containsKey(d)) {
 				newCache.put(d, cache.get(d));
 				cache.remove(d);
-			}else{
+			} else {
 				PolylineOptions opts = new PolylineOptions();
 				opts.addAll(d.getCoordinates());
 				Polyline line = map.addPolyline(opts);
@@ -300,13 +302,14 @@ public class SfSweepActivity extends FragmentActivity implements
 			}
 		}
 
-		Log.e("fetchData", String.format("Cache size: %s (+%s,-%s)", newCache.size(), addCount, cache.size()));
-		
+		Log.e("fetchData", String.format("Cache size: %s (+%s,-%s)",
+				newCache.size(), addCount, cache.size()));
+
 		// Remove offscreen data
 		for (Polyline p : cache.values()) {
 			p.remove();
 		}
-		
+
 		// Save the new cache
 		cache = newCache;
 	}
@@ -334,21 +337,45 @@ public class SfSweepActivity extends FragmentActivity implements
 		return l;
 	}
 
+	public Pair<StreetSweeperData, LatLng> findNearestData(LatLng point) {
+		double nearestDistance = Double.MAX_VALUE;
+		LatLng nearestPoint = null;
+		StreetSweeperData nearestData = null;
+		for (StreetSweeperData d : cache.keySet()) {
+
+			LatLng p = d.nearestPoint(point);
+			double distance = StreetSweeperData.distance(point, p);
+			if (distance < nearestDistance) {
+				nearestDistance = distance;
+				nearestPoint = p;
+				nearestData = d;
+			}
+		}
+		return new Pair<StreetSweeperData, LatLng>(nearestData, nearestPoint);
+	}
+
 	@Override
-	public void onMapClick(LatLng latLng) {
+	public void onMapClick(LatLng point) {
+
+		Pair<StreetSweeperData, LatLng> p = findNearestData(point);
+		point = p.second;
 
 		if (expanded) {
+			// Remove the marker
+			if (marker != null)
+				marker.remove();
+
 			// Re-enable controls
 			map.setMyLocationEnabled(true);
 		} else {
 			// Set the marker
-			map.addMarker(new MarkerOptions().position(latLng));
+			marker = map.addMarker(new MarkerOptions().position(point));
 
 			// Disable controls
 			map.setMyLocationEnabled(false);
 
 			// Zoom to the click
-			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
+			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(point);
 			map.animateCamera(cameraUpdate, animDuration, null);
 		}
 
