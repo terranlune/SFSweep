@@ -258,27 +258,32 @@ public class SfSweepActivity extends FragmentActivity implements
 	}
 
 	public void fetchData(LatLngBounds bounds) {
+		List<StreetSweeperData> l = getDataFromDb(bounds);
+		updateCache(l);
+		stylePolylines();
+	}
 
-		double min_latitude = bounds.southwest.latitude;
-		double max_latitude = bounds.northeast.latitude;
-		double min_longitude = bounds.southwest.longitude;
-		double max_longitude = bounds.northeast.longitude;
+	private void stylePolylines() {
+		// Apply the new colors
+		Date now = new Date();
+		for (StreetSweeperData d : cache.keySet()) {
+			Polyline line = cache.get(d);
 
-		double buffer_latitude = (max_latitude - min_latitude) / 2;
-		double buffer_longitude = (max_longitude - min_longitude) / 2;
+			// Heatmap mode
+			Date nextSweeping = d.nextSweeping();
+			if (nextSweeping != null) {
+				long diff = d.nextSweeping().getTime() - now.getTime();
+				double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
+				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)),
+						0);
+				line.setColor(color);
+			} else {
+				line.setColor(Color.MAGENTA);
+			}
+		}
+	}
 
-		Object[] args = { min_latitude - buffer_latitude,
-				max_latitude + buffer_latitude,
-				min_longitude - buffer_longitude,
-				max_longitude + buffer_longitude };
-
-		From query = new Select()
-				.from(StreetSweeperData.class)
-				.where("((min_latitude BETWEEN ?1 AND ?2 OR max_latitude BETWEEN ?1 AND ?2)"
-						+ " AND (min_longitude BETWEEN ?3 AND ?4 OR max_longitude BETWEEN ?3 AND ?4))",
-						args);
-		List<StreetSweeperData> l = query.execute();
-		
+	private void updateCache(List<StreetSweeperData> l) {
 		HashMap<StreetSweeperData, Polyline> newCache = new HashMap<StreetSweeperData, Polyline>();
 
 		int addCount = 0;
@@ -304,24 +309,29 @@ public class SfSweepActivity extends FragmentActivity implements
 		
 		// Save the new cache
 		cache = newCache;
+	}
 
-		// Apply the new colors
-		Date now = new Date();
-		for (StreetSweeperData d : cache.keySet()) {
-			Polyline line = cache.get(d);
+	private List<StreetSweeperData> getDataFromDb(LatLngBounds bounds) {
+		double min_latitude = bounds.southwest.latitude;
+		double max_latitude = bounds.northeast.latitude;
+		double min_longitude = bounds.southwest.longitude;
+		double max_longitude = bounds.northeast.longitude;
 
-			// Heatmap mode
-			Date nextSweeping = d.nextSweeping();
-			if (nextSweeping != null) {
-				long diff = d.nextSweeping().getTime() - now.getTime();
-				double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
-				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)),
-						0);
-				line.setColor(color);
-			} else {
-				line.setColor(Color.MAGENTA);
-			}
-		}
+		double buffer_latitude = (max_latitude - min_latitude) / 2;
+		double buffer_longitude = (max_longitude - min_longitude) / 2;
+
+		Object[] args = { min_latitude - buffer_latitude,
+				max_latitude + buffer_latitude,
+				min_longitude - buffer_longitude,
+				max_longitude + buffer_longitude };
+
+		From query = new Select()
+				.from(StreetSweeperData.class)
+				.where("((min_latitude BETWEEN ?1 AND ?2 OR max_latitude BETWEEN ?1 AND ?2)"
+						+ " AND (min_longitude BETWEEN ?3 AND ?4 OR max_longitude BETWEEN ?3 AND ?4))",
+						args);
+		List<StreetSweeperData> l = query.execute();
+		return l;
 	}
 
 	@Override
