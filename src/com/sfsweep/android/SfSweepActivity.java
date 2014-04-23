@@ -1,4 +1,7 @@
 package com.sfsweep.android;
+// Remember to commit ot git through eclipse first.
+//never forget!! ********GIT! Did you COMMIT!!??
+
 
 import java.util.Arrays;
 import java.util.Date;
