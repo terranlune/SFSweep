@@ -46,6 +46,8 @@ public class SfSweepActivity extends FragmentActivity implements
 		GooglePlayServicesClient.OnConnectionFailedListener,
 		OnCameraChangeListener, OnMapClickListener {
 
+	private static final LatLng SF = new LatLng(37.7577,-122.4376);
+
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
 	private LocationClient mLocationClient;
@@ -75,6 +77,9 @@ public class SfSweepActivity extends FragmentActivity implements
 						Toast.LENGTH_SHORT).show();
 				map.setMyLocationEnabled(true);
 				map.getUiSettings().setZoomControlsEnabled(false);
+
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(SF, 18));
+
 				map.setOnCameraChangeListener(this);
 				map.setOnMapClickListener(this);
 
