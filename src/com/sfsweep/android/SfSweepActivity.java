@@ -5,7 +5,6 @@ package com.sfsweep.android;
 
 
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +14,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -24,6 +24,8 @@ import android.util.Pair;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.activeandroid.query.From;
@@ -51,23 +53,32 @@ public class SfSweepActivity extends FragmentActivity implements
 		GooglePlayServicesClient.OnConnectionFailedListener,
 		OnCameraChangeListener, OnMapClickListener {
 
-	private static final LatLng SF = new LatLng(37.7577,-122.4376);
-
-	private SupportMapFragment mapFragment;
-	private GoogleMap map;
-	private LocationClient mLocationClient;
-	private HashMap<StreetSweeperData, Polyline> cache;
 	/*
 	 * Define a request code to send to Google Play services This code is
 	 * returned in Activity.onActivityResult
 	 */
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+	private final static int SETTINGS_REQUEST = 1; 
+	private final static LatLng SF = new LatLng(37.7577,-122.4376);
+	
+	private SupportMapFragment mapFragment;
+	private GoogleMap map;
+	private LocationClient mLocationClient;
+	private HashMap<StreetSweeperData, Polyline> cache;
 
 	long PARKING_DURATION_MILLIS = 1000 * 60 * 60 * 24 * 7;
 	private boolean expanded = false;
 	private int animDuration;
 	private Marker marker;
 
+	private Button   mBtnMoveBy;
+	private TextView mTvMoveBy;
+	private TextView mTvDay; 
+	
+	private String   mFont = "Roboto-Light.ttf";
+	private Typeface mTypeface; 
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -96,12 +107,32 @@ public class SfSweepActivity extends FragmentActivity implements
 			Toast.makeText(this, "Error - Map Fragment was null!!",
 					Toast.LENGTH_SHORT).show();
 		}
-
+		setupMoveByButton();
+		
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
 
 		cache = new HashMap<StreetSweeperData, Polyline>();
 	}
 
+	private void setupMoveByButton() {
+		mTypeface = Typeface.createFromAsset(getAssets(), mFont); 
+		
+		mTvMoveBy = (TextView) findViewById(R.id.tvMoveBy); 
+		mTvMoveBy.setTypeface(mTypeface); 
+		
+		mTvDay    = (TextView) findViewById(R.id.tvDay); 
+		mTvDay.setTypeface(mTypeface); 
+		
+		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy); 
+		mBtnMoveBy.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+//				Intent i = new Intent(SfSweepActivity.this, SettingsActivity.class);
+//				startActivityForResult(i, SETTINGS_REQUEST); 
+			}
+		});
+	}
+	
 	/*
 	 * Called when the Activity becomes visible.
 	 */
