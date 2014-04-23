@@ -47,8 +47,11 @@ public class SfSweepActivity extends FragmentActivity implements
 		GooglePlayServicesClient.OnConnectionFailedListener,
 		OnCameraChangeListener, OnMapClickListener {
 
-//	private static final LatLng SF = new LatLng(37.7577, -122.4376);
-	private static final LatLng SF = new LatLng(37.7799584833508,-122.507891878245);
+	private static final int LINE_WIDTH = 20;
+
+	// private static final LatLng SF = new LatLng(37.7577, -122.4376);
+	private static final LatLng SF = new LatLng(37.7799584833508,
+			-122.507891878245);
 
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
@@ -318,6 +321,7 @@ public class SfSweepActivity extends FragmentActivity implements
 				cache.remove(d);
 			} else {
 				PolylineOptions opts = new PolylineOptions();
+				opts.width(LINE_WIDTH);
 				opts.addAll(d.getCoordinates());
 				Polyline line = map.addPolyline(opts);
 				newCache.put(d, line);
@@ -382,22 +386,25 @@ public class SfSweepActivity extends FragmentActivity implements
 
 		Pair<StreetSweeperData, LatLng> p = findNearestData(point);
 		point = p.second;
+		StreetSweeperData data = p.first;
 
-		if (p.second == null)
+		if (data == null)
 			return;
-		sweepDataDetailFragment.updateUi(p.first);
 
 		if (expanded) {
 			// Remove the marker
 			if (marker != null)
 				marker.remove();
-
+			
 			// Re-enable controls
 			map.setMyLocationEnabled(true);
 		} else {
+
+			sweepDataDetailFragment.setData(data);
+			
 			// Set the marker
 			marker = map.addMarker(new MarkerOptions().position(point));
-
+			
 			// Disable controls
 			map.setMyLocationEnabled(false);
 

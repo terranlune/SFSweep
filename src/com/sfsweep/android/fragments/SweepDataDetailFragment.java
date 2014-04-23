@@ -25,6 +25,7 @@ public class SweepDataDetailFragment extends Fragment {
 	private TextView tvStreetName;
 	private TextView tvNextSweeping;
 	private TextView tvSweepingInProgress;
+	private StreetSweeperData data;
 
 	public SweepDataDetailFragment() {
 	}
@@ -43,7 +44,14 @@ public class SweepDataDetailFragment extends Fragment {
 		return rootView;
 	}
 
-	public void updateUi(StreetSweeperData d) {
+	public StreetSweeperData getData() {
+		return this.data;
+	}
+	
+	public void setData(StreetSweeperData d) {
+		
+		this.data = d;
+		
 		if (d.BlockSide.equals("")) {
 			tvStreetName.setText(d.Corridor);
 		} else {
