@@ -1,6 +1,5 @@
 package com.sfsweep.android;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +13,9 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.Toast;
 
 import com.activeandroid.query.From;
@@ -26,16 +28,18 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class SfSweepActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
-		OnCameraChangeListener {
+		OnCameraChangeListener, OnMapClickListener {
 
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
@@ -46,9 +50,10 @@ public class SfSweepActivity extends FragmentActivity implements
 	 */
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
-
 	long PARKING_DURATION_MILLIS = 1000 * 60 * 60 * 24 * 7;
-	
+	private boolean expanded = false;
+	private int animDuration;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -64,6 +69,7 @@ public class SfSweepActivity extends FragmentActivity implements
 				map.setMyLocationEnabled(true);
 				map.getUiSettings().setZoomControlsEnabled(false);
 				map.setOnCameraChangeListener(this);
+				map.setOnMapClickListener(this);
 
 			} else {
 				Toast.makeText(this, "Error - Map was null!!",
@@ -74,6 +80,8 @@ public class SfSweepActivity extends FragmentActivity implements
 					Toast.LENGTH_SHORT).show();
 		}
 
+		animDuration = (int) (1000 / getResources()
+				.getDisplayMetrics().density);
 	}
 
 	/*
@@ -253,8 +261,7 @@ public class SfSweepActivity extends FragmentActivity implements
 		double buffer_latitude = (max_latitude - min_latitude) / 2;
 		double buffer_longitude = (max_longitude - min_longitude) / 2;
 
-		Object[] args = {
-				min_latitude - buffer_latitude,
+		Object[] args = { min_latitude - buffer_latitude,
 				max_latitude + buffer_latitude,
 				min_longitude - buffer_longitude,
 				max_longitude + buffer_longitude };
@@ -277,14 +284,80 @@ public class SfSweepActivity extends FragmentActivity implements
 			if (nextSweeping != null) {
 				long diff = d.nextSweeping().getTime() - now.getTime();
 				double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
-				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)), 0);
+				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)),
+						0);
 				opts.color(color);
-			}else{
+			} else {
 				opts.color(Color.MAGENTA);
 			}
-			
+
 			opts.addAll(d.getCoordinates());
 			map.addPolyline(opts);
+		}
+	}
+
+	@Override
+	public void onMapClick(LatLng latLng) {
+				
+		if (expanded) {
+			// Re-enable controls
+			map.setMyLocationEnabled(true);
+		} else {
+			// Set the marker
+			map.addMarker(new MarkerOptions().position(latLng));
+
+			// Disable controls
+			map.setMyLocationEnabled(false);
+
+			// Zoom to the click
+			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
+			map.animateCamera(cameraUpdate, animDuration, null);
+		}
+
+		View v = findViewById(R.id.container);
+		HeightAnimation a;
+		if (expanded) {
+			a = new HeightAnimation(v, 0);
+		} else {
+			int height = Math
+					.round(this.getWindow().getDecorView().getBottom() * 0.6f);
+			a = new HeightAnimation(v, height);
+		}
+		a.setDuration(animDuration);
+		v.startAnimation(a);
+		expanded = !expanded;
+	}
+
+	public class HeightAnimation extends Animation {
+		private final int targetHeight;
+		private final int originalHeight;
+		private final View view;
+
+		public HeightAnimation(View view, int targetHeight) {
+			this.view = view;
+			this.targetHeight = targetHeight;
+			this.originalHeight = view.getLayoutParams().height;
+		}
+
+		@Override
+		protected void applyTransformation(float interpolatedTime,
+				Transformation t) {
+			int diff = targetHeight - originalHeight;
+			int newHeight = Math.round(interpolatedTime * diff)
+					+ originalHeight;
+			view.getLayoutParams().height = newHeight;
+			view.requestLayout();
+		}
+
+		@Override
+		public void initialize(int width, int height, int parentWidth,
+				int parentHeight) {
+			super.initialize(width, height, parentWidth, parentHeight);
+		}
+
+		@Override
+		public boolean willChangeBounds() {
+			return true;
 		}
 	}
 
