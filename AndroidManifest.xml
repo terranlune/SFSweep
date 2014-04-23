@@ -51,6 +51,11 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name="com.sfsweep.android.SweepDataDetailActivity"
+            android:label="@string/title_activity_sweep_data_detail" >
+        </activity>
     </application>
 
 </manifest>

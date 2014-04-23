@@ -4,5 +4,7 @@
     <string name="app_name">SFSweep</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
+    <string name="title_activity_sweep_data_detail">SweepDataDetail</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

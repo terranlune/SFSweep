@@ -5,7 +5,6 @@ package com.sfsweep.android;
 
 
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +44,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.sfsweep.android.fragments.SweepDataDetailFragment;
 
 public class SfSweepActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
@@ -67,6 +67,8 @@ public class SfSweepActivity extends FragmentActivity implements
 	private boolean expanded = false;
 	private int animDuration;
 	private Marker marker;
+
+	private SweepDataDetailFragment sweepDataDetailFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +98,9 @@ public class SfSweepActivity extends FragmentActivity implements
 			Toast.makeText(this, "Error - Map Fragment was null!!",
 					Toast.LENGTH_SHORT).show();
 		}
+		
+
+		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager().findFragmentById(R.id.sweepDetail);
 
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
 
@@ -370,6 +375,8 @@ public class SfSweepActivity extends FragmentActivity implements
 		Pair<StreetSweeperData, LatLng> p = findNearestData(point);
 		point = p.second;
 
+		sweepDataDetailFragment.updateUi(p.first);
+		
 		if (expanded) {
 			// Remove the marker
 			if (marker != null)
@@ -389,7 +396,7 @@ public class SfSweepActivity extends FragmentActivity implements
 			map.animateCamera(cameraUpdate, animDuration, null);
 		}
 
-		View v = findViewById(R.id.container);
+		View v = findViewById(R.id.sweepDetail);
 		HeightAnimation a;
 		if (expanded) {
 			a = new HeightAnimation(v, 0);

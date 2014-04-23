@@ -1,5 +1,6 @@
 package com.sfsweep.android;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,7 +15,9 @@ import com.activeandroid.annotation.Table;
 import com.google.android.gms.maps.model.LatLng;
 
 @Table(name = "street_sweeper_data")
-public class StreetSweeperData extends Model {
+public class StreetSweeperData extends Model implements Serializable {
+
+	private static final long serialVersionUID = 7312634491527815370L;
 
 	@Column(name = "kml_id")
 	public String kml_id;
@@ -147,7 +150,7 @@ public class StreetSweeperData extends Model {
 		}
 		return result;
 	}
-
+	
 	public Date nextSweeping() {
 		Calendar now = Calendar.getInstance();
 		Calendar nextMonth = Calendar.getInstance();
