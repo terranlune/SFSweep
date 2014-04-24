@@ -8,5 +8,10 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_hub">HubActivity</string>
     <string name="tv_map_hub">Map</string>
+    <string name="title_activity_address">AddressActivity</string>
+    <string name="tv_address_intro">Street cleaning is\nscheduled for</string>
+    <string name="title_activity_alarm">AlarmActivity</string>
+    <string name="tv_alarm_intro">Warn me</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 
 </resources>

@@ -60,6 +60,18 @@
             android:name="com.sfsweep.android.activities.HubActivity"
             android:label="@string/title_activity_hub" >
         </activity>
+        <activity
+            android:name="com.sfsweep.android.activities.AddressActivity"
+            android:label="@string/title_activity_address" >
+        </activity>
+        <activity
+            android:name="com.sfsweep.android.activities.AlarmActivity"
+            android:label="@string/title_activity_alarm" >
+        </activity>
+        <activity
+            android:name="com.sfsweep.android.activities.SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
     </application>
 
 </manifest>

@@ -1021,7 +1021,6 @@ For display of colors next to names, see: http://www.computerhope.com/htmcolor.h
 	<color name="android_57_chevy_blue">#52D0FF</color>
 	
 	
-	
 	<!--android_mid_green-->
 	<color name="android_lime_green">#C6FF19</color>
 	<color name="android_forest_green">#607F00</color>
@@ -1053,6 +1052,10 @@ For display of colors next to names, see: http://www.computerhope.com/htmcolor.h
 	
 	<!--Red-->
 	
+	
+	<!--SFSweep Colors-->
+	<color name="sfsweep_dark_blue">#21518A</color>
+	<color name="sfsweep_orange">#F1941E</color>
 	
 </resources>
 

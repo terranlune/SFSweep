@@ -9,6 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:layout_marginBottom="10dp"
         android:src="@drawable/ic_launcher" />
 
     <TextView
@@ -17,6 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/ivItemImage"
         android:layout_centerHorizontal="true"
-        android:textAppearance="?android:attr/textAppearanceLarge" /> 
+        android:textSize="16sp"
+        android:text="Text" /> 
 
 </RelativeLayout>

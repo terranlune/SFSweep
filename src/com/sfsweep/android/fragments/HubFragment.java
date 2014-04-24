@@ -1,6 +1,7 @@
 package com.sfsweep.android.fragments;
 
 import android.app.Activity;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -18,6 +19,8 @@ public abstract class HubFragment extends Fragment {
 	private TextView               mTvItemText; 
 	private OnHubItemClickListener mListener; 
 	
+	private String   mFont = "Roboto-Light.ttf";
+	private Typeface mTypeface;
 	
 	public interface OnHubItemClickListener {
 		public void onHubItemClick(String hubFragmentType); 
@@ -59,6 +62,9 @@ public abstract class HubFragment extends Fragment {
 				mListener.onHubItemClick(getHubFragmentType());
 			}
 		}); 
+		
+		mTypeface = Typeface.createFromAsset(getActivity().getAssets(), mFont); 
+		mTvItemText.setTypeface(mTypeface); 
 	}
 
 	public View getInflatedView() {

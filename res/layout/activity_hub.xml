@@ -1,16 +1,57 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
+
+  	<TableRow
+        android:layout_height="0dp"
+        android:layout_weight="1" >
     
-    <FrameLayout 
-        android:id="@+id/hubFragmentContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" 
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true" />
+        <fragment
+	        android:id="@+id/mapHubFragment"
+	        android:name="com.sfsweep.android.fragments.MapHubFragment"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:layout_gravity="center_vertical"
+	        android:background="@color/white"
+	        android:layout="@layout/fragment_hub" />
+	
+	    <fragment
+	        android:id="@+id/addressHubFragment"
+	        android:name="com.sfsweep.android.fragments.AddressHubFragment"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:layout_gravity="center_vertical"
+	        android:background="@color/sfsweep_orange"
+	        android:layout="@layout/fragment_hub" />
+	
+	</TableRow>
     
- </RelativeLayout>
+  	<TableRow
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+    
+         <fragment
+	        android:id="@+id/alarmHubFragment"
+	        android:name="com.sfsweep.android.fragments.AlarmHubFragment"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:layout_gravity="center_vertical"
+	        android:background="@color/sfsweep_dark_blue"
+	        android:layout="@layout/fragment_hub" />
+       
+       <fragment
+	        android:id="@+id/settingsHubFragment"
+	        android:name="com.sfsweep.android.fragments.SettingsHubFragment"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:layout_gravity="center_vertical"
+	        android:background="@color/white"
+	        android:layout="@layout/fragment_hub" />
+	
+	</TableRow>
+  	
+</TableLayout> 

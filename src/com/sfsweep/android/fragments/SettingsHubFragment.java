@@ -5,12 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class AddressHubFragment extends HubFragment {
+public class SettingsHubFragment extends HubFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		super.onCreateView(inflater, parent, savedInstanceState); 
-		getItemText().setText("Address stub"); 
+		getItemText().setText("Settings stub"); 
 		return getInflatedView(); 
 	}
 	
