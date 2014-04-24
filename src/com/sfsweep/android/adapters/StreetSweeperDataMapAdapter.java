@@ -25,15 +25,20 @@ public class StreetSweeperDataMapAdapter {
 
 	private long PARKING_DURATION_MILLIS = 1000 * 60 * 60 * 24 * 7;
 	private static final int LINE_WIDTH = 20;
+	private static final int MODE_HEAT_MAP = 1;
+	private static final int MODE_WEEKDAY = 2;
 	private HashMap<StreetSweeperData, Polyline> cache;
 	private HashMap<String, List<StreetSweeperData>> cnnCache;
 	private GoogleMap map;
-	
+	private int mode = MODE_HEAT_MAP;
+	private String mode_weekday_filter;
+
 	public StreetSweeperDataMapAdapter(GoogleMap map) {
 		this.map = map;
 		cache = new HashMap<StreetSweeperData, Polyline>();
+		cnnCache = new HashMap<String, List<StreetSweeperData>>();
 	}
-	
+
 	public void fetchData(LatLngBounds bounds) {
 		List<StreetSweeperData> l = getDataFromDb(bounds);
 		updateCache(l);
@@ -41,6 +46,36 @@ public class StreetSweeperDataMapAdapter {
 	}
 
 	private void stylePolylines() {
+		if (mode == MODE_HEAT_MAP) {
+			stylePolylinesHeatmap();
+		} else if (mode == MODE_WEEKDAY) {
+			stylePolylinesWeekday(mode_weekday_filter);
+		}
+	}
+	
+	public void setModeHeatmap() {
+		mode = MODE_HEAT_MAP;
+		stylePolylines();
+	}
+	public void setModeWeekday(String weekday) {
+		mode = MODE_WEEKDAY;
+		mode_weekday_filter = weekday;
+		stylePolylines();
+	}
+
+	private void stylePolylinesWeekday(String weekDay) {
+		for (StreetSweeperData d : cache.keySet()) {
+			Polyline l = cache.get(d);
+			l.setColor(Color.BLUE);
+			if (d.WeekDay.equals(weekDay)) {
+				l.setVisible(true);
+			} else {
+				l.setVisible(false);
+			}
+		}
+	}
+
+	private void stylePolylinesHeatmap() {
 
 		for (String CNN : cnnCache.keySet()) {
 
@@ -85,13 +120,14 @@ public class StreetSweeperDataMapAdapter {
 			DateInterval di2 = d2.nextSweeping(false);
 			if (di1 == null && di2 == null) {
 				return 0;
-			}else if (di1 == null) {
+			} else if (di1 == null) {
 				return 1;
-			}else if (di2 == null) {
+			} else if (di2 == null) {
 				return -1;
-			}else{
-				return -1*d1.nextSweeping(false).start.compareTo(d2
-						.nextSweeping(false).start);
+			} else {
+				return -1
+						* d1.nextSweeping(false).start.compareTo(d2
+								.nextSweeping(false).start);
 			}
 		}
 	}

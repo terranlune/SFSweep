@@ -93,6 +93,7 @@ public class MapActivity extends FragmentActivity implements
 				map.setOnMapClickListener(this);
 				
 				mapAdapter = new StreetSweeperDataMapAdapter(map);
+//				mapAdapter.setModeWeekday("Fri");
 
 			} else {
 				Toast.makeText(this, "Error - Map was null!!",
