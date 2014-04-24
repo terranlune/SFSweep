@@ -6,5 +6,7 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_sweep_data_detail">SweepDataDetail</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_hub">HubActivity</string>
+    <string name="tv_map_hub">Map</string>
 
 </resources>

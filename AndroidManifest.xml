@@ -56,6 +56,10 @@
             android:name="com.sfsweep.android.SweepDataDetailActivity"
             android:label="@string/title_activity_sweep_data_detail" >
         </activity>
+        <activity
+            android:name="com.sfsweep.android.activities.HubActivity"
+            android:label="@string/title_activity_hub" >
+        </activity>
     </application>
 
 </manifest>

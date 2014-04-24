@@ -53,8 +53,8 @@ public class MapActivity extends FragmentActivity implements
 	 * Define a request code to send to Google Play services This code is
 	 * returned in Activity.onActivityResult
 	 */
-	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-	private final static int SETTINGS_REQUEST = 1; 
+	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+	private static final int HUB_REQUEST = 1; 
 
 	private boolean expanded = false;
 	private int animDuration;
@@ -126,8 +126,8 @@ public class MapActivity extends FragmentActivity implements
 		mBtnMoveBy.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-//				Intent i = new Intent(SfSweepActivity.this, SettingsActivity.class);
-//				startActivityForResult(i, SETTINGS_REQUEST); 
+				Intent i = new Intent(MapActivity.this, HubActivity.class);
+				startActivityForResult(i, HUB_REQUEST); 
 			}
 		});
 	}
