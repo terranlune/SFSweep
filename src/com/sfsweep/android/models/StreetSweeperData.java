@@ -1,4 +1,4 @@
-package com.sfsweep.android;
+package com.sfsweep.android.models;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -225,7 +225,7 @@ public class StreetSweeperData extends Model implements Serializable {
 		return nearestPoint;
 	}
 
-	static double distance(LatLng a, LatLng b) {
+	public static double distance(LatLng a, LatLng b) {
 		return Math.sqrt((a.latitude - b.latitude) * (a.latitude - b.latitude)
 				+ (a.longitude - b.longitude) * (a.longitude - b.longitude));
 	}

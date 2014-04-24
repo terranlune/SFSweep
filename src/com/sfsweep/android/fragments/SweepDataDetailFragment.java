@@ -14,8 +14,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.sfsweep.android.R;
-import com.sfsweep.android.StreetSweeperData;
-import com.sfsweep.android.StreetSweeperData.DateInterval;
+import com.sfsweep.android.models.StreetSweeperData;
+import com.sfsweep.android.models.StreetSweeperData.DateInterval;
 
 /**
  * A placeholder fragment containing a simple view.
