@@ -3,9 +3,9 @@
     android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".MainActivity" >
 
+    
     <fragment
         android:id="@+id/map"
         android:layout_width="match_parent"
@@ -15,6 +15,41 @@
         android:layout_alignParentTop="true"
         class="com.google.android.gms.maps.SupportMapFragment" />
 
+     <FrameLayout
+	    android:id="@+id/flMoveBy"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentLeft="true"
+	    android:layout_alignParentTop="true" >
+	    
+	    <Button
+	        android:id="@+id/btnMoveBy"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:background="@drawable/btn_move_by" />
+	    
+	    <TextView 
+	        android:id="@+id/tvMoveBy"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="12dp" 
+	        android:layout_marginLeft="5dp"
+	        android:textSize="10sp"
+	        android:textColor="@color/white"
+	        android:text="Move by" />
+	    
+	    <TextView 
+	        android:id="@+id/tvDay"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="25dp"
+	        android:layout_marginLeft="4dp"
+	        android:textSize="18sp"
+	        android:textStyle="bold" 
+	        android:textColor="@color/white"
+	        android:text="Thurs" />
+	    
+	</FrameLayout>
     <View
         android:layout_width="fill_parent"
         android:layout_height="1dp"
