@@ -148,7 +148,7 @@ public class StreetSweeperData extends Model implements Serializable {
 						cal.get(Calendar.MONTH) + 1, cal.get(Calendar.YEAR),
 						this.ToHour);
 				Date end = sdf.parse(sEnd);
-				
+
 				result.add(new DateInterval(start, end));
 			} catch (ParseException e) {
 				e.printStackTrace();
@@ -156,16 +156,34 @@ public class StreetSweeperData extends Model implements Serializable {
 		}
 		return result;
 	}
-	
+
 	public class DateInterval {
 		public Date start;
 		public Date end;
+
 		DateInterval(Date start, Date end) {
 			this.start = start;
 			this.end = end;
 		}
 	}
-	
+
+	public DateInterval nextSweeping(boolean includeInProgress) {
+		DateInterval nextSweeping;
+		List<DateInterval> upcomingSweepings = upcomingSweepings();
+		try {
+			nextSweeping = upcomingSweepings.get(0);
+			if (nextSweeping.start.before(new Date())) {
+				// Sweeping in progress
+				if (includeInProgress) {
+					nextSweeping = upcomingSweepings.get(1);
+				}
+			}
+		} catch (IndexOutOfBoundsException e) {
+			nextSweeping = null;
+		}
+		return nextSweeping;
+	}
+
 	public List<DateInterval> upcomingSweepings() {
 		Calendar now = Calendar.getInstance();
 		Calendar nextMonth = Calendar.getInstance();
@@ -212,7 +230,8 @@ public class StreetSweeperData extends Model implements Serializable {
 				+ (a.longitude - b.longitude) * (a.longitude - b.longitude));
 	}
 
-	private static LatLng nearestPointOnLine(LatLng a, LatLng b, LatLng p, boolean clampToSegment) {
+	private static LatLng nearestPointOnLine(LatLng a, LatLng b, LatLng p,
+			boolean clampToSegment) {
 
 		double apx = p.latitude - a.latitude;
 		double apy = p.longitude - a.longitude;

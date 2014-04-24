@@ -1,5 +1,8 @@
 package com.sfsweep.android;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +60,7 @@ public class SfSweepActivity extends FragmentActivity implements
 	private GoogleMap map;
 	private LocationClient mLocationClient;
 	private HashMap<StreetSweeperData, Polyline> cache;
+	private HashMap<String, List<StreetSweeperData>> cnnCache;
 	/*
 	 * Define a request code to send to Google Play services This code is
 	 * returned in Activity.onActivityResult
@@ -281,32 +285,57 @@ public class SfSweepActivity extends FragmentActivity implements
 	}
 
 	private void stylePolylines() {
-		// Apply the new colors
-		Date now = new Date();
-		for (StreetSweeperData d : cache.keySet()) {
-			Polyline line = cache.get(d);
 
-			// Heatmap mode
-			List<DateInterval> upcomingSweepings = d.upcomingSweepings();
+		for (String CNN : cnnCache.keySet()) {
 
-			DateInterval nextSweeping;
-			try {
-				nextSweeping = upcomingSweepings.get(0);
-				if (nextSweeping.start.before(new Date())) {
-					// Sweeping in progress
-					nextSweeping = upcomingSweepings.get(1);
-				}
-			} catch (IndexOutOfBoundsException e) {
-				nextSweeping = null;
+			// Sort by next sweep
+			List<StreetSweeperData> l = cnnCache.get(CNN);
+			Collections.sort(l, new NextSweepingComparator());
+
+			// Color the first one
+			StreetSweeperData nextSweepingData = l.remove(0);
+			Polyline line = cache.get(nextSweepingData);
+			line.setVisible(true);
+			int color = getHeatmapColor(nextSweepingData, false);
+			line.setColor(color);
+
+			// Hide the remaining ones
+			for (StreetSweeperData d : l) {
+				cache.get(d).setVisible(false);
 			}
-			if (nextSweeping != null) {
-				long diff = nextSweeping.start.getTime() - now.getTime();
-				double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
-				int color = Color.rgb(0, Math.min(255, (int) (255 * percent)),
-						0);
-				line.setColor(color);
-			} else {
-				line.setColor(Color.MAGENTA);
+
+		}
+	}
+
+	private int getHeatmapColor(StreetSweeperData d, boolean includeInProgress) {
+		if (d == null) {
+			return Color.MAGENTA;
+		}
+		DateInterval nextSweeping = d.nextSweeping(includeInProgress);
+		if (nextSweeping == null) {
+			return Color.MAGENTA;
+		}
+		long diff = nextSweeping.start.getTime() - new Date().getTime();
+		double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
+		int color = Color.rgb(0, Math.min(255, (int) (255 * percent)), 0);
+		return color;
+	}
+
+	public class NextSweepingComparator implements
+			Comparator<StreetSweeperData> {
+		@Override
+		public int compare(StreetSweeperData d1, StreetSweeperData d2) {
+			DateInterval di1 = d1.nextSweeping(false);
+			DateInterval di2 = d2.nextSweeping(false);
+			if (di1 == null && di2 == null) {
+				return 0;
+			}else if (di1 == null) {
+				return 1;
+			}else if (di2 == null) {
+				return -1;
+			}else{
+				return -1*d1.nextSweeping(false).start.compareTo(d2
+						.nextSweeping(false).start);
 			}
 		}
 	}
@@ -329,7 +358,7 @@ public class SfSweepActivity extends FragmentActivity implements
 			}
 		}
 
-		Log.e("fetchData", String.format("Cache size: %s (+%s,-%s)",
+		Log.e("updateCache", String.format("Cache size: %s (+%s,-%s)",
 				newCache.size(), addCount, cache.size()));
 
 		// Remove offscreen data
@@ -339,6 +368,15 @@ public class SfSweepActivity extends FragmentActivity implements
 
 		// Save the new cache
 		cache = newCache;
+
+		// Group the data by CNN
+		cnnCache = new HashMap<String, List<StreetSweeperData>>();
+		for (StreetSweeperData d : cache.keySet()) {
+			if (!cnnCache.containsKey(d.CNN)) {
+				cnnCache.put(d.CNN, new ArrayList<StreetSweeperData>());
+			}
+			cnnCache.get(d.CNN).add(d);
+		}
 	}
 
 	private List<StreetSweeperData> getDataFromDb(LatLngBounds bounds) {
@@ -370,6 +408,10 @@ public class SfSweepActivity extends FragmentActivity implements
 		StreetSweeperData nearestData = null;
 		for (StreetSweeperData d : cache.keySet()) {
 
+			if (!cache.get(d).isVisible()) {
+				continue;
+			}
+
 			LatLng p = d.nearestPoint(point);
 			double distance = StreetSweeperData.distance(point, p);
 			if (distance < nearestDistance) {
@@ -395,16 +437,16 @@ public class SfSweepActivity extends FragmentActivity implements
 			// Remove the marker
 			if (marker != null)
 				marker.remove();
-			
+
 			// Re-enable controls
 			map.setMyLocationEnabled(true);
 		} else {
 
 			sweepDataDetailFragment.setData(data);
-			
+
 			// Set the marker
 			marker = map.addMarker(new MarkerOptions().position(point));
-			
+
 			// Disable controls
 			map.setMyLocationEnabled(false);
 

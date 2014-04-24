@@ -59,6 +59,7 @@ public class SweepDataDetailFragment extends Fragment {
 					d.BlockSide));
 		}
 
+		// TODO: Refactor some of this into StreetSweeperData
 		List<DateInterval> upcomingSweepings = d.upcomingSweepings();
 		DateInterval nextSweeping = upcomingSweepings.get(0);
 		if (nextSweeping.start.before(new Date())) {

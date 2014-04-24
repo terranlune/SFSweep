@@ -15,6 +15,12 @@
         android:layout_alignParentTop="true"
         class="com.google.android.gms.maps.SupportMapFragment" />
 
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/map"
+        android:background="@android:drawable/divider_horizontal_bright" />
+    
     <fragment
         android:id="@+id/sweepDetail"
         android:layout_width="match_parent"
