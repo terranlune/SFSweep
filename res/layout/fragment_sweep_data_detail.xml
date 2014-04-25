@@ -6,13 +6,16 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/white"
     tools:context="com.sfsweep.android.fragments.SweepDataDetailFragment" >
 
     <TextView
         android:id="@+id/tvStreetName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:text="Street Name"
+        android:textColor="@color/gunmetal"
         android:textSize="24sp" />
 
     <TextView
@@ -20,6 +23,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvStreetName"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:background="@color/white"
         android:text="Sweeping in progress! (ends in 2h)"
         android:textColor="@color/sweepingInProgress"
         android:textSize="20sp"
@@ -31,7 +37,69 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/tvSweepingInProgress"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:background="@color/white"
         android:text="Wednesday 8am-10am (in 3 days)"
+        android:textColor="@color/gunmetal"
         android:textSize="20sp" />
+    
+     <TextView
+         android:id="@+id/tvNotificationHead"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignParentLeft="true"
+         android:layout_below="@+id/tvNextSweeping"
+         android:layout_marginTop="50dp"
+         android:background="@color/white"
+         android:text="@string/tv_notification_head"
+         android:textColor="@color/gunmetal"
+         android:textSize="20sp" />
+    
+    <fragment
+        android:id="@+id/minuteNotificationFragment"
+        android:name="com.sfsweep.android.fragments.MinuteNotificationFragment"
+        android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/tvNotificationHead"
+	    android:layout_marginTop="5dp"
+	    android:layout_marginLeft="20dp"
+	    android:background="@color/white"
+	    android:layout="@layout/fragment_notification" />
+    
+    <fragment
+        android:id="@+id/hourNotificationFragment"
+        android:name="com.sfsweep.android.fragments.HourNotificationFragment"
+        android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/minuteNotificationFragment"
+	    android:layout_marginTop="5dp"
+	    android:layout_marginLeft="20dp"
+	    android:background="@color/white"
+	    android:layout="@layout/fragment_notification" />
+    
+    <fragment
+        android:id="@+id/dayNotificationFragment"
+        android:name="com.sfsweep.android.fragments.DayNotificationFragment"
+        android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_below="@+id/hourNotificationFragment"
+	    android:layout_marginTop="5dp"
+	    android:layout_marginLeft="20dp"
+	    android:background="@color/white"
+	    android:layout="@layout/fragment_notification" />
 
+    <TextView
+        android:id="@+id/tvNotificationTail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/dayNotificationFragment"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="15dp"
+        android:background="@color/white"
+        android:text="@string/tv_notification_tail"
+        android:textColor="@color/gunmetal"
+        android:textSize="18sp" />
+    
 </RelativeLayout>

@@ -126,7 +126,7 @@ public class MapActivity extends FragmentActivity implements
 		mBtnMoveBy.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent i = new Intent(MapActivity.this, HubActivity.class);
+				Intent i = new Intent(MapActivity.this, com.sfsweep.android.zdeprecated.HubActivity.class);
 				startActivityForResult(i, HUB_REQUEST); 
 			}
 		});

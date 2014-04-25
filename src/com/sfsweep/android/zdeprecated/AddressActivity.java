@@ -1,4 +1,4 @@
-package com.sfsweep.android.activities;
+package com.sfsweep.android.zdeprecated;
 
 import android.graphics.Typeface;
 import android.os.Bundle;

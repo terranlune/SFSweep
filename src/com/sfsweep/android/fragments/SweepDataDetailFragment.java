@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.format.DateUtils;
@@ -25,8 +26,13 @@ public class SweepDataDetailFragment extends Fragment {
 	private TextView tvStreetName;
 	private TextView tvNextSweeping;
 	private TextView tvSweepingInProgress;
+	private TextView mTvNotificationHead;
+	private TextView mTvNotificationTail;
 	private StreetSweeperData data;
 
+	private String   mFont="Roboto-Light.ttf";
+	private Typeface mTypeface;
+	
 	public SweepDataDetailFragment() {
 	}
 
@@ -36,10 +42,23 @@ public class SweepDataDetailFragment extends Fragment {
 		View rootView = inflater.inflate(R.layout.fragment_sweep_data_detail,
 				container, false);
 
+		mTypeface = Typeface.createFromAsset(getActivity().getAssets(), mFont); 
+		
 		tvStreetName = (TextView) rootView.findViewById(R.id.tvStreetName);
+		tvStreetName.setTypeface(mTypeface); 
+		
 		tvNextSweeping = (TextView) rootView.findViewById(R.id.tvNextSweeping);
+		tvNextSweeping.setTypeface(mTypeface);
+		
 		tvSweepingInProgress = (TextView) rootView
 				.findViewById(R.id.tvSweepingInProgress);
+		tvSweepingInProgress.setTypeface(mTypeface); 
+		
+		mTvNotificationHead = (TextView) rootView.findViewById(R.id.tvNotificationHead);
+		mTvNotificationHead.setTypeface(mTypeface);
+		
+		mTvNotificationTail = (TextView) rootView.findViewById(R.id.tvNotificationTail);
+		mTvNotificationTail.setTypeface(mTypeface); 
 
 		return rootView;
 	}

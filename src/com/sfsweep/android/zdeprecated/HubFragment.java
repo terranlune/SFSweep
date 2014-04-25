@@ -1,4 +1,4 @@
-package com.sfsweep.android.fragments;
+package com.sfsweep.android.zdeprecated;
 
 import android.app.Activity;
 import android.graphics.Color;

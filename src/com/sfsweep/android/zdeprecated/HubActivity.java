@@ -1,4 +1,4 @@
-package com.sfsweep.android.activities;
+package com.sfsweep.android.zdeprecated;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 
 import com.sfsweep.android.R;
-import com.sfsweep.android.fragments.HubFragment.OnHubItemClickListener;
+import com.sfsweep.android.zdeprecated.HubFragment.OnHubItemClickListener;
 
 public class HubActivity extends ActionBarActivity implements OnHubItemClickListener {
 
