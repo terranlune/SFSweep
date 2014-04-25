@@ -8,7 +8,7 @@
     
         <fragment
 	        android:id="@+id/mapHubFragment"
-	        android:name="com.sfsweep.android.fragments.MapHubFragment"
+	        android:name="com.sfsweep.android.zdeprecated.MapHubFragment"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
@@ -18,7 +18,7 @@
 	
 	    <fragment
 	        android:id="@+id/addressHubFragment"
-	        android:name="com.sfsweep.android.fragments.AddressHubFragment"
+	        android:name="com.sfsweep.android.zdeprecated.AddressHubFragment"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
@@ -34,7 +34,7 @@
     
          <fragment
 	        android:id="@+id/notificationHubFragment"
-	        android:name="com.sfsweep.android.fragments.NotificationHubFragment"
+	        android:name="com.sfsweep.android.zdeprecated.NotificationHubFragment"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
@@ -45,7 +45,7 @@
        
        <fragment
 	        android:id="@+id/alarmHubFragment"
-	        android:name="com.sfsweep.android.fragments.AlarmHubFragment"
+	        android:name="com.sfsweep.android.zdeprecated.AlarmHubFragment"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"

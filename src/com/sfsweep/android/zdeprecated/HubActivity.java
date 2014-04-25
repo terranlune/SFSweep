@@ -17,10 +17,10 @@ public class HubActivity extends ActionBarActivity implements OnHubItemClickList
 							    ADDRESS_REQUEST       = 2,
 								NOTIFICATION_REQUEST  = 3;
 	
-	private static final String ADDRESS_ACTIVITY      = "com.sfsweep.android.activities.AddressActivity",
-	                            ALARM_ACTIVITY        = "com.sfsweep.android.activities.AlarmActivity",
-	                            MAP_ACTIVITY          = "com.sfsweep.android.activities.MapActivity",
-	                            NOTIFICATION_ACTIVITY = "com.sfsweep.android.activities.NotificationActivity";
+	private static final String ADDRESS_ACTIVITY      = "com.sfsweep.android.zdeprecated.AddressActivity",
+	                            ALARM_ACTIVITY        = "com.sfsweep.android.zdeprecated.AlarmActivity",
+	                            MAP_ACTIVITY          = "com.sfsweep.android.zdeprecated.MapActivity",
+	                            NOTIFICATION_ACTIVITY = "com.sfsweep.android.zdeprecated.NotificationActivity";
 	
 	
 	@Override

@@ -1,5 +1,6 @@
 package com.sfsweep.android.fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,9 +11,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.sfsweep.android.R;
+import com.sfsweep.android.helpers.SpinnerSelectionConverter;
 
 public abstract class NotificationFragment extends Fragment {
 
+	private static final String SPINNER_PREFERENCES = "spinner_preferences"; 
+	
 	private Spinner                    mSpnNotifier; 
 	private ArrayAdapter<CharSequence> mAdapter;
 	
@@ -34,12 +38,18 @@ public abstract class NotificationFragment extends Fragment {
 				R.layout.spinner_item_custom);
 		mAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom); 
 		mSpnNotifier.setAdapter(mAdapter); 
+		
+		SharedPreferences prefs = getActivity().getSharedPreferences(SPINNER_PREFERENCES, 0); 
+		String selectionKey = getSpinnerSelectionKey();
+		int position = prefs.getInt(selectionKey, 0); 
+		mSpnNotifier.setSelection(position); 
 	}
 	
 	private void setupListeners() {
 		mSpnNotifier.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override 
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				int itemValue = getSelectedSpinnerItem(position); 
 				// TODO: Notify system alarm 
 			}
 			
@@ -58,10 +68,35 @@ public abstract class NotificationFragment extends Fragment {
 		});
 	}
 	
+	private int getSelectedSpinnerItem(int position) {
+		String selection = (String) mSpnNotifier.getItemAtPosition(position); 
+		SpinnerSelectionConverter converter = new SpinnerSelectionConverter(selection); 
+		return converter.getSpinnerItemAsInt(); 
+	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		
+		SharedPreferences prefs = getActivity().getSharedPreferences(SPINNER_PREFERENCES, 0); 
+		SharedPreferences.Editor editor = prefs.edit(); 
+		saveSpinnerSelection(editor, mSpnNotifier); 
+	}
+	
 	/*
-	 * Subclass should implement method to return resource value from R.java corresponding to 
-	 * string array used to populate subclass's spinner
+	 * Subclass should return resource value from R.java corresponding to string array 
+	 * used to populate subclass's spinner
 	 */
 	public abstract int getSpinnerValues(); 
+
+	/*
+	 * Subclass should use editor argument to persist its spinner value in SharedPreferences
+	 */
+	public abstract void saveSpinnerSelection(SharedPreferences.Editor editor, Spinner spinner); 
+	
+	/*
+	 * Subclass should return String key to its spinner value stored in SharedPreferences
+	 */
+	public abstract String getSpinnerSelectionKey(); 
 	
 }
