@@ -5,78 +5,30 @@
     android:layout_height="match_parent" 
     android:background="@color/white" >
 
+    <AnalogClock
+        android:id="@+id/analogClock1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvAlarmIntro"
+        android:layout_centerHorizontal="true" />
+
     <TextView
         android:id="@+id/tvAlarmIntro"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="60dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="38dp"
         android:background="@color/white"
-        android:textSize="30sp"
-        android:textColor="@color/gunmetal"
-        android:text="@string/tv_alarm_intro" />
+        android:text="@string/tv_alarm_intro"
+        android:textSize="30sp" />
 
-    <Spinner
-        android:id="@+id/spnDayInterval"
+    <DatePicker
+        android:id="@+id/datePicker1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/tvAlarmIntro"
-        android:layout_marginTop="40dp" 
-        android:background="@color/white" />
-
-    <Spinner
-        android:id="@+id/spnDaysInAdvance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/spnDayInterval"
-        android:layout_marginTop="40dp" 
-        android:background="@color/white" />
-
-    <Spinner
-        android:id="@+id/spnHoursInAdvance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/spnDaysInAdvance"
-        android:layout_marginTop="40dp" 
-        android:background="@color/white" />
-   
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="18dp" />
+    
 </RelativeLayout>
-
-
-<!--  <Button
-        android:id="@+id/btnDayInterval"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/tvAlarmIntro"
-        android:layout_marginTop="44dp"
-        android:background="@color/white"
-        android:textSize="30sp"
-        android:text="Button" />
-
-    <Button
-        android:id="@+id/btnDaysInAdvance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/btnDayInterval"
-        android:layout_marginTop="63dp"
-        android:background="@color/white"
-        android:textSize="30sp"
-        android:text="Button" />
-
-    <Button
-        android:id="@+id/btnHoursInAdvance"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/btnDaysInAdvance"
-        android:layout_marginTop="64dp"
-        android:background="@color/white"
-        android:textSize="30sp"
-        android:text="Button" />
- -->

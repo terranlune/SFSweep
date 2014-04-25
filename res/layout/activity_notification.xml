@@ -1,0 +1,47 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:background="@color/white" >
+
+    <TextView
+        android:id="@+id/tvNotificationIntro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"
+        android:background="@color/white"
+        android:text="@string/tv_notification_intro"
+        android:textColor="@color/gunmetal"
+        android:textSize="30sp" />
+
+    <Spinner
+        android:id="@+id/spnDayInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tvNotificationIntro"
+        android:layout_marginTop="40dp" 
+        android:background="@color/white" />
+
+    <Spinner
+        android:id="@+id/spnDaysInAdvance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/spnDayInterval"
+        android:layout_marginTop="40dp" 
+        android:background="@color/white" />
+
+    <Spinner
+        android:id="@+id/spnHoursInAdvance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/spnDaysInAdvance"
+        android:layout_marginTop="40dp" 
+        android:background="@color/white" />
+   
+</RelativeLayout>

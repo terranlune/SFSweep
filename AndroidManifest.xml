@@ -65,12 +65,12 @@
             android:label="@string/title_activity_address" >
         </activity>
         <activity
-            android:name="com.sfsweep.android.activities.AlarmActivity"
-            android:label="@string/title_activity_alarm" >
+            android:name="com.sfsweep.android.activities.NotificationActivity"
+            android:label="@string/title_activity_notification" >
         </activity>
         <activity
-            android:name="com.sfsweep.android.activities.SettingsActivity"
-            android:label="@string/title_activity_settings" >
+            android:name="com.sfsweep.android.activities.AlarmActivity"
+            android:label="@string/title_activity_alarm" >
         </activity>
     </application>
 

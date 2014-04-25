@@ -33,22 +33,24 @@
         android:layout_weight="1" >
     
          <fragment
+	        android:id="@+id/notificationHubFragment"
+	        android:name="com.sfsweep.android.fragments.NotificationHubFragment"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:layout_gravity="center_vertical"
+	        android:layout_marginBottom="20dp"
+	        android:background="@color/sfsweep_dark_blue"
+	        android:layout="@layout/fragment_hub" />
+       
+       <fragment
 	        android:id="@+id/alarmHubFragment"
 	        android:name="com.sfsweep.android.fragments.AlarmHubFragment"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
 	        android:layout_gravity="center_vertical"
-	        android:background="@color/sfsweep_dark_blue"
-	        android:layout="@layout/fragment_hub" />
-       
-       <fragment
-	        android:id="@+id/settingsHubFragment"
-	        android:name="com.sfsweep.android.fragments.SettingsHubFragment"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:layout_gravity="center_vertical"
+	        android:layout_marginBottom="20dp"
 	        android:background="@color/white"
 	        android:layout="@layout/fragment_hub" />
 	

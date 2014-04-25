@@ -6,26 +6,28 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 
 import com.sfsweep.android.R;
 import com.sfsweep.android.fragments.HubFragment.OnHubItemClickListener;
 
 public class HubActivity extends ActionBarActivity implements OnHubItemClickListener {
 
-	private static final int    ALARM_REQUEST     = 1,
-							    ADDRESS_REQUEST   = 2,
-								SETTINGS_REQUEST  = 3;
+	private static final int    ALARM_REQUEST         = 1,
+							    ADDRESS_REQUEST       = 2,
+								NOTIFICATION_REQUEST  = 3;
 	
-	private static final String ADDRESS_ACTIVITY  = "com.sfsweep.android.activities.AddressActivity",
-	                            ALARM_ACTIVITY    = "com.sfsweep.android.activities.AlarmActivity",
-	                            MAP_ACTIVITY      = "com.sfsweep.android.activities.MapActivity",
-	                            SETTINGS_ACTIVITY = "com.sfsweep.android.activities.SettingsActivity";
+	private static final String ADDRESS_ACTIVITY      = "com.sfsweep.android.activities.AddressActivity",
+	                            ALARM_ACTIVITY        = "com.sfsweep.android.activities.AlarmActivity",
+	                            MAP_ACTIVITY          = "com.sfsweep.android.activities.MapActivity",
+	                            NOTIFICATION_ACTIVITY = "com.sfsweep.android.activities.NotificationActivity";
 	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_hub); 
+		
 	}
 	
 	@Override
@@ -53,8 +55,8 @@ public class HubActivity extends ActionBarActivity implements OnHubItemClickList
 			startActivityForResult(i, ADDRESS_REQUEST); 
 		} else if (destination.equals(ALARM_ACTIVITY)) {
 			startActivityForResult(i, ALARM_REQUEST);
-		} else if (destination.equals(SETTINGS_ACTIVITY)) {
-			startActivityForResult(i, SETTINGS_REQUEST); 
+		} else if (destination.equals(NOTIFICATION_ACTIVITY)) {
+			startActivityForResult(i, NOTIFICATION_REQUEST); 
 		} else {
 			// TODO: Call startActivity(i) if activity entered through system notification
 			finish(); 	// destination is MapHubFragment
@@ -69,7 +71,7 @@ public class HubActivity extends ActionBarActivity implements OnHubItemClickList
 		} else if (destination.startsWith("Map")) {
 			destination = MAP_ACTIVITY; 
 		} else {
-			destination = SETTINGS_ACTIVITY; 
+			destination = NOTIFICATION_ACTIVITY; 
 		}
 		return destination; 
 	}

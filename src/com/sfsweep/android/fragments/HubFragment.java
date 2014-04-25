@@ -1,6 +1,7 @@
 package com.sfsweep.android.fragments;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -65,6 +66,7 @@ public abstract class HubFragment extends Fragment {
 		
 		mTypeface = Typeface.createFromAsset(getActivity().getAssets(), mFont); 
 		mTvItemText.setTypeface(mTypeface); 
+		mTvItemText.setTextColor(getResources().getColor(R.color.sfsweep_icon_gray));
 	}
 
 	public View getInflatedView() {

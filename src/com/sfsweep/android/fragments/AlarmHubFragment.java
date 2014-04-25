@@ -1,5 +1,7 @@
 package com.sfsweep.android.fragments;
 
+import com.sfsweep.android.R;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +12,14 @@ public class AlarmHubFragment extends HubFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		super.onCreateView(inflater, parent, savedInstanceState); 
-		getItemText().setText("Alarm stub"); 
+		
+		setupWidgets();
 		return getInflatedView(); 
+	}
+	
+	private void setupWidgets() {
+		getItemText().setText("Alarm"); 
+		getItemImage().setImageResource(R.drawable.ic_alarm_90dp); 
 	}
 	
 	@Override 
