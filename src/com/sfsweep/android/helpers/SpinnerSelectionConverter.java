@@ -1,12 +1,13 @@
 package com.sfsweep.android.helpers;
 
-import android.util.Log;
-
 /**
- * Class converts a String-based Spinner item to an int
+ * Helper class converts a String-based Spinner item to an int. Class implementation 
+ * assumes that the String may represent, among other things, a specified number of days
+ * or weeks
  * 
  * Preconditions: Spinner String must contain only one numerical value, which represents
- * and integer
+ * an integer. Only Strings whose numerical value represents weeks contain the substring
+ * "week"
  */
 public class SpinnerSelectionConverter {
 
@@ -17,8 +18,19 @@ public class SpinnerSelectionConverter {
 	}
 
 	private int convertToInt(String selection) {
+		// Distinguish between days and weeks
+		boolean isWeek = false; 
+		if (selection.contains("week")) {
+			isWeek = true; 
+		}
+		
 		String selectionNumbersOnly = selection.replaceAll("[^0-9]", ""); 
-		return Integer.parseInt(selectionNumbersOnly); 
+		int spinnerValue = Integer.parseInt(selectionNumbersOnly); 
+		
+		if (isWeek) {
+			spinnerValue = spinnerValue * 7;
+		}
+		return spinnerValue; 
 	}
 	
 	public int getSpinnerItemAsInt() {

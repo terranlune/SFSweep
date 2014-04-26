@@ -32,9 +32,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
-import com.sfsweep.android.R.id;
-import com.sfsweep.android.R.layout;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
+import com.sfsweep.android.fragments.NotificationFragment.OnScheduleAlarmCallbacks;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
 import com.sfsweep.android.helpers.HeightAnimation;
 import com.sfsweep.android.models.StreetSweeperData;
@@ -42,7 +41,7 @@ import com.sfsweep.android.models.StreetSweeperData;
 public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
-		OnCameraChangeListener, OnMapClickListener {
+		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmCallbacks {
 
 	private static final LatLng SF = new LatLng(37.7577, -122.4376);
 
@@ -345,4 +344,18 @@ public class MapActivity extends FragmentActivity implements
 		expanded = !expanded;
 	}
 
+	@Override
+	public String onSweepTimeRange() {
+		SweepDataDetailFragment fragment = (SweepDataDetailFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.sweepDetail); 
+		return fragment.getSweepTimeRange(); 
+	}
+	
+	@Override
+	public String onDaysToNextSweep() {
+		SweepDataDetailFragment fragment = (SweepDataDetailFragment) getSupportFragmentManager().
+				findFragmentById(R.id.sweepDetail);
+		return fragment.getDaysToNextSweep();
+	}
+	
 }

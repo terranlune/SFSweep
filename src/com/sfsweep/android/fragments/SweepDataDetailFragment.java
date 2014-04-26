@@ -29,6 +29,8 @@ public class SweepDataDetailFragment extends Fragment {
 	private TextView mTvNotificationHead;
 	private TextView mTvNotificationTail;
 	private StreetSweeperData data;
+	private String mSweepTimeRange; 
+	private String mDaysToNextSweep;
 
 	private String   mFont="Roboto-Light.ttf";
 	private Typeface mTypeface;
@@ -100,15 +102,27 @@ public class SweepDataDetailFragment extends Fragment {
 			tvSweepingInProgress.setVisibility(View.GONE);
 		}
 		
-		String range = new SimpleDateFormat("cccc ha", Locale.US).format(nextSweeping.start) + "-" +
+		/* [John: I enlarged the scope and made getters for the range (now mSweepTimeRange) 
+		 * and rel (now mDaysToNextSweep) variables in order to set the system alarm. -Adam]
+		 */
+		mSweepTimeRange = new SimpleDateFormat("cccc ha", Locale.US).format(nextSweeping.start) + "-" +
 				new SimpleDateFormat("ha", Locale.US).format(nextSweeping.end);
 		
-		String rel = (String) DateUtils
+		mDaysToNextSweep = (String) DateUtils
 				.getRelativeTimeSpanString(
 						nextSweeping.start.getTime(),
 						new Date().getTime(),
 						DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_SHOW_DATE);
 				
-		tvNextSweeping.setText(String.format("%s (%s)", range, rel));
+		tvNextSweeping.setText(String.format("%s (%s)", mSweepTimeRange, mDaysToNextSweep));
 	}
+	
+	public String getSweepTimeRange() {
+		return mSweepTimeRange;
+	}
+	
+	public String getDaysToNextSweep() {
+		return mDaysToNextSweep; 
+	}
+	
 }
