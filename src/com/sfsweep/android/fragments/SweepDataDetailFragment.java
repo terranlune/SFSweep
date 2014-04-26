@@ -26,8 +26,6 @@ public class SweepDataDetailFragment extends Fragment {
 	private TextView tvStreetName;
 	private TextView tvNextSweeping;
 	private TextView tvSweepingInProgress;
-	private TextView mTvNotificationHead;
-	private TextView mTvNotificationTail;
 	private StreetSweeperData data;
 	private String mSweepTimeRange; 
 	private String mDaysToNextSweep;
@@ -55,13 +53,6 @@ public class SweepDataDetailFragment extends Fragment {
 		tvSweepingInProgress = (TextView) rootView
 				.findViewById(R.id.tvSweepingInProgress);
 		tvSweepingInProgress.setTypeface(mTypeface); 
-		
-		mTvNotificationHead = (TextView) rootView.findViewById(R.id.tvNotificationHead);
-		mTvNotificationHead.setTypeface(mTypeface);
-		
-		mTvNotificationTail = (TextView) rootView.findViewById(R.id.tvNotificationTail);
-		mTvNotificationTail.setTypeface(mTypeface); 
-
 		return rootView;
 	}
 

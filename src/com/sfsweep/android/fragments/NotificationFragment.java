@@ -157,8 +157,8 @@ public abstract class NotificationFragment extends Fragment {
 		calendar.set(Calendar.MINUTE, alarmMinute); 
 		
 		// FIXME: For some reason, Eclipse refuses to recognize alarmMgr.setExact(...), which
-		// is the API 19 update to alarmMgr.set(...). Unlike set(...), setExact(...) does not
-		// allow the system to adjust delivery time.
+		// is the minSdkTarget API 19 update to alarmMgr.set(...). Unlike set(...), setExact(...) 
+		// does not allow the system to adjust delivery time.
 		alarmMgr.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent); 
 		
 		// TODO: Ensure system alarm persists if device is shut down

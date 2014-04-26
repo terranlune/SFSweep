@@ -1,5 +1,6 @@
 package com.sfsweep.android.activities;
 
+import android.animation.LayoutTransition;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -9,10 +10,13 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +37,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
+import com.sfsweep.android.fragments.NotificationContainerFragment;
 import com.sfsweep.android.fragments.NotificationFragment.OnScheduleAlarmCallbacks;
+import com.sfsweep.android.fragments.NotificationIconFragment;
+import com.sfsweep.android.fragments.NotificationIconFragment.OnNotificationIconClickListener;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
 import com.sfsweep.android.helpers.HeightAnimation;
 import com.sfsweep.android.models.StreetSweeperData;
@@ -41,7 +48,8 @@ import com.sfsweep.android.models.StreetSweeperData;
 public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
-		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmCallbacks {
+		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmCallbacks,
+		OnNotificationIconClickListener {
 
 	private static final LatLng SF = new LatLng(37.7577, -122.4376);
 
@@ -54,7 +62,9 @@ public class MapActivity extends FragmentActivity implements
 	 */
 	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	private static final int HUB_REQUEST = 1; 
-
+	private static final String NOTIFICATION_ICON_FRAGMENT_TAG = "notification_icon_fragment_tag"; 
+	private static final String NOTIFICATION_CONTAINER_FRAGMENT_TAG = "notification_container_fragment_tag"; 
+	
 	private boolean expanded = false;
 	private int animDuration;
 	private Marker marker;
@@ -62,6 +72,7 @@ public class MapActivity extends FragmentActivity implements
 	private SweepDataDetailFragment sweepDataDetailFragment;
 
 	private Button   mBtnMoveBy;
+	private Button   mBtnNotify; 
 	private TextView mTvMoveBy;
 	private TextView mTvDay; 
 	
@@ -107,6 +118,7 @@ public class MapActivity extends FragmentActivity implements
 				.findFragmentById(R.id.sweepDetail);
 
 		setupMoveByButton();
+		setupFragments(); 
 		
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
 
@@ -129,6 +141,18 @@ public class MapActivity extends FragmentActivity implements
 				startActivityForResult(i, HUB_REQUEST); 
 			}
 		});
+	}
+	
+	private void setupFragments() {
+		NotificationIconFragment niFragment = new NotificationIconFragment(); 
+		NotificationContainerFragment ncFragment = new NotificationContainerFragment(); 
+		
+		FragmentManager fm = getSupportFragmentManager();
+		fm.beginTransaction()
+		  .add(R.id.flIconContainer, niFragment, NOTIFICATION_ICON_FRAGMENT_TAG)
+		  .add(R.id.flNotificationContainer, ncFragment, NOTIFICATION_CONTAINER_FRAGMENT_TAG)
+		  .hide(ncFragment)
+		  .commit();
 	}
 	
 	/*
@@ -336,7 +360,7 @@ public class MapActivity extends FragmentActivity implements
 			a = new HeightAnimation(v, 0);
 		} else {
 			int height = Math
-					.round(this.getWindow().getDecorView().getBottom() * 0.6f);
+					.round(this.getWindow().getDecorView().getBottom() * 0.24f);  // For reference: originally 0.6f
 			a = new HeightAnimation(v, height);
 		}
 		a.setDuration(animDuration);
@@ -358,4 +382,27 @@ public class MapActivity extends FragmentActivity implements
 		return fragment.getDaysToNextSweep();
 	}
 	
+	@Override
+	public void onNotificationIconClick() {
+		// Bump drawer to show notifications
+		View v = findViewById(R.id.sweepDetail);
+		int height = Math.round(this.getWindow().getDecorView().getBottom() * 0.60f);  
+		HeightAnimation a = new HeightAnimation(v, height);
+		a.setDuration(animDuration);
+		v.startAnimation(a);
+		
+		// Show notification container fragment 
+		FragmentManager fm = getSupportFragmentManager(); 
+		NotificationContainerFragment ncFragment = (NotificationContainerFragment) 
+				fm.findFragmentByTag(NOTIFICATION_CONTAINER_FRAGMENT_TAG);
+		fm.beginTransaction().show(ncFragment).commit(); 
+		
+		// TODO: Transpose notification icon and properly layout fully-opened drawer
+//		FrameLayout fl = (FrameLayout) findViewById(R.id.flIconContainer);
+//		fl.setLayoutTransition(new LayoutTransition());
+//		FrameLayout.LayoutParams flLayoutParams = new FrameLayout.LayoutParams(
+//				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//		flLayoutParams.setMargins(0, 10, 0, 0); 
+//		fl.setLayoutParams(flLayoutParams); 
+	}
 }
