@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity" >
-
     
     <fragment
         android:id="@+id/map"
@@ -12,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/sweepDetail"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/spinner1"
         class="com.google.android.gms.maps.SupportMapFragment" />
 
      <FrameLayout
@@ -21,12 +20,6 @@
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentLeft="true"
 	    android:layout_alignParentTop="true" >
-	    
-	    <Button
-	        android:id="@+id/btnMoveBy"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:background="@drawable/btn_move_by" />
 	    
 	    <TextView 
 	        android:id="@+id/tvMoveBy"
@@ -62,5 +55,21 @@
         android:layout_height="0dp"
         android:layout_alignParentBottom="true"
         class="com.sfsweep.android.fragments.SweepDataDetailFragment" />
+
+     <Spinner
+         android:id="@+id/spinner1"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignParentLeft="true"
+         android:layout_alignParentTop="true"
+         android:prompt="@color/android_deep_red" />
+
+     <Button
+         android:id="@+id/btnMoveBy"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignParentLeft="true"
+         android:layout_alignTop="@+id/map"
+         android:background="@drawable/btn_move_by" />
 
 </RelativeLayout>

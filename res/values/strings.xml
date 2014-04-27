@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
+     <string-array name="spinner1_opt">
+<item>Heatmap</item>
+<item>Sun</item>
+<item>Mon</item>
+<item>Tues</item>
+<item>Wed</item>
+<item>Thu</item>
+<item>Fri</item>
+<item>Sat</item>
+</string-array>
+    
 
      <string-array name="spn_options_day_interval">
         <item>day</item>
