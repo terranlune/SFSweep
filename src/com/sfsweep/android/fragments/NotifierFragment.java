@@ -22,7 +22,7 @@ import com.sfsweep.android.activities.MapActivity;
 import com.sfsweep.android.helpers.SpinnerSelectionConverter;
 import com.sfsweep.android.helpers.StreetSweeperDataConverter;
 
-public abstract class NotificationFragment extends Fragment {
+public abstract class NotifierFragment extends Fragment {
 
 	private static final String SPINNER_PREFERENCES = "spinner_preferences"; 
 	
@@ -52,7 +52,7 @@ public abstract class NotificationFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		super.onCreateView(inflater, parent, savedInstanceState); 
-		View v = inflater.inflate(R.layout.fragment_notification, parent, false); 
+		View v = inflater.inflate(R.layout.fragment_notifier, parent, false); 
 		
 		setupWidgets(v); 
 		setupListeners(); 

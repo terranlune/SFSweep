@@ -5,7 +5,7 @@ import android.widget.Spinner;
 
 import com.sfsweep.android.R;
 
-public class MinuteNotificationFragment extends NotificationFragment {
+public class MinuteNotifierFragment extends NotifierFragment {
 
 	private static final String MINUTE_SPINNER_POSITION = "minute_spinner_position";
 	

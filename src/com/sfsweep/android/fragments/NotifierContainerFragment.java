@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.sfsweep.android.R;
 
-public class NotificationContainerFragment extends Fragment {
+public class NotifierContainerFragment extends Fragment {
 
 	private TextView mTvNotificationHead,
                      mTvNotificationTail;
@@ -21,7 +21,7 @@ public class NotificationContainerFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		super.onCreateView(inflater, parent, savedInstanceState); 
-		View v = inflater.inflate(R.layout.fragment_notification_drawer, parent, false); 
+		View v = inflater.inflate(R.layout.fragment_notifier_drawer, parent, false); 
 		
 		setupWidgets(v); 
 		return v; 

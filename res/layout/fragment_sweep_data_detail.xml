@@ -54,7 +54,7 @@
         android:layout_centerHorizontal="true" />
      
     <FrameLayout
-        android:id="@+id/flNotificationContainer"
+        android:id="@+id/flNotifierContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/flIconContainer"

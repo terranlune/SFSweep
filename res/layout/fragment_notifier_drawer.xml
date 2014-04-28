@@ -15,44 +15,44 @@
          android:textSize="16sp" />
 
     <fragment
-        android:id="@+id/minuteNotificationFragment"
-        android:name="com.sfsweep.android.fragments.MinuteNotificationFragment"
+        android:id="@+id/minuteNotifierFragment"
+        android:name="com.sfsweep.android.fragments.MinuteNotifierFragment"
         android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_below="@+id/tvNotificationHead"
 	    android:layout_marginTop="5dp"
 	    android:layout_marginLeft="20dp"
 	    android:background="@color/white"
-	    android:layout="@layout/fragment_notification" />
+	    android:layout="@layout/fragment_notifier" />
     
     <fragment
-        android:id="@+id/hourNotificationFragment"
-        android:name="com.sfsweep.android.fragments.HourNotificationFragment"
+        android:id="@+id/hourNotifierFragment"
+        android:name="com.sfsweep.android.fragments.HourNotifierFragment"
         android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
-	    android:layout_below="@+id/minuteNotificationFragment"
+	    android:layout_below="@+id/minuteNotifierFragment"
 	    android:layout_marginTop="5dp"
 	    android:layout_marginLeft="20dp"
 	    android:background="@color/white"
-	    android:layout="@layout/fragment_notification" />
+	    android:layout="@layout/fragment_notifier" />
     
     <fragment
-        android:id="@+id/dayNotificationFragment"
-        android:name="com.sfsweep.android.fragments.DayNotificationFragment"
+        android:id="@+id/dayNotifierFragment"
+        android:name="com.sfsweep.android.fragments.DayNotifierFragment"
         android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
-	    android:layout_below="@+id/hourNotificationFragment"
+	    android:layout_below="@+id/hourNotifierFragment"
 	    android:layout_marginTop="5dp"
 	    android:layout_marginLeft="20dp"
 	    android:background="@color/white"
-	    android:layout="@layout/fragment_notification" />
+	    android:layout="@layout/fragment_notifier" />
     
     <TextView
         android:id="@+id/tvNotificationTail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/dayNotificationFragment"
+        android:layout_below="@+id/dayNotifierFragment"
         android:layout_marginTop="5dp"
         android:layout_marginLeft="15dp"
         android:background="@color/white"
