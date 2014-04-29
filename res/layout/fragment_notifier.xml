@@ -5,10 +5,22 @@
     android:background="@color/white" >
 
     <Spinner
-        android:id="@+id/spnNotifier"
-        android:layout_width="match_parent"
+        android:id="@+id/spnNumber"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true" 
+        android:layout_marginRight="4sp"
+        android:dropDownVerticalOffset="20dp"
+        android:background="@color/white" 
+        android:popupBackground="@color/white"
+        android:textSize="16sp" />
+    
+    <Spinner
+        android:id="@+id/spnInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/spnNumber"
         android:layout_centerVertical="true" 
         android:dropDownVerticalOffset="20dp"
         android:background="@color/white" 
