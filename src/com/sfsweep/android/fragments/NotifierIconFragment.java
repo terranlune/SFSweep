@@ -6,13 +6,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.sfsweep.android.R;
 
 public class NotifierIconFragment extends Fragment {
 
-	private Button mBtnNotify; 
+	private ImageButton mBtnNotify; 
 	private OnNotifierIconClickListener mListener; 
 	
 	
@@ -42,7 +42,7 @@ public class NotifierIconFragment extends Fragment {
 	}
 	
 	private void setupWidgets(View v) {
-		mBtnNotify = (Button) v.findViewById(R.id.btnNotify);
+		mBtnNotify = (ImageButton) v.findViewById(R.id.btnNotify);
 		mBtnNotify.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {

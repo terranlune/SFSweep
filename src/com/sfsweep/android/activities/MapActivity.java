@@ -34,7 +34,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
-import com.sfsweep.android.fragments.NotifierContainerFragment;
+import com.sfsweep.android.fragments.NotifierDrawerFragment;
 import com.sfsweep.android.fragments.NotifierFragment.OnScheduleAlarmCallbacks;
 import com.sfsweep.android.fragments.NotifierIconFragment;
 import com.sfsweep.android.fragments.NotifierIconFragment.OnNotifierIconClickListener;
@@ -142,7 +142,7 @@ public class MapActivity extends FragmentActivity implements
 	
 	private void setupFragments() {
 		NotifierIconFragment niFragment = new NotifierIconFragment(); 
-		NotifierContainerFragment ncFragment = new NotifierContainerFragment(); 
+		NotifierDrawerFragment ncFragment = new NotifierDrawerFragment(); 
 		
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction()
@@ -390,7 +390,7 @@ public class MapActivity extends FragmentActivity implements
 		
 		// Show notifier container fragment 
 		FragmentManager fm = getSupportFragmentManager(); 
-		NotifierContainerFragment ncFragment = (NotifierContainerFragment) 
+		NotifierDrawerFragment ncFragment = (NotifierDrawerFragment) 
 				fm.findFragmentByTag(NOTIFIER_CONTAINER_FRAGMENT_TAG);
 		fm.beginTransaction().show(ncFragment).commit(); 
 		

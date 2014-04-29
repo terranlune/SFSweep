@@ -45,7 +45,7 @@
     <string name="tv_notification_intro">Warn me</string>
     <string name="title_activity_settings">Settings</string>
     <string name="tv_alarm_intro">Set alarm for</string>
-    <string name="tv_notification_head">Warn me:</string>
+    <string name="tv_notification_head">Warn me</string>
     <string name="tv_notification_tail">before I need to move my car</string>
 
 </resources>

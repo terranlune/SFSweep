@@ -38,7 +38,7 @@ public class NotifierIntervalAdapter extends ArrayAdapter<CharSequence> {
 		if (convertView == null) {
 			LayoutInflater inflater = (LayoutInflater) getContext()
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = inflater.inflate(R.layout.spinner_item_custom, null); 
+			convertView = inflater.inflate(R.layout.spinner_item_custom, parent, false); 
 		}
 		
 		mTvSpnItem = (TextView) convertView.findViewById(R.id.tvSpnItem); 

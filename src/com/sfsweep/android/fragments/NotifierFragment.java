@@ -12,11 +12,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.sfsweep.android.R;
@@ -79,7 +81,8 @@ public class NotifierFragment extends Fragment {
 	private void setupWidgets(View v) {
 		// Set up interval spinner 
 		mSpnInterval = (Spinner) v.findViewById(R.id.spnInterval); 
-			// Implement using ArrayList to enable mutability (e.g., for purposes of changing 
+			
+		    // Implement using ArrayList to enable mutability (e.g., for purposes of changing 
 			// interval from singular to plural)
 		CharSequence[] intervals = {"minutes", "hours", "days"};
 		ArrayList<CharSequence> list = new ArrayList<CharSequence>(); 
@@ -145,6 +148,36 @@ public class NotifierFragment extends Fragment {
 		}
 		mSpnNumber.setSelection(numberPosition); 
 		adapter.notifyDataSetChanged(); 
+		formatSpinners(); 
+	}
+	
+	private void formatSpinners() {
+		LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mSpnNumber.getLayoutParams();
+			// Get dp-to-pixel conversion factor
+		DisplayMetrics metrics = new DisplayMetrics(); 
+		getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics); 
+		final float logicalDensity = metrics.density;
+		int rightMarginPixels = (int) Math.ceil(4 * logicalDensity);	// dp values taken from trial-and-error results presented in res/layout/fragment_notifier 
+			// Set margins
+		switch (mSelectedInterval) {
+		case 0:
+			// FIXME: Figure out why formatting is correct only after you select a value (eg, "12 minutes"), then select a different
+			// interval (eg, "hours"), and then return to the original interval 
+			if (mSelectedMinutes == 0)  params.setMargins(-1 * (int) Math.ceil(11 * logicalDensity), 0, rightMarginPixels, 0); 
+			else if (0 < mSelectedMinutes && mSelectedMinutes < 9)  params.setMargins(-1 * (int) Math.ceil(11 * logicalDensity), 0, rightMarginPixels, 0);
+			else params.setMargins((int) Math.ceil(5 * logicalDensity), 0, rightMarginPixels, 0); 
+			break;
+		case 1:
+			if (mSelectedHours == 0)  params.setMargins((int) Math.ceil(10 * logicalDensity), 0, rightMarginPixels, 0); 
+			else if (0 < mSelectedHours && mSelectedHours < 9)  params.setMargins((int) Math.ceil(3 * logicalDensity), 0, rightMarginPixels, 0);
+			else params.setMargins((int) Math.ceil(21 * logicalDensity), 0, rightMarginPixels, 0); 
+			break;
+		default:
+			if (mSelectedDays == 0)  params.setMargins((int) Math.ceil(15 * logicalDensity), 0, rightMarginPixels, 0); 
+			else if (0 < mSelectedDays && mSelectedDays < 9)  params.setMargins((int) Math.ceil(3 * logicalDensity), 0, rightMarginPixels, 0);
+			else params.setMargins((int) Math.ceil(19 * logicalDensity), 0, rightMarginPixels, 0); 
+		}
+		mSpnNumber.setLayoutParams(params); 
 	}
 	
 	private void setupListeners() {

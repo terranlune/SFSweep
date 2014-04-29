@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.sfsweep.android.R;
 
-public class NotifierContainerFragment extends Fragment {
+public class NotifierDrawerFragment extends Fragment {
 
 	private TextView mTvNotificationHead,
                      mTvNotificationTail;

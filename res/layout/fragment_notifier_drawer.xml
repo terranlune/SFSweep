@@ -2,26 +2,26 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-    
-      <TextView
-         android:id="@+id/tvNotificationHead"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_alignParentLeft="true"
-         android:layout_marginTop="10dp"
-         android:background="@color/white"
-         android:text="@string/tv_notification_head"
-         android:textColor="@color/gunmetal"
-         android:textSize="16sp" />
 
+    <TextView
+        android:id="@+id/tvNotificationHead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:background="@color/white"
+        android:text="@string/tv_notification_head"
+        android:textColor="@color/gunmetal"
+        android:textSize="16sp" />
+    
     <fragment
         android:id="@+id/notifierFragment"
         android:name="com.sfsweep.android.fragments.NotifierFragment"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
+	    android:layout_centerHorizontal="true"
 	    android:layout_below="@+id/tvNotificationHead"
-	    android:layout_marginTop="5dp"
-	    android:layout_marginLeft="11dp"
 	    android:background="@color/white"
 	    android:layout="@layout/fragment_notifier" />
     
@@ -29,10 +29,9 @@
         android:id="@+id/tvNotificationTail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_below="@+id/notifierFragment"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="11dp"
+        android:layout_centerHorizontal="true" 
+        android:layout_marginTop="10dp"
         android:background="@color/white"
         android:text="@string/tv_notification_tail"
         android:textColor="@color/gunmetal"
