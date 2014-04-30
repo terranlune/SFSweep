@@ -4,11 +4,13 @@
     android:layout_height="wrap_content"
     android:layout_centerHorizontal="true" >
     
-<Button
+<ImageButton
         android:id="@+id/btnNotify"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/ic_bell_16dp_orange_xxhdpi" /> -->
+        android:scaleType="matrix"
+        android:background="@color/white"
+        android:src="@drawable/ic_alarmclock_20dpx3dppad_gunmetal" /> 
 
 </RelativeLayout>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/tvNotificationHead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="14dp"
+        android:background="@color/white"
+        android:text="@string/tv_notification_head"
+        android:textColor="@color/gunmetal"
+        android:textSize="16sp" />
+    
+    <fragment
+        android:id="@+id/notifierFragment"
+        android:name="com.sfsweep.android.fragments.NotifierFragment"
+        android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_centerHorizontal="true"
+	    android:layout_below="@+id/tvNotificationHead"
+	    android:background="@color/white"
+	    android:layout="@layout/fragment_notifier" />
+   
+    <ImageButton
+        android:id="@+id/btnAddNotifier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/notifierFragment"
+        android:layout_alignStart="@+id/tvNotificationHead"
+        android:layout_marginLeft="-2dp"
+        android:background="@color/white"
+        android:scaleType="matrix"
+        android:src="@drawable/ic_plus_14dpx10dppad_gunmetal" />
+     
+    <ImageButton
+        android:id="@+id/btnSubtractNotifier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/notifierFragment"
+        android:layout_alignEnd="@+id/tvNotificationHead"
+        android:background="@color/white"
+        android:alpha="0.8"
+        android:scaleType="matrix"
+        android:src="@drawable/ic_minus_14dpx10dppad_gunmetal" />
+    
+    <TextView
+        android:id="@+id/tvNotificationTail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnAddNotifier"
+        android:layout_centerHorizontal="true" 
+        android:layout_marginTop="12dp"
+        android:background="@color/white"
+        android:text="@string/tv_notification_tail"
+        android:textColor="@color/gunmetal"
+        android:textSize="16sp" />
+    
+</RelativeLayout>

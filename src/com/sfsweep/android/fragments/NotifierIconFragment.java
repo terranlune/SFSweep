@@ -6,47 +6,47 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.sfsweep.android.R;
 
-public class NotificationIconFragment extends Fragment {
+public class NotifierIconFragment extends Fragment {
 
-	private Button mBtnNotify; 
-	private OnNotificationIconClickListener mListener; 
+	private ImageButton mBtnNotify; 
+	private OnNotifierIconClickListener mListener; 
 	
 	
-	public interface OnNotificationIconClickListener {
-		public void onNotificationIconClick(); 
+	public interface OnNotifierIconClickListener {
+		public void onNotifierIconClick(); 
 	}
 	
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity); 
 		
-		if (activity instanceof OnNotificationIconClickListener) {
-			mListener = (OnNotificationIconClickListener) activity;
+		if (activity instanceof OnNotifierIconClickListener) {
+			mListener = (OnNotifierIconClickListener) activity;
 		} else {
 			throw new ClassCastException(activity.toString() + " must implement "
-					+ "OnNotificationIconClicked interface"); 
+					+ "OnNotifierIconClicked interface"); 
 		}
 	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		super.onCreateView(inflater, parent, savedInstanceState);
-		View v = inflater.inflate(R.layout.fragment_notification_icon, parent, false); 
+		View v = inflater.inflate(R.layout.fragment_notifier_icon, parent, false); 
 		
 		setupWidgets(v);
 		return v; 
 	}
 	
 	private void setupWidgets(View v) {
-		mBtnNotify = (Button) v.findViewById(R.id.btnNotify);
+		mBtnNotify = (ImageButton) v.findViewById(R.id.btnNotify);
 		mBtnNotify.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mListener.onNotificationIconClick(); 
+				mListener.onNotifierIconClick(); 
 			}
 		});
 	}
