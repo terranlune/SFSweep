@@ -18,19 +18,19 @@ import com.sfsweep.android.fragments.NotifierFragment;
  * by an associated spinner. Class allows for both plural and singular intervals (e.g., "minutes"  
  * and "minute")
  */
-public class NotifierIntervalAdapter extends ArrayAdapter<CharSequence> {
+public class NotifierNumberAdapter extends ArrayAdapter<CharSequence> {
 
-	private Context          mContext; 
-	private NotifierFragment mNotifier;
-	private TextView         mTvSpnItem; 
+	private Context  mContext; 
+	private List<CharSequence> mNumberList; 
+	private TextView mTvSpnItem; 
 	
 	private String   mFont = "Roboto-Light.ttf"; 
 	private Typeface mTypeface;
 	
 	
-	public NotifierIntervalAdapter(Context context, List<CharSequence> intervalList, NotifierFragment notifier) {
-		super(context, 0, intervalList);
-		mNotifier = notifier;
+	public NotifierNumberAdapter(Context context, List<CharSequence> numberList, NotifierFragment notifier) {
+		super(context, 0, numberList);
+		mNumberList = numberList; 
 		mTypeface = Typeface.createFromAsset(context.getAssets(), mFont); 
 		mContext  = context; 
 	}
@@ -45,30 +45,8 @@ public class NotifierIntervalAdapter extends ArrayAdapter<CharSequence> {
 		
 		mTvSpnItem = (TextView) convertView.findViewById(R.id.tvSpnItem); 
 		mTvSpnItem.setTypeface(mTypeface); 
-		
-		switch (position) {
-		case 0:
-			if (mNotifier.getSelectedMinutes() != 0) {
-				mTvSpnItem.setText("minutes");
-			} else {
-				mTvSpnItem.setText("minute"); 
-			}
-			break;
-		case 1: 
-			if (mNotifier.getSelectedHours() != 0) {
-				mTvSpnItem.setText("hours");
-			} else {
-				mTvSpnItem.setText("hour"); 
-			}
-			break;
-		default:
-			if (mNotifier.getSelectedDays() != 0) {
-				mTvSpnItem.setText("days");
-			} else {
-				mTvSpnItem.setText("day"); 
-			}
-		}
-		return convertView;
+		mTvSpnItem.setText(mNumberList.get(position)); 
+		return convertView; 
 	}
 	
 	public TextView getTvSpnItem() {

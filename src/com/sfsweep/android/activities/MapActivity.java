@@ -69,7 +69,6 @@ public class MapActivity extends FragmentActivity implements
 	private SweepDataDetailFragment sweepDataDetailFragment;
 
 	private Button   mBtnMoveBy;
-	private Button   mBtnNotify; 
 	private TextView mTvMoveBy;
 	private TextView mTvDay; 
 	
@@ -393,13 +392,5 @@ public class MapActivity extends FragmentActivity implements
 		NotifierDrawerFragment ncFragment = (NotifierDrawerFragment) 
 				fm.findFragmentByTag(NOTIFIER_CONTAINER_FRAGMENT_TAG);
 		fm.beginTransaction().show(ncFragment).commit(); 
-		
-		// TODO: Transpose notifier icon and properly layout fully-opened drawer
-//		FrameLayout fl = (FrameLayout) findViewById(R.id.flIconContainer);
-//		fl.setLayoutTransition(new LayoutTransition());
-//		FrameLayout.LayoutParams flLayoutParams = new FrameLayout.LayoutParams(
-//				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//		flLayoutParams.setMargins(0, 10, 0, 0); 
-//		fl.setLayoutParams(flLayoutParams); 
 	}
 }

@@ -20,37 +20,41 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.sfsweep.android.R;
 import com.sfsweep.android.activities.MapActivity;
 import com.sfsweep.android.adapters.NotifierIntervalAdapter;
+import com.sfsweep.android.adapters.NotifierNumberAdapter;
 import com.sfsweep.android.helpers.StreetSweeperDataConverter;
 
 public class NotifierFragment extends Fragment {
 
 	private static final String SPINNER_PREFERENCES = "spinner_preferences"; 
-    private static final String SELECTED_INTERVAL   = "spinner_interval_selection";
+	private static final String SELECTED_INTERVAL   = "spinner_interval_selection";
     private static final String SELECTED_MINUTES    = "spinner_minutes_selection";
     private static final String SELECTED_HOURS      = "spinner_hours_selection";
     private static final String SELECTED_DAYS       = "spinner_days_selection";
+    private static final String ACTIVE_STATUS       = "spinner_active_status";
     
     private static int sSystemCallsToOnItemSelected = 0; 	// This (ungainly) flag counteracts Android's firing onItemSelected() upon Spinner instantiation, rather than waiting for user interaction (see http://stackoverflow.com/questions/2562248/android-how-to-keep-onitemselected-from-firing-off-on-a-newly-instantiated-spin)
 	
 	private Spinner mSpnInterval, 
 	                mSpnNumber;
-	private ArrayAdapter<CharSequence> mNotifierIntervalAdapter, 
-	                                   mNotifierMinutesAdapter,
-	                                   mNotifierHoursAdapter,
-	                                   mNotifierDaysAdapter; 
-	private String mSpinnerSelectionKey; 
-	private int    mSelectedInterval, 
-	               mSelectedMinutes,
-	               mSelectedHours,
-	               mSelectedDays; 
+	private NotifierIntervalAdapter mNotifierIntervalAdapter;
+	private NotifierNumberAdapter   mNotifierMinutesAdapter,
+	                                mNotifierHoursAdapter,
+	                                mNotifierDaysAdapter; 
+	private String  mSpinnerSelectionKey; 
+	private int     mSelectedInterval, 
+	                mSelectedMinutes,
+	                mSelectedHours,
+	                mSelectedDays; 
+	private boolean mActive = true; 
 	private SharedPreferences mPrefs; 
-	private OnScheduleAlarmCallbacks mListener; 
-	
+	private OnScheduleAlarmCallbacks    mScheduleListener; 
 
+	
 	public interface OnScheduleAlarmCallbacks {
 		public String onSweepTimeRange(); 
 		public String onDaysToNextSweep();
@@ -61,7 +65,7 @@ public class NotifierFragment extends Fragment {
 		super.onAttach(activity); 
 		
 		if (activity instanceof OnScheduleAlarmCallbacks) {
-			mListener = (OnScheduleAlarmCallbacks) activity; 
+			mScheduleListener = (OnScheduleAlarmCallbacks) activity; 
 		} else {
 			throw new ClassCastException(activity.toString() + " must implement "
 					+ "OnScheduleAlarmCallBacks interface"); 
@@ -79,6 +83,10 @@ public class NotifierFragment extends Fragment {
 	}
 	
 	private void setupWidgets(View v) {
+		// Restore active status
+		mPrefs  = getActivity().getSharedPreferences(SPINNER_PREFERENCES, 0); 
+		mActive = mPrefs.getBoolean(ACTIVE_STATUS, true); 
+		
 		// Set up interval spinner 
 		mSpnInterval = (Spinner) v.findViewById(R.id.spnInterval); 
 			
@@ -92,7 +100,6 @@ public class NotifierFragment extends Fragment {
 		mSpnInterval.setAdapter(mNotifierIntervalAdapter); 
 		
 			// Restore pre-selected interval, if any
-		mPrefs = getActivity().getSharedPreferences(SPINNER_PREFERENCES, 0); 
 		int intervalPosition = mPrefs.getInt(SELECTED_INTERVAL, 0);
 		mSpnInterval.setSelection(intervalPosition); 
 		
@@ -107,24 +114,32 @@ public class NotifierFragment extends Fragment {
 		switch (intervalPosition) {
 		case 0: 
 			if (mNotifierMinutesAdapter == null) {
-				mNotifierMinutesAdapter = ArrayAdapter.createFromResource(getActivity(), 
-					R.array.spn_options_minutes, R.layout.spinner_item_custom); 
+//				mNotifierMinutesAdapter = (NotifierNumberAdapter) ArrayAdapter.createFromResource(
+//					getActivity(), R.array.spn_options_minutes, R.layout.spinner_item_custom); 
+				CharSequence[] minutes = getResources().getStringArray(R.array.spn_options_minutes); 
+				ArrayList<CharSequence> list = new ArrayList<CharSequence>();
+				list.addAll(Arrays.asList(minutes)); 
+				mNotifierMinutesAdapter = new NotifierNumberAdapter(getActivity(), list, this);  
 				mNotifierMinutesAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
 			}
 			adapter = mNotifierMinutesAdapter; 
 			break;
 		case 1: 
 			if (mNotifierHoursAdapter == null) {
-				mNotifierHoursAdapter = ArrayAdapter.createFromResource(getActivity(), 
-					R.array.spn_options_hours, R.layout.spinner_item_custom);
+				CharSequence[] hours = getResources().getStringArray(R.array.spn_options_hours);
+				ArrayList<CharSequence> list = new ArrayList<CharSequence>();
+				list.addAll(Arrays.asList(hours)); 
+				mNotifierHoursAdapter = new NotifierNumberAdapter(getActivity(), list, this); 
 				mNotifierHoursAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
 			}
 			adapter = mNotifierHoursAdapter;
 			break;
 		default: 
 			if (mNotifierDaysAdapter == null) {
-				mNotifierDaysAdapter = ArrayAdapter.createFromResource(getActivity(), 
-					R.array.spn_options_days, R.layout.spinner_item_custom); 
+				CharSequence[] days = getResources().getStringArray(R.array.spn_options_days);
+				ArrayList<CharSequence> list = new ArrayList<CharSequence>();
+				list.addAll(Arrays.asList(days)); 
+				mNotifierDaysAdapter = new NotifierNumberAdapter(getActivity(), list, this); 
 				mNotifierDaysAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom); 
 			}
 			adapter = mNotifierDaysAdapter; 
@@ -197,7 +212,17 @@ public class NotifierFragment extends Fragment {
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) { }
 		});
-					
+		
+		mSpnInterval.setOnLongClickListener(new View.OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				mActive = !mActive; 
+				reformatOnActiveStatusChange(); 
+				// TODO: Activate or inactivate notification
+				return true;
+			}
+		});
+		
 		mSpnNumber.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override 
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -225,6 +250,57 @@ public class NotifierFragment extends Fragment {
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) { }
 		});
+		
+		mSpnNumber.setOnLongClickListener(new View.OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				mActive = !mActive;
+				reformatOnActiveStatusChange(); 
+				// TODO: Activate or inactivate notification
+				return true;
+			}
+		});
+	}
+	
+	public void reformatOnActiveStatusChange() {
+		TextView intervalTvSpnItem = mNotifierIntervalAdapter.getTvSpnItem();
+		Context  intervalContext   = mNotifierIntervalAdapter.getAdapterContext(); 
+		TextView numberTvSpnItem;
+		Context  numberContext; 
+		NotifierNumberAdapter adapter; 
+		
+		switch (mSelectedInterval) {
+		case 0: 
+			numberTvSpnItem = mNotifierMinutesAdapter.getTvSpnItem();
+			numberContext   = mNotifierMinutesAdapter.getAdapterContext(); 
+			adapter = mNotifierMinutesAdapter; 
+			break;
+		case 1:
+			numberTvSpnItem = mNotifierHoursAdapter.getTvSpnItem();
+			numberContext   = mNotifierHoursAdapter.getAdapterContext(); 
+			adapter = mNotifierHoursAdapter; 
+			break;
+		default:
+			numberTvSpnItem = mNotifierDaysAdapter.getTvSpnItem();
+			numberContext   = mNotifierDaysAdapter.getAdapterContext(); 
+			adapter = mNotifierDaysAdapter; 
+		}
+
+		if (mActive) { 	// Notifier is active
+			intervalTvSpnItem.setTextColor(intervalContext.getResources().getColor(R.color.platinum)); 
+			numberTvSpnItem.setTextColor(numberContext.getResources().getColor(R.color.platinum));
+			updateNumberArrayFormat(adapter); 
+		} else {
+			intervalTvSpnItem.setTextColor(intervalContext.getResources().getColor(R.color.sfsweep_orange)); 
+			numberTvSpnItem.setTextColor(numberContext.getResources().getColor(R.color.sfsweep_orange)); 
+			updateNumberArrayFormat(adapter); 
+			// TODO: Deactivate spinner
+		}
+	}
+	
+	private void updateNumberArrayFormat(NotifierNumberAdapter adapter) {
+		
+		// TODO
 	}
 	
 	@Override
@@ -240,6 +316,7 @@ public class NotifierFragment extends Fragment {
 		      .putInt(SELECTED_MINUTES, mSelectedMinutes)
 		      .putInt(SELECTED_HOURS, mSelectedHours)
 		      .putInt(SELECTED_DAYS, mSelectedDays)
+		      .putBoolean(ACTIVE_STATUS, mActive)
 		      .commit(); 
 		
 		// TODO: Consider associating with a "set timer" button
@@ -249,8 +326,8 @@ public class NotifierFragment extends Fragment {
 	
 	private void scheduleSystemAlarm() {		
 		// Get and parse street sweeping data 
-		String timeRange  = mListener.onSweepTimeRange(),
-		       daysToNext = mListener.onDaysToNextSweep(); 
+		String timeRange  = mScheduleListener.onSweepTimeRange(),
+		       daysToNext = mScheduleListener.onDaysToNextSweep(); 
 		
 		StreetSweeperDataConverter converter = new StreetSweeperDataConverter(timeRange, daysToNext); 	
 		int sweepDay    = converter.getDaysToNextSweepAsInt(),
@@ -298,6 +375,31 @@ public class NotifierFragment extends Fragment {
 		context = null; 
 	}
 	
+	public void setActiveStatus(boolean active) {
+		mActive = active;
+		mPrefs.edit().putBoolean(ACTIVE_STATUS, mActive).commit(); 
+	}
+	
+	public boolean getActiveStatus() {
+		return mActive; 
+	}
+	
+	public NotifierIntervalAdapter getNotifierIntervalAdapter() {
+		return mNotifierIntervalAdapter;
+	}
+	
+	public NotifierNumberAdapter getNotifierMinutesAdapter() {
+		return mNotifierMinutesAdapter;
+	}
+	
+	public NotifierNumberAdapter getNotifierHoursAdapter() {
+		return mNotifierHoursAdapter;
+	}
+	
+	public NotifierNumberAdapter getNotifierDaysAdapter() {
+		return mNotifierDaysAdapter;
+	}
+	
 	public int getSelectedMinutes() {
 		return mSelectedMinutes;
 	}
@@ -309,5 +411,5 @@ public class NotifierFragment extends Fragment {
 	public int getSelectedDays() {
 		return mSelectedDays;
 	}
-	
+
 }

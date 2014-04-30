@@ -6,14 +6,17 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.sfsweep.android.R;
 
 public class NotifierDrawerFragment extends Fragment {
 
-	private TextView mTvNotificationHead,
-                     mTvNotificationTail;
+	private TextView    mTvNotificationHead,
+                        mTvNotificationTail;
+	private ImageButton mBtnAddNotifier,
+	                    mBtnSubtractNotifier;
 	
 	private String   mFont="Roboto-Light.ttf";
 	private Typeface mTypeface;
@@ -35,5 +38,22 @@ public class NotifierDrawerFragment extends Fragment {
 		
 		mTvNotificationTail = (TextView) v.findViewById(R.id.tvNotificationTail);
 		mTvNotificationTail.setTypeface(mTypeface); 
+		
+		mBtnAddNotifier = (ImageButton) v.findViewById(R.id.btnAddNotifier); 
+		mBtnAddNotifier.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// Add new notifier
+			}
+		});
+		
+		mBtnSubtractNotifier = (ImageButton) v.findViewById(R.id.btnSubtractNotifier); 
+		mBtnSubtractNotifier.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// Delete notifier after dialog (unless first) 
+			}
+		});
 	}
+
 }
