@@ -3,6 +3,8 @@ package com.sfsweep.android.fragments;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -13,6 +15,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +29,6 @@ import com.sfsweep.android.R;
 import com.sfsweep.android.activities.MapActivity;
 import com.sfsweep.android.adapters.NotifierIntervalAdapter;
 import com.sfsweep.android.adapters.NotifierNumberAdapter;
-import com.sfsweep.android.helpers.StreetSweeperDataConverter;
 
 public class NotifierFragment extends Fragment {
 
@@ -36,28 +38,27 @@ public class NotifierFragment extends Fragment {
     private static final String SELECTED_HOURS      = "spinner_hours_selection";
     private static final String SELECTED_DAYS       = "spinner_days_selection";
     private static final String ACTIVE_STATUS       = "spinner_active_status";
+    private static final int    ALARM_REQUEST       = 1; 
     
-    private static int sSystemCallsToOnItemSelected = 0; 	// This (ungainly) flag counteracts Android's firing onItemSelected() upon Spinner instantiation, rather than waiting for user interaction (see http://stackoverflow.com/questions/2562248/android-how-to-keep-onitemselected-from-firing-off-on-a-newly-instantiated-spin)
+    private static int sSystemCallsToOnItemSelected = 0; 	// Flag neutralizes Android's firing onItemSelected() upon Spinner instantiation, rather than waiting for user interaction (see http://stackoverflow.com/questions/2562248/android-how-to-keep-onitemselected-from-firing-off-on-a-newly-instantiated-spin)
 	
-	private Spinner mSpnInterval, 
-	                mSpnNumber;
+	private Spinner mSpnInterval; 
+	private Spinner mSpnNumber;
 	private NotifierIntervalAdapter mNotifierIntervalAdapter;
-	private NotifierNumberAdapter   mNotifierMinutesAdapter,
-	                                mNotifierHoursAdapter,
-	                                mNotifierDaysAdapter; 
-	private String  mSpinnerSelectionKey; 
-	private int     mSelectedInterval, 
-	                mSelectedMinutes,
-	                mSelectedHours,
-	                mSelectedDays; 
+	private NotifierNumberAdapter mNotifierMinutesAdapter;
+	private NotifierNumberAdapter mNotifierHoursAdapter;
+	private NotifierNumberAdapter mNotifierDaysAdapter; 
+	private int mSelectedInterval;
+	private int mSelectedMinutes;
+	private int mSelectedHours;
+	private int mSelectedDays; 
 	private boolean mActive = true; 
 	private SharedPreferences mPrefs; 
-	private OnScheduleAlarmCallbacks    mScheduleListener; 
+	private OnScheduleAlarmCallbacks mScheduleListener; 
 
 	
 	public interface OnScheduleAlarmCallbacks {
-		public String onSweepTimeRange(); 
-		public String onDaysToNextSweep();
+		public Date onGetNextSweepStart(); 
 	}
 	
 	@Override
@@ -90,55 +91,52 @@ public class NotifierFragment extends Fragment {
 		// Set up interval spinner 
 		mSpnInterval = (Spinner) v.findViewById(R.id.spnInterval); 
 			
-		    // Implement using ArrayList to enable mutability (e.g., for purposes of changing 
-			// interval from singular to plural)
-		CharSequence[] intervals = {"minutes", "hours", "days"};
-		ArrayList<CharSequence> list = new ArrayList<CharSequence>(); 
-		list.addAll(Arrays.asList(intervals)); 
+		    // Implement using ArrayList to enable mutability (e.g., to change interval label 
+			// from singular to plural)
+		ArrayList<CharSequence> list = createAdapterArray(R.array.spn_options_intervals); 
 		mNotifierIntervalAdapter = new NotifierIntervalAdapter(getActivity(), list, this); 
 		mNotifierIntervalAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
 		mSpnInterval.setAdapter(mNotifierIntervalAdapter); 
 		
 			// Restore pre-selected interval, if any
-		int intervalPosition = mPrefs.getInt(SELECTED_INTERVAL, 0);
-		mSpnInterval.setSelection(intervalPosition); 
+		int selectedInterval = mPrefs.getInt(SELECTED_INTERVAL, 0);
+		mSpnInterval.setSelection(selectedInterval); 
 		
 		// Set up number spinner
 		mSpnNumber = (Spinner) v.findViewById(R.id.spnNumber); 
-		updateNumberSpinner(intervalPosition, mPrefs);
+		updateNumberSpinner(selectedInterval, mPrefs);
 	}
 	
-	private void updateNumberSpinner(int intervalPosition, SharedPreferences prefs) {
+	private ArrayList<CharSequence> createAdapterArray(int resourceId) {
+		CharSequence[] values = getResources().getStringArray(resourceId);
+		ArrayList<CharSequence> list = new ArrayList<CharSequence>();
+		list.addAll(Arrays.asList(values)); 
+		return list; 
+	}
+	
+	private void updateNumberSpinner(int selectedInterval, SharedPreferences prefs) {
 		// Retrieve pre-selected interval and create appropriate number adapter
 		ArrayAdapter<CharSequence> adapter; 
-		switch (intervalPosition) {
-		case 0: 
+		switch (selectedInterval) {
+		case 0: 	// Minute-based interval (passim)
 			if (mNotifierMinutesAdapter == null) {
-//				mNotifierMinutesAdapter = (NotifierNumberAdapter) ArrayAdapter.createFromResource(
-//					getActivity(), R.array.spn_options_minutes, R.layout.spinner_item_custom); 
-				CharSequence[] minutes = getResources().getStringArray(R.array.spn_options_minutes); 
-				ArrayList<CharSequence> list = new ArrayList<CharSequence>();
-				list.addAll(Arrays.asList(minutes)); 
+				ArrayList<CharSequence> list = createAdapterArray(R.array.spn_options_minutes);
 				mNotifierMinutesAdapter = new NotifierNumberAdapter(getActivity(), list, this);  
 				mNotifierMinutesAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
 			}
 			adapter = mNotifierMinutesAdapter; 
 			break;
-		case 1: 
+		case 1:		// Hour-based interval (passim)
 			if (mNotifierHoursAdapter == null) {
-				CharSequence[] hours = getResources().getStringArray(R.array.spn_options_hours);
-				ArrayList<CharSequence> list = new ArrayList<CharSequence>();
-				list.addAll(Arrays.asList(hours)); 
+				ArrayList<CharSequence> list = createAdapterArray(R.array.spn_options_hours); 
 				mNotifierHoursAdapter = new NotifierNumberAdapter(getActivity(), list, this); 
 				mNotifierHoursAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
 			}
 			adapter = mNotifierHoursAdapter;
 			break;
-		default: 
+		default: 	// Day-based interval (passim) 
 			if (mNotifierDaysAdapter == null) {
-				CharSequence[] days = getResources().getStringArray(R.array.spn_options_days);
-				ArrayList<CharSequence> list = new ArrayList<CharSequence>();
-				list.addAll(Arrays.asList(days)); 
+				ArrayList<CharSequence> list = createAdapterArray(R.array.spn_options_days); 
 				mNotifierDaysAdapter = new NotifierNumberAdapter(getActivity(), list, this); 
 				mNotifierDaysAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom); 
 			}
@@ -151,7 +149,7 @@ public class NotifierFragment extends Fragment {
 		mSelectedHours   = prefs.getInt(SELECTED_HOURS, 0);
 		mSelectedDays    = prefs.getInt(SELECTED_DAYS, 0); 
 		int numberPosition = 0;
-		switch (intervalPosition) {
+		switch (selectedInterval) {
 		case 0:
 			numberPosition = mSelectedMinutes;
 			break;
@@ -168,11 +166,13 @@ public class NotifierFragment extends Fragment {
 	
 	private void formatSpinners() {
 		LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mSpnNumber.getLayoutParams();
+			
 			// Get dp-to-pixel conversion factor
 		DisplayMetrics metrics = new DisplayMetrics(); 
 		getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics); 
 		final float logicalDensity = metrics.density;
 		int rightMarginPixels = (int) Math.ceil(4 * logicalDensity);	// dp values taken from trial-and-error results presented in res/layout/fragment_notifier 
+			
 			// Set margins
 		switch (mSelectedInterval) {
 		case 0:
@@ -321,48 +321,68 @@ public class NotifierFragment extends Fragment {
 		
 		// TODO: Consider associating with a "set timer" button
 		// TODO: Update scheduleSystemAlarm() in line with revised notifiers
-//		scheduleSystemAlarm(); 
+		scheduleSystemAlarm(); 
 	}
 	
 	private void scheduleSystemAlarm() {		
 		// Get and parse street sweeping data 
-		String timeRange  = mScheduleListener.onSweepTimeRange(),
-		       daysToNext = mScheduleListener.onDaysToNextSweep(); 
+		Date nextSweepStart = mScheduleListener.onGetNextSweepStart();
+		Calendar calendar = Calendar.getInstance(Locale.US); 
+		calendar.setTime(nextSweepStart); 
+		Log.d("DEBUG", "Calendar initially set at next sweep time: " + calendar.toString()); 
+		int sweepHour   = calendar.get(Calendar.HOUR_OF_DAY), 
+		    sweepDay    = calendar.get(Calendar.DAY_OF_YEAR); 
+		Log.d("DEBUG", "sweepHour is: " + sweepHour + ", and sweepDay is: " + sweepDay); 
 		
-		StreetSweeperDataConverter converter = new StreetSweeperDataConverter(timeRange, daysToNext); 	
-		int sweepDay    = converter.getDaysToNextSweepAsInt(),
-			sweepHour   = converter.getSweepTimeRangeAsInt(),
-			sweepMinute = 0; 
+		// Calculate system alarm schedule
+		int alarmMinute, alarmHour, alarmDay;  
+		int defaultMinute = 0,						// Alarm defaults to on-the-hour for hour- and day-based notifications
+		    defaultHour   = 15; 					// Alarm defaults to 3pm for day-based notifications
 		
-		// Get and parse spinner value  
-		int daysInAdvance    = 0,
-		    hoursInAdvance   = 0,
-		    minutesInAdvance = 0;
-		
-		if (mSpinnerSelectionKey.startsWith("day")) {
-			daysInAdvance = mSelectedMinutes; 
-		} else if (mSpinnerSelectionKey.startsWith("hour")) {
-			hoursInAdvance = mSelectedMinutes;
-		} else {
-			minutesInAdvance = mSelectedMinutes; 
+		switch (mSelectedInterval) {
+		case 0:
+			alarmMinute = 60 - mSelectedMinutes;
+			if (sweepHour != 1)  alarmHour = sweepHour - 1;
+			else                 alarmHour = 24;
+			if (sweepHour != 24) alarmDay = sweepDay; 
+			else                 alarmDay = sweepDay - 1; 
+			break;
+		case 1: 
+			alarmMinute = defaultMinute;
+			if (sweepHour < mSelectedHours) {
+				alarmHour = 24 - (mSelectedHours - sweepHour); 
+				alarmDay  = sweepDay - 1;
+			}
+			else if (sweepHour == mSelectedHours) {
+				alarmHour = 24; 
+				alarmDay  = sweepDay; 
+			}
+			else {
+				alarmHour = sweepHour - mSelectedHours; 
+				if (sweepHour != 24) alarmDay = sweepDay; 
+				else                 alarmDay = sweepDay - 1;
+			}
+			break;
+		default:
+			alarmMinute = defaultMinute;
+			alarmHour   = defaultHour;					
+			alarmDay    = sweepDay - mSelectedDays; 
 		}
-		
-		// Calculate scheduling time for system alarm
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(System.currentTimeMillis()); 
-		int alarmDay    = sweepDay - daysInAdvance + calendar.get(Calendar.DAY_OF_YEAR),
-		    alarmHour   = sweepHour - hoursInAdvance,
-		    alarmMinute = sweepMinute - minutesInAdvance;
+		Log.d("DEBUG", "sweepMinute: " + defaultMinute + ", sweepHour: " + sweepHour + ", sweepDay: " + sweepDay); 
+		Log.d("DEBUG", "alarmMinute: " + alarmMinute + ", alarmHour: " + alarmHour + ", alarmDay: " + alarmDay); 
 		
 		// Schedule system alarm 
 		Activity context = getActivity(); 
 		AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE); 
 		Intent intent = new Intent(context, MapActivity.class); 
-		PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0); 
+		PendingIntent alarmIntent = PendingIntent.getBroadcast(context, ALARM_REQUEST, intent,
+				PendingIntent.FLAG_ONE_SHOT); 
 		
 		calendar.set(Calendar.DAY_OF_YEAR, alarmDay); 
 		calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
 		calendar.set(Calendar.MINUTE, alarmMinute); 
+		
+		Log.d("DEBUG", "Alarm set at: " + calendar.toString()); 
 		
 		// FIXME: For some reason, Eclipse refuses to recognize alarmMgr.setExact(...), which
 		// is the minSdkTarget API 19 update to alarmMgr.set(...). Unlike set(...), setExact(...) 

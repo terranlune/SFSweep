@@ -2,6 +2,7 @@ package com.sfsweep.android.activities;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
 
@@ -561,17 +562,10 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public String onSweepTimeRange() {
+	public Date onGetNextSweepStart() {
 		SweepDataDetailFragment fragment = (SweepDataDetailFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.sweepDetail);
-		return fragment.getSweepTimeRange();
-	}
-
-	@Override
-	public String onDaysToNextSweep() {
-		SweepDataDetailFragment fragment = (SweepDataDetailFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.sweepDetail);
-		return fragment.getDaysToNextSweep();
+		return fragment.getNextSweepStart();
 	}
 
 	@Override
