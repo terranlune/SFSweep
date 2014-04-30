@@ -84,14 +84,15 @@ public class StreetSweeperDataMapAdapter {
 			Collections.sort(l, new NextSweepingComparator());
 
 			// Color the first one
-			StreetSweeperData nextSweepingData = l.remove(0);
+			StreetSweeperData nextSweepingData = l.get(0);
 			Polyline line = cache.get(nextSweepingData);
 			line.setVisible(true);
 			int color = getHeatmapColor(nextSweepingData, false);
 			line.setColor(color);
 
 			// Hide the remaining ones
-			for (StreetSweeperData d : l) {
+			for (int i=1; i<l.size(); ++i) {
+				StreetSweeperData d = l.get(i);
 				cache.get(d).setVisible(false);
 			}
 
