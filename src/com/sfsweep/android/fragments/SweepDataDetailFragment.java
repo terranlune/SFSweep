@@ -1,7 +1,6 @@
 package com.sfsweep.android.fragments;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -31,7 +30,7 @@ public class SweepDataDetailFragment extends Fragment {
 	private TextView tvNextSweeping;
 	private TextView tvSweepingInProgress;
 	private StreetSweeperData data;
-	private Date mNextSweepStart;
+	private Date mSweepStartDate;
 	private String mDaysToNextSweep;
 
 	private String mFont = "Roboto-Light.ttf";
@@ -166,9 +165,12 @@ public class SweepDataDetailFragment extends Fragment {
 			tvSweepingInProgress.setVisibility(View.GONE);
 		}
 
-		mNextSweepStart = nextSweeping.start; 
+		Date sweepStartDate = nextSweeping.start; 
+		if (parked) {		// Make accessible via getSweepStartDate() only if related to a parking event
+			mSweepStartDate = sweepStartDate;
+		}
 		String range = new SimpleDateFormat("cccc ha", Locale.US)
-				.format(mNextSweepStart)
+				.format(sweepStartDate)
 				+ "-"
 				+ new SimpleDateFormat("ha", Locale.US)
 						.format(nextSweeping.end);
@@ -181,8 +183,8 @@ public class SweepDataDetailFragment extends Fragment {
 				mDaysToNextSweep));
 	}
 
-	public Date getNextSweepStart() {
-		return mNextSweepStart;
+	public Date getSweepStartDate() {
+		return mSweepStartDate;
 	}
 
 }

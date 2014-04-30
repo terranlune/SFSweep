@@ -50,7 +50,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
 import com.sfsweep.android.fragments.NotifierDrawerFragment;
-import com.sfsweep.android.fragments.NotifierFragment.OnScheduleAlarmCallbacks;
+import com.sfsweep.android.fragments.NotifierFragment.OnScheduleAlarmListener;
 import com.sfsweep.android.fragments.NotifierIconFragment;
 import com.sfsweep.android.fragments.NotifierIconFragment.OnNotifierIconClickListener;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
@@ -61,7 +61,7 @@ import com.sfsweep.android.models.StreetSweeperData;
 public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
-		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmCallbacks,
+		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmListener,
 		OnNotifierIconClickListener, OnClickParkActionListener {
 
 	private static final LatLng SF = new LatLng(37.7577, -122.4376);
@@ -562,12 +562,12 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public Date onGetNextSweepStart() {
+	public Date onScheduleAlarm() {
 		SweepDataDetailFragment fragment = (SweepDataDetailFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.sweepDetail);
-		return fragment.getNextSweepStart();
+				.findFragmentById(R.id.sweepDetail); 
+		return fragment.getSweepStartDate();
 	}
-
+	
 	@Override
 	public void onNotifierIconClick() {
 		// Bump drawer to show notifiers
@@ -605,7 +605,7 @@ public class MapActivity extends FragmentActivity implements
 				.commit();
 		
 		this.sweepDataDetailFragment.setData(clickedData, true);
-
+		
 		clickedMarker.remove();
 		placeParkedMarker(clickedPoint);
 	}

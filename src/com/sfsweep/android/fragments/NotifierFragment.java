@@ -21,6 +21,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -48,28 +50,29 @@ public class NotifierFragment extends Fragment {
 	private int mSelectedMinutes;							 
 	private int mSelectedHours;
 	private int mSelectedDays; 
+	private CheckBox mCbActivateNotifier; 
 	private boolean mActive = true; 						  // If true, alarm associated with notifier is active 
 	private NotifierIntervalAdapter mNotifierIntervalAdapter;
 	private NotifierNumberAdapter mNotifierMinutesAdapter;
 	private NotifierNumberAdapter mNotifierHoursAdapter;
 	private NotifierNumberAdapter mNotifierDaysAdapter; 
 	private SharedPreferences mPrefs; 
-	private OnScheduleAlarmCallbacks mScheduleListener; 
+	private OnScheduleAlarmListener mScheduleListener; 
 
 	
-	public interface OnScheduleAlarmCallbacks {
-		public Date onGetNextSweepStart(); 
+	public interface OnScheduleAlarmListener {
+		public Date onScheduleAlarm();
 	}
 	
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity); 
 		
-		if (activity instanceof OnScheduleAlarmCallbacks) {
-			mScheduleListener = (OnScheduleAlarmCallbacks) activity; 
+		if (activity instanceof OnScheduleAlarmListener) {
+			mScheduleListener = (OnScheduleAlarmListener) activity; 
 		} else {
 			throw new ClassCastException(activity.toString() + " must implement "
-					+ "OnScheduleAlarmCallBacks interface"); 
+					+ OnScheduleAlarmListener.class.getName()); 
 		}
 	}
 	
@@ -100,8 +103,9 @@ public class NotifierFragment extends Fragment {
 		mSelectedInterval = mPrefs.getInt(SELECTED_INTERVAL, 0);
 		mSpnInterval.setSelection(mSelectedInterval); 
 		
-		// Set up number spinner
+		// Set up number spinner and activate box
 		mSpnNumber = (Spinner) v.findViewById(R.id.spnNumber); 
+		mCbActivateNotifier = (CheckBox) v.findViewById(R.id.cbActivateNotifier); 
 	}
 	
 	private ArrayList<CharSequence> createAdapterArray(int resourceId) {
@@ -222,16 +226,6 @@ public class NotifierFragment extends Fragment {
 			public void onNothingSelected(AdapterView<?> parent) { }
 		});
 		
-		mSpnInterval.setOnLongClickListener(new View.OnLongClickListener() {
-			@Override
-			public boolean onLongClick(View v) {
-				mActive = !mActive; 
-				reformatOnActiveStatusChange(); 
-				// TODO: Activate or deactivate notification
-				return true;
-			}
-		});
-		
 		mSpnNumber.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override 
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -260,18 +254,17 @@ public class NotifierFragment extends Fragment {
 			public void onNothingSelected(AdapterView<?> parent) { }
 		});
 		
-		mSpnNumber.setOnLongClickListener(new View.OnLongClickListener() {
+		mCbActivateNotifier.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 			@Override
-			public boolean onLongClick(View v) {
-				mActive = !mActive;
-				reformatOnActiveStatusChange(); 
-				// TODO: Activate or deactivate notification
-				return true;
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked) scheduleSystemAlarm();
+				else           cancelSystemAlarm();
+				reformatOnActiveStatusChange(isChecked);
 			}
 		});
 	}
 	
-	public void reformatOnActiveStatusChange() {
+	public void reformatOnActiveStatusChange(boolean notifierActive) {
 		TextView intervalTvSpnItem = mNotifierIntervalAdapter.getTvSpnItem();
 		Context  intervalContext   = mNotifierIntervalAdapter.getAdapterContext(); 
 		TextView numberTvSpnItem;
@@ -291,13 +284,12 @@ public class NotifierFragment extends Fragment {
 			numberContext   = mNotifierDaysAdapter.getAdapterContext(); 
 		}
 
-		if (mActive) { 	// Notifier is active
-			intervalTvSpnItem.setTextColor(intervalContext.getResources().getColor(R.color.platinum)); 
-			numberTvSpnItem.setTextColor(numberContext.getResources().getColor(R.color.platinum));
-		} else {
+		if (notifierActive) { 	
 			intervalTvSpnItem.setTextColor(intervalContext.getResources().getColor(R.color.sfsweep_orange)); 
 			numberTvSpnItem.setTextColor(numberContext.getResources().getColor(R.color.sfsweep_orange)); 
-			// TODO: Deactivate spinner
+		} else {
+			intervalTvSpnItem.setTextColor(intervalContext.getResources().getColor(R.color.platinum)); 
+			numberTvSpnItem.setTextColor(numberContext.getResources().getColor(R.color.platinum));
 		}
 	}
 	
@@ -315,15 +307,12 @@ public class NotifierFragment extends Fragment {
 		      .putInt(SELECTED_DAYS,     mSelectedDays)
 		      .putBoolean(ACTIVE_STATUS, mActive)
 		      .commit(); 
-		
-		// TODO: Consider associating with a "set timer" button
-		// TODO: Update scheduleSystemAlarm() in line with revised notifiers
-		scheduleSystemAlarm(); 
 	}
 	
 	private void scheduleSystemAlarm() {		
-		// Get and parse street sweeping data 
-		Date nextSweepStart = mScheduleListener.onGetNextSweepStart();
+		// Get and parse street sweeping data
+		Date nextSweepStart = mScheduleListener.onScheduleAlarm();
+		if (nextSweepStart == null) return; 	// Ensure a parking event has occurred
 		Calendar calendar = Calendar.getInstance(Locale.US); 
 		calendar.setTime(nextSweepStart); 
 		Log.d("DEBUG", "******************* In scheduleSystemAlarm() *******************");
@@ -339,7 +328,7 @@ public class NotifierFragment extends Fragment {
 		
 		// Calculate system alarm schedule
 		int alarmMinute, alarmHour, alarmDay;  
-		int defaultMinute = 0,						// Alarm defaults to on-the-hour for hour- and day-based notifications
+		int defaultMinute = 0,						// Alarm defaults to on-the-hour timing for hour- and day-based notifications
 		    defaultHour   = 15; 					// Alarm defaults to 3pm for day-based notifications
 		
 		switch (mSelectedInterval) {
@@ -395,10 +384,12 @@ public class NotifierFragment extends Fragment {
 		alarmMgr.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent); 
 		
 		// TODO: Ensure system alarm persists if device is shut down
-		// TODO: Enable user to cancel system alarm
-		// TODO: Ensure re-selecting notifications cancels and replaces prior system alarm
 		context = null; 
 		Log.d("DEBUG", "**************************************");
+	}
+	
+	private void cancelSystemAlarm() {
+		// TODO
 	}
 	
 	public void setActiveStatus(boolean active) {
