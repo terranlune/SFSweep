@@ -57,19 +57,19 @@
             android:label="@string/title_activity_sweep_data_detail" >
         </activity>
         <activity
-            android:name="com.sfsweep.android.activities.HubActivity"
+            android:name="com.sfsweep.android.zdeprecated.HubActivity"
             android:label="@string/title_activity_hub" >
         </activity>
         <activity
-            android:name="com.sfsweep.android.activities.AddressActivity"
+            android:name="com.sfsweep.android.zdeprecated.AddressActivity"
             android:label="@string/title_activity_address" >
         </activity>
         <activity
-            android:name="com.sfsweep.android.activities.NotificationActivity"
+            android:name="com.sfsweep.android.zdeprecated.NotificationActivity"
             android:label="@string/title_activity_notification" >
         </activity>
         <activity
-            android:name="com.sfsweep.android.activities.AlarmActivity"
+            android:name="com.sfsweep.android.zdeprecated.AlarmActivity"
             android:label="@string/title_activity_alarm" >
         </activity>
     </application>

@@ -1,4 +1,4 @@
-package com.sfsweep.android.fragments;
+package com.sfsweep.android.zdeprecated;
 
 import com.sfsweep.android.R;
 
@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class AlarmHubFragment extends HubFragment {
+public class AddressHubFragment extends HubFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -18,8 +18,8 @@ public class AlarmHubFragment extends HubFragment {
 	}
 	
 	private void setupWidgets() {
-		getItemText().setText("Alarm"); 
-		getItemImage().setImageResource(R.drawable.ic_alarm_90dp); 
+		getItemText().setText("Parking info"); 
+		getItemImage().setImageResource(R.drawable.ic_parking_90dp); 
 	}
 	
 	@Override 

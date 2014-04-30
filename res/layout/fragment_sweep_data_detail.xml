@@ -6,23 +6,29 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/white"
     tools:context="com.sfsweep.android.fragments.SweepDataDetailFragment" >
 
     <TextView
         android:id="@+id/tvStreetName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:text="Street Name"
-        android:textSize="24sp" />
-
+        android:textColor="@color/gunmetal"
+        android:textSize="20sp" />
+    
     <TextView
         android:id="@+id/tvSweepingInProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvStreetName"
+        android:layout_marginTop="2dp"
+        android:layout_marginLeft="20dp"
+        android:background="@color/white"
         android:text="Sweeping in progress! (ends in 2h)"
         android:textColor="@color/sweepingInProgress"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:visibility="gone" />
 
     <TextView
@@ -31,7 +37,29 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/tvSweepingInProgress"
+        android:layout_marginTop="2dp"
+        android:layout_marginLeft="20dp"
+        android:background="@color/white"
         android:text="Wednesday 8am-10am (in 3 days)"
-        android:textSize="20sp" />
-
+        android:textColor="@color/gunmetal"
+        android:textSize="16sp" />
+   
+    <FrameLayout
+        android:id="@+id/flIconContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvNextSweeping"
+        android:layout_marginTop="0dp"
+        android:background="@color/white"
+        android:layout_centerHorizontal="true" />
+     
+    <FrameLayout
+        android:id="@+id/flNotificationContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/flIconContainer"
+        android:layout_marginTop="10dp"
+        android:background="@color/white"
+        android:layout_centerHorizontal="true" />
+    
 </RelativeLayout>

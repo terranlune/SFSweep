@@ -1,13 +1,12 @@
-package com.sfsweep.android.fragments;
-
-import com.sfsweep.android.R;
+package com.sfsweep.android.zdeprecated;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.sfsweep.android.R;
 
-public class AddressHubFragment extends HubFragment {
+public class MapHubFragment extends HubFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -18,8 +17,8 @@ public class AddressHubFragment extends HubFragment {
 	}
 	
 	private void setupWidgets() {
-		getItemText().setText("Parking info"); 
-		getItemImage().setImageResource(R.drawable.ic_parking_90dp); 
+		getItemText().setText("Map"); 
+		getItemImage().setImageResource(R.drawable.ic_map_90dp); 
 	}
 	
 	@Override 

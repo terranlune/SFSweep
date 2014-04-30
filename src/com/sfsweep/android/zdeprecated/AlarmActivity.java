@@ -1,4 +1,4 @@
-package com.sfsweep.android.activities;
+package com.sfsweep.android.zdeprecated;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
