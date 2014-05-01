@@ -28,7 +28,7 @@ public class NotifierIconFragment extends Fragment {
 			mListener = (OnNotifierIconClickListener) activity;
 		} else {
 			throw new ClassCastException(activity.toString() + " must implement "
-					+ "OnNotifierIconClicked interface"); 
+					+ OnNotifierIconClickListener.class.getName()); 
 		}
 	}
 	

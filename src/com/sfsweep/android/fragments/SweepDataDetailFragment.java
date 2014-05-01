@@ -31,6 +31,7 @@ public class SweepDataDetailFragment extends Fragment {
 	private TextView tvSweepingInProgress;
 	private StreetSweeperData data;
 	private Date mSweepStartDate;
+	private String mSweepTimeRange; 
 	private String mDaysToNextSweep;
 
 	private String mFont = "Roboto-Light.ttf";
@@ -169,7 +170,7 @@ public class SweepDataDetailFragment extends Fragment {
 		if (parked) {		// Make accessible via getSweepStartDate() only if related to a parking event
 			mSweepStartDate = sweepStartDate;
 		}
-		String range = new SimpleDateFormat("cccc ha", Locale.US)
+		mSweepTimeRange = new SimpleDateFormat("cccc ha", Locale.US)
 				.format(sweepStartDate)
 				+ "-"
 				+ new SimpleDateFormat("ha", Locale.US)
@@ -179,12 +180,12 @@ public class SweepDataDetailFragment extends Fragment {
 				nextSweeping.start.getTime(), new Date().getTime(),
 				DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_SHOW_DATE);
 
-		tvNextSweeping.setText(String.format("%s (%s)", range,
+		tvNextSweeping.setText(String.format("%s (%s)", mSweepTimeRange,
 				mDaysToNextSweep));
 	}
 
 	public Date getSweepStartDate() {
 		return mSweepStartDate;
 	}
-
+	
 }

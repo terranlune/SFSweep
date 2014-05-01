@@ -81,6 +81,7 @@ public class MapActivity extends FragmentActivity implements
 	private static final String PARKED_SWEEP_DATA_ID = "parked_sweep_data_id";
 	private static final String PARKED_SWEEP_DATA_LAT = "parked_sweep_data_lat";
 	private static final String PARKED_SWEEP_DATA_LNG = "parked_sweep_data_lng";
+	private static final String PARKED_SWEEP_DATA_DATE = "parked_sweep_data_date";
 
 	private boolean expanded = false;
 	private int animDuration;
@@ -562,10 +563,11 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public Date onScheduleAlarm() {
-		SweepDataDetailFragment fragment = (SweepDataDetailFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.sweepDetail); 
-		return fragment.getSweepStartDate();
+	public long onScheduleAlarm() {
+		long sweepStartDate =  PreferenceManager
+				.getDefaultSharedPreferences(this)
+				.getLong(PARKED_SWEEP_DATA_DATE, 0);
+		return sweepStartDate;
 	}
 	
 	@Override
@@ -596,15 +598,21 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	protected void onPark() {
+		// [John: I reversed the order of the call to setData() and the shared preferences transaction below,
+		// as I needed to access the relevant parking data strings produced by setData() and didn't want to
+		// split up the shared preferences transaction]
+		
+		this.sweepDataDetailFragment.setData(clickedData, true);
+		Date sweepStartDate = this.sweepDataDetailFragment.getSweepStartDate();
+		
 		PreferenceManager
 				.getDefaultSharedPreferences(this)
 				.edit()
 				.putLong(PARKED_SWEEP_DATA_ID, clickedData.getId())
 				.putFloat(PARKED_SWEEP_DATA_LAT, (float) clickedPoint.latitude)
 				.putFloat(PARKED_SWEEP_DATA_LNG, (float) clickedPoint.longitude)
+				.putLong(PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
 				.commit();
-		
-		this.sweepDataDetailFragment.setData(clickedData, true);
 		
 		clickedMarker.remove();
 		placeParkedMarker(clickedPoint);

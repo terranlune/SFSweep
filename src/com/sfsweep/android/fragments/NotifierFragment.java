@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -15,7 +14,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,13 +32,13 @@ import com.sfsweep.android.adapters.NotifierNumberAdapter;
 
 public class NotifierFragment extends Fragment {
 
-	private static final String SPINNER_PREFERENCES = "spinner_preferences"; 
-	private static final String SELECTED_INTERVAL   = "spinner_interval_selection";
-    private static final String SELECTED_MINUTES    = "spinner_minutes_selection";
-    private static final String SELECTED_HOURS      = "spinner_hours_selection";
-    private static final String SELECTED_DAYS       = "spinner_days_selection";
-    private static final String ACTIVE_STATUS       = "spinner_active_status";
-    private static final int    ALARM_REQUEST       = 1; 
+	private static final String NOTIFIER_FRAGMENT_PREFERENCES = "notifier_fragment_preferences"; 
+	private static final String SELECTED_INTERVAL = "notifier_interval_selection";
+    private static final String SELECTED_MINUTES  = "notifier_minutes_selection";
+    private static final String SELECTED_HOURS    = "notifier_hours_selection";
+    private static final String SELECTED_DAYS     = "notifier_days_selection";
+    private static final String IS_CHECKED        = "checkbox_is_checked";
+    private static final int    ALARM_REQUEST     = 1; 
     
     private static int sSystemCallsToOnItemSelected = 0; 	  // Flag neutralizes Android's firing onItemSelected() upon Spinner instantiation, rather than waiting for user interaction (see http://stackoverflow.com/questions/2562248/android-how-to-keep-onitemselected-from-firing-off-on-a-newly-instantiated-spin)
 	
@@ -50,18 +48,17 @@ public class NotifierFragment extends Fragment {
 	private int mSelectedMinutes;							 
 	private int mSelectedHours;
 	private int mSelectedDays; 
-	private CheckBox mCbActivateNotifier; 
-	private boolean mActive = true; 						  // If true, alarm associated with notifier is active 
 	private NotifierIntervalAdapter mNotifierIntervalAdapter;
 	private NotifierNumberAdapter mNotifierMinutesAdapter;
 	private NotifierNumberAdapter mNotifierHoursAdapter;
 	private NotifierNumberAdapter mNotifierDaysAdapter; 
+	private CheckBox mCbActivateNotifier; 
 	private SharedPreferences mPrefs; 
 	private OnScheduleAlarmListener mScheduleListener; 
 
 	
 	public interface OnScheduleAlarmListener {
-		public Date onScheduleAlarm();
+		public long onScheduleAlarm(); 
 	}
 	
 	@Override
@@ -82,15 +79,12 @@ public class NotifierFragment extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_notifier, parent, false); 
 		
 		setupWidgets(v); 
-		updateNumberSpinner(); 		// Number spinner updated to reflect interval selection (viz., minutes, hours, days)
 		setupListeners(); 
 		return v;
 	}
 	
 	private void setupWidgets(View v) {
-		// Restore status of notifier (viz., active or inactive)
-		mPrefs  = getActivity().getSharedPreferences(SPINNER_PREFERENCES, 0); 
-		mActive = mPrefs.getBoolean(ACTIVE_STATUS, true); 
+		mPrefs  = getActivity().getSharedPreferences(NOTIFIER_FRAGMENT_PREFERENCES, 0); 
 		
 		// Set up interval spinner 
 		mSpnInterval = (Spinner) v.findViewById(R.id.spnInterval); 
@@ -103,9 +97,14 @@ public class NotifierFragment extends Fragment {
 		mSelectedInterval = mPrefs.getInt(SELECTED_INTERVAL, 0);
 		mSpnInterval.setSelection(mSelectedInterval); 
 		
-		// Set up number spinner and activate box
+		// Set up number spinner 
 		mSpnNumber = (Spinner) v.findViewById(R.id.spnNumber); 
+		updateNumberSpinner(); 				// Number spinner adjusted to reflect interval selection (viz., minutes, hours, days)
+		
+		// Set up check box
 		mCbActivateNotifier = (CheckBox) v.findViewById(R.id.cbActivateNotifier); 
+		boolean isChecked = mPrefs.getBoolean(IS_CHECKED, false);
+		mCbActivateNotifier.setChecked(isChecked);
 	}
 	
 	private ArrayList<CharSequence> createAdapterArray(int resourceId) {
@@ -305,21 +304,26 @@ public class NotifierFragment extends Fragment {
 		      .putInt(SELECTED_MINUTES,  mSelectedMinutes)
 		      .putInt(SELECTED_HOURS,    mSelectedHours)
 		      .putInt(SELECTED_DAYS,     mSelectedDays)
-		      .putBoolean(ACTIVE_STATUS, mActive)
+		      .putBoolean(IS_CHECKED, mCbActivateNotifier.isChecked())
 		      .commit(); 
 	}
 	
 	private void scheduleSystemAlarm() {		
+//		Log.d("DEBUG", "******************* In scheduleSystemAlarm() *******************");
+	
 		// Get and parse street sweeping data
-		Date nextSweepStart = mScheduleListener.onScheduleAlarm();
-		if (nextSweepStart == null) return; 	// Ensure a parking event has occurred
-		Calendar calendar = Calendar.getInstance(Locale.US); 
-		calendar.setTime(nextSweepStart); 
-		Log.d("DEBUG", "******************* In scheduleSystemAlarm() *******************");
-		Log.d("DEBUG", "Calendar initially set at next sweep time: " + calendar.toString()); 
-		int sweepHour   = calendar.get(Calendar.HOUR_OF_DAY), 
-		    sweepDay    = calendar.get(Calendar.DAY_OF_YEAR); 
-		Log.d("DEBUG", "sweepHour is: " + sweepHour + ", and sweepDay is: " + sweepDay); 
+		long sweepStartDateInMillis = mScheduleListener.onScheduleAlarm();
+		if (sweepStartDateInMillis == 0) return; 	// Abort if no parking history
+//		Log.d("DEBUG", "sweepStartDateInMillis: " + sweepStartDateInMillis); 
+		Date sweepStartDate = new Date(sweepStartDateInMillis); 
+//		Log.d("DEBUG", "sweepStartDate: " + sweepStartDate); 
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(sweepStartDate);
+		int sweepHour = calendar.get(Calendar.HOUR_OF_DAY); 
+		int sweepDay  = calendar.get(Calendar.DAY_OF_YEAR);
+//		Log.d("DEBUG", "Calendar initially set at next sweep time: " + calendar.toString()); 
+		
+//		Log.d("DEBUG", "sweepHour is: " + sweepHour + ", and sweepDay is: " + sweepDay); 
 		
 		// Calculate actual value selected from number spinner (i.e., convert from index value)
 		int selectedMinute = mSelectedMinutes + 1,
@@ -329,7 +333,7 @@ public class NotifierFragment extends Fragment {
 		// Calculate system alarm schedule
 		int alarmMinute, alarmHour, alarmDay;  
 		int defaultMinute = 0,						// Alarm defaults to on-the-hour timing for hour- and day-based notifications
-		    defaultHour   = 15; 					// Alarm defaults to 3pm for day-based notifications
+		    defaultHour   = 12; 					// Alarm defaults to 12pm for day-based notifications
 		
 		switch (mSelectedInterval) {
 		case 0:
@@ -360,10 +364,10 @@ public class NotifierFragment extends Fragment {
 			alarmHour   = defaultHour;					
 			alarmDay    = sweepDay - selectedDay; 
 		}
-		Log.d("DEBUG", "mSelectedMinutes: " + mSelectedMinutes + ", mSelectedHours: " + mSelectedHours + ", mSelectedDays: " + mSelectedDays); 
-		Log.d("DEBUG", "selectedMinute: " + selectedMinute + ", selectedHour: " + selectedHour + ", selectedDay: " + selectedDay); 
-		Log.d("DEBUG", "sweepMinute: " + defaultMinute + ", sweepHour: " + sweepHour + ", sweepDay: " + sweepDay); 
-		Log.d("DEBUG", "alarmMinute: " + alarmMinute + ", alarmHour: " + alarmHour + ", alarmDay: " + alarmDay); 
+//		Log.d("DEBUG", "mSelectedMinutes: " + mSelectedMinutes + ", mSelectedHours: " + mSelectedHours + ", mSelectedDays: " + mSelectedDays); 
+//		Log.d("DEBUG", "selectedMinute: " + selectedMinute + ", selectedHour: " + selectedHour + ", selectedDay: " + selectedDay); 
+//		Log.d("DEBUG", "sweepMinute: " + defaultMinute + ", sweepHour: " + sweepHour + ", sweepDay: " + sweepDay); 
+//		Log.d("DEBUG", "alarmMinute: " + alarmMinute + ", alarmHour: " + alarmHour + ", alarmDay: " + alarmDay); 
 		
 		// Schedule system alarm 
 		Activity context = getActivity(); 
@@ -376,7 +380,7 @@ public class NotifierFragment extends Fragment {
 		calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
 		calendar.set(Calendar.MINUTE, alarmMinute); 
 		
-		Log.d("DEBUG", "Alarm set at: " + calendar.toString()); 
+//		Log.d("DEBUG", "Alarm set at: " + calendar.toString()); 
 		
 		// FIXME: For some reason, Eclipse refuses to recognize alarmMgr.setExact(...), which
 		// is the minSdkTarget API 19 update to alarmMgr.set(...). Unlike set(...), setExact(...) 
@@ -385,36 +389,11 @@ public class NotifierFragment extends Fragment {
 		
 		// TODO: Ensure system alarm persists if device is shut down
 		context = null; 
-		Log.d("DEBUG", "**************************************");
+//		Log.d("DEBUG", "**************************************");
 	}
 	
 	private void cancelSystemAlarm() {
 		// TODO
-	}
-	
-	public void setActiveStatus(boolean active) {
-		mActive = active;
-		mPrefs.edit().putBoolean(ACTIVE_STATUS, mActive).commit(); 
-	}
-	
-	public boolean getActiveStatus() {
-		return mActive; 
-	}
-	
-	public NotifierIntervalAdapter getNotifierIntervalAdapter() {
-		return mNotifierIntervalAdapter;
-	}
-	
-	public NotifierNumberAdapter getNotifierMinutesAdapter() {
-		return mNotifierMinutesAdapter;
-	}
-	
-	public NotifierNumberAdapter getNotifierHoursAdapter() {
-		return mNotifierHoursAdapter;
-	}
-	
-	public NotifierNumberAdapter getNotifierDaysAdapter() {
-		return mNotifierDaysAdapter;
 	}
 	
 	public int getSelectedMinutes() {
