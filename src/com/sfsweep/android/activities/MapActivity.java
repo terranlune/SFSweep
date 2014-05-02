@@ -21,6 +21,7 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -513,7 +514,6 @@ public class MapActivity extends FragmentActivity implements
 			hideSweepDetail();
 		} else {
 			Marker marker = placeClickedMarker(clickedPoint);
-			hideMapControls();
 			showSweepDetail(marker.getPosition(), clickedData, false);
 		}
 	}
@@ -530,6 +530,8 @@ public class MapActivity extends FragmentActivity implements
 	private void showSweepDetail(LatLng point, StreetSweeperData data,
 			Boolean parked) {
 
+		hideMapControls();
+
 		// Zoom to the click
 		CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(point);
 		map.animateCamera(cameraUpdate, animDuration, null);
@@ -539,8 +541,12 @@ public class MapActivity extends FragmentActivity implements
 
 		// Animate the view's visibility
 		View v = findViewById(R.id.sweepDetail);
-		int height = Math
-				.round(this.getWindow().getDecorView().getBottom() * 0.24f);
+		v.measure(MeasureSpec.makeMeasureSpec(this.getWindow().getDecorView().getWidth(), MeasureSpec.AT_MOST),
+				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+		int height = v.getMeasuredHeight();
+
+		// int height = Math
+		// .round(this.getWindow().getDecorView().getBottom() * 0.14f);
 		HeightAnimation a = new HeightAnimation(v, height);
 		a.setDuration(animDuration);
 		v.startAnimation(a);
@@ -605,24 +611,22 @@ public class MapActivity extends FragmentActivity implements
 		// split up the shared preferences transaction]
 
 		LatLng p = clickedMarker.getPosition();
-		
+
 		placeParkedMarker(p);
 		showSweepDetail(p, d, false);
 		removeClickedMarker();
-		
+
 		this.sweepDataDetailFragment.setData(clickedData, true);
 		Date sweepStartDate = this.sweepDataDetailFragment.getSweepStartDate();
 
-		PreferenceManager
-				.getDefaultSharedPreferences(this)
-				.edit()
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
 				.putLong(PARKED_SWEEP_DATA_ID, clickedData.getId())
 				.putFloat(PARKED_SWEEP_DATA_LAT, (float) p.latitude)
 				.putFloat(PARKED_SWEEP_DATA_LNG, (float) p.longitude)
 				.putLong(PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
 				.commit();
 	}
-	
+
 	protected void onUnPark(StreetSweeperData d) {
 		clickedData = d;
 		LatLng p = parkedMarker.getPosition();

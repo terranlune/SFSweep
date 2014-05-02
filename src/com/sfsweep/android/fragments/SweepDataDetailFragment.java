@@ -27,11 +27,12 @@ import com.sfsweep.android.models.StreetSweeperData.DateInterval;
 public class SweepDataDetailFragment extends Fragment {
 
 	private TextView tvStreetName;
-	private TextView tvNextSweeping;
+	private TextView tvNextSweepingAbs;
+	private TextView tvNextSweepingRel;
 	private TextView tvSweepingInProgress;
 	private StreetSweeperData data;
 	private Date mSweepStartDate;
-	private String mSweepTimeRange; 
+	private String mSweepTimeRange;
 	private String mDaysToNextSweep;
 
 	private String mFont = "Roboto-Light.ttf";
@@ -45,6 +46,7 @@ public class SweepDataDetailFragment extends Fragment {
 
 	public interface OnClickParkActionListener {
 		public void onClickParkAction(StreetSweeperData d);
+
 		public void onClickUnParkAction(StreetSweeperData d);
 	}
 
@@ -77,8 +79,13 @@ public class SweepDataDetailFragment extends Fragment {
 		tvStreetName = (TextView) rootView.findViewById(R.id.tvStreetName);
 		tvStreetName.setTypeface(mTypeface);
 
-		tvNextSweeping = (TextView) rootView.findViewById(R.id.tvNextSweeping);
-		tvNextSweeping.setTypeface(mTypeface);
+		tvNextSweepingAbs = (TextView) rootView
+				.findViewById(R.id.tvNextSweepingAbs);
+		tvNextSweepingAbs.setTypeface(mTypeface);
+
+		tvNextSweepingRel = (TextView) rootView
+				.findViewById(R.id.tvNextSweepingRel);
+		tvNextSweepingRel.setTypeface(mTypeface);
 
 		ivParkAction = (ImageView) rootView.findViewById(R.id.ivParkAction);
 		ivParkAction.setOnClickListener(new OnClickListener() {
@@ -109,12 +116,12 @@ public class SweepDataDetailFragment extends Fragment {
 		if (parked) {
 			ivParkAction.setVisibility(View.INVISIBLE);
 			ivUnParkAction.setVisibility(View.VISIBLE);
-		}else{
+		} else {
 			ivParkAction.setVisibility(View.VISIBLE);
 			ivUnParkAction.setVisibility(View.INVISIBLE);
 		}
 	}
-	
+
 	protected void onClickParkAction() {
 		if (listener != null) {
 			listener.onClickParkAction(this.data);
@@ -180,12 +187,12 @@ public class SweepDataDetailFragment extends Fragment {
 				nextSweeping.start.getTime(), new Date().getTime(),
 				DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_SHOW_DATE);
 
-		tvNextSweeping.setText(String.format("%s (%s)", mSweepTimeRange,
-				mDaysToNextSweep));
+		tvNextSweepingAbs.setText(mSweepTimeRange);
+		tvNextSweepingRel.setText(mDaysToNextSweep);
 	}
 
 	public Date getSweepStartDate() {
 		return mSweepStartDate;
 	}
-	
+
 }

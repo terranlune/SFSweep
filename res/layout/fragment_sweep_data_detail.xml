@@ -1,20 +1,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
     tools:context=".fragments.SweepDataDetailFragment" >
 
     <TextView
         android:id="@+id/tvStreetName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/separator"
         android:layout_alignParentLeft="true"
-        android:text="Street Name"
+        android:layout_toLeftOf="@+id/tvNextSweepingRel"
+        android:text="Diamond Heights Blvd (North)"
         android:textColor="@color/gunmetal"
         android:textSize="20sp" />
 
@@ -33,25 +30,30 @@
         android:visibility="gone" />
 
     <TextView
-        android:id="@+id/tvNextSweeping"
+        android:id="@+id/tvNextSweepingAbs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_alignLeft="@+id/tvStreetName"
         android:layout_below="@+id/tvSweepingInProgress"
+        android:text="Wednesday 8am-10am" />
+    
+    <TextView
+        android:id="@+id/tvNextSweepingRel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_toLeftOf="@+id/separator"
-        android:layout_marginLeft="0dp"
-        android:layout_marginTop="2dp"
-        android:text="Wednesday 8am-10am (in 3 days)"
+        android:layout_toRightOf="@+id/flIconContainer"
+        android:gravity="center"
+        android:text="in 3 days"
         android:textColor="@color/gunmetal"
-        android:textSize="16sp" />
+        android:textSize="24sp" />
 
     <View
         android:id="@+id/separator"
         android:layout_width="1dp"
-        android:layout_height="1dp"
+        android:layout_height="fill_parent"
         android:layout_margin="5dp"
-        android:layout_alignBottom="@+id/tvNextSweeping"
-        android:layout_alignTop="@+id/tvStreetName"
         android:layout_toLeftOf="@+id/ivParkAction"
         android:background="@android:drawable/divider_horizontal_bright" />
 
@@ -60,9 +62,7 @@
         android:layout_width="50dp"
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
-        android:layout_alignBottom="@+id/tvNextSweeping"
-        android:layout_alignTop="@+id/tvStreetName"
-        android:visibility="invisible"
+        android:layout_centerVertical="true"
         android:src="@drawable/park_action" />
     
     <ImageView
@@ -70,8 +70,7 @@
         android:layout_width="50dp"
         android:layout_height="40dp"
         android:layout_alignParentRight="true"
-        android:layout_alignBottom="@+id/tvNextSweeping"
-        android:layout_alignTop="@+id/tvStreetName"
+        android:layout_centerVertical="true"
         android:visibility="invisible"
         android:src="@drawable/unpark_action" />
     
@@ -79,7 +78,7 @@
         android:id="@+id/flIconContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tvNextSweeping"
+        android:layout_below="@+id/tvNextSweepingRel"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp" />
 
@@ -90,5 +89,4 @@
         android:layout_below="@+id/flIconContainer"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"/>
-
 </RelativeLayout>
