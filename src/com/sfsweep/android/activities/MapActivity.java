@@ -52,8 +52,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
 import com.sfsweep.android.fragments.NotifierDrawerFragment;
-import com.sfsweep.android.fragments.NotifierIconFragment;
-import com.sfsweep.android.fragments.NotifierIconFragment.OnNotifierIconClickListener;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
 import com.sfsweep.android.fragments.SweepDataDetailFragment.OnClickParkActionListener;
 import com.sfsweep.android.helpers.HeightAnimation;
@@ -64,8 +62,7 @@ public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
 		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmListener,
-		OnNotifierIconClickListener, OnClickParkActionListener,
-		OnMarkerClickListener {
+		OnClickParkActionListener, OnMarkerClickListener {
 
 	private static final LatLng SF = new LatLng(37.7577, -122.4376);
 
@@ -225,7 +222,6 @@ public class MapActivity extends FragmentActivity implements
 		setupZoomToParked();
 		showMapControls();
 		setupMoveByButton();
-		setupFragments();
 
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
 
@@ -317,18 +313,6 @@ public class MapActivity extends FragmentActivity implements
 				startActivityForResult(i, HUB_REQUEST);
 			}
 		});
-	}
-
-	private void setupFragments() {
-		NotifierIconFragment niFragment = new NotifierIconFragment();
-		NotifierDrawerFragment ndFragment = new NotifierDrawerFragment();
-
-		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction()
-				.add(R.id.flIconContainer, niFragment,
-						NOTIFIER_ICON_FRAGMENT_TAG)
-				.add(R.id.flNotifierContainer, ndFragment,
-						NOTIFIER_DRAWER_FRAGMENT_TAG).hide(ndFragment).commit();
 	}
 
 	/*
@@ -541,7 +525,9 @@ public class MapActivity extends FragmentActivity implements
 
 		// Animate the view's visibility
 		View v = findViewById(R.id.sweepDetail);
-		v.measure(MeasureSpec.makeMeasureSpec(this.getWindow().getDecorView().getWidth(), MeasureSpec.AT_MOST),
+		v.measure(
+				MeasureSpec.makeMeasureSpec(this.getWindow().getDecorView()
+						.getWidth(), MeasureSpec.AT_MOST),
 				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 		int height = v.getMeasuredHeight();
 
@@ -577,23 +563,6 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public void onNotifierIconClick() {
-		// Bump drawer to show notifiers
-		View v = findViewById(R.id.sweepDetail);
-		int height = Math
-				.round(this.getWindow().getDecorView().getBottom() * 0.60f);
-		HeightAnimation a = new HeightAnimation(v, height);
-		a.setDuration(animDuration);
-		v.startAnimation(a);
-
-		// Show notifier drawer fragment
-		FragmentManager fm = getSupportFragmentManager();
-		NotifierDrawerFragment ndFragment = (NotifierDrawerFragment) fm
-				.findFragmentByTag(NOTIFIER_DRAWER_FRAGMENT_TAG);
-		fm.beginTransaction().show(ndFragment).commit();
-	}
-
-	@Override
 	public void onClickParkAction(StreetSweeperData d) {
 		onPark(d);
 	}
@@ -613,7 +582,7 @@ public class MapActivity extends FragmentActivity implements
 		LatLng p = clickedMarker.getPosition();
 
 		placeParkedMarker(p);
-		showSweepDetail(p, d, false);
+		showSweepDetail(p, d, true);
 		removeClickedMarker();
 
 		this.sweepDataDetailFragment.setData(clickedData, true);

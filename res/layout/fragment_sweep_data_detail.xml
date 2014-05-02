@@ -19,11 +19,11 @@
         android:id="@+id/tvSweepingInProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/tvStreetName"
-        android:layout_toLeftOf="@+id/separator"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="2dp"
-        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/separator"
         android:text="Sweeping in progress! (ends in 2h)"
         android:textColor="@color/sweepingInProgress"
         android:textSize="16sp"
@@ -36,12 +36,13 @@
         android:layout_alignLeft="@+id/tvStreetName"
         android:layout_below="@+id/tvSweepingInProgress"
         android:text="Wednesday 8am-10am" />
-    
+
     <TextView
         android:id="@+id/tvNextSweepingRel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_alignBottom="@+id/tvNextSweepingAbs"
+        android:layout_alignParentTop="true"
         android:layout_toLeftOf="@+id/separator"
         android:layout_toRightOf="@+id/flIconContainer"
         android:gravity="center"
@@ -52,8 +53,11 @@
     <View
         android:id="@+id/separator"
         android:layout_width="1dp"
-        android:layout_height="fill_parent"
+        android:layout_height="1dp"
         android:layout_margin="5dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignBottom="@+id/tvNextSweepingRel"
+        android:layout_above="@+id/fNotifierDrawer"
         android:layout_toLeftOf="@+id/ivParkAction"
         android:background="@android:drawable/divider_horizontal_bright" />
 
@@ -61,32 +65,27 @@
         android:id="@+id/ivParkAction"
         android:layout_width="50dp"
         android:layout_height="40dp"
+        android:layout_alignBottom="@+id/tvNextSweepingRel"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
+        android:layout_alignParentTop="true"
         android:src="@drawable/park_action" />
-    
+
     <ImageView
         android:id="@+id/ivUnParkAction"
         android:layout_width="50dp"
         android:layout_height="40dp"
+        android:layout_alignBottom="@+id/tvNextSweepingRel"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:visibility="invisible"
+        android:layout_alignParentTop="true"
         android:src="@drawable/unpark_action" />
-    
-    <FrameLayout
-        android:id="@+id/flIconContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tvNextSweepingRel"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp" />
 
-    <FrameLayout
-        android:id="@+id/flNotifierContainer"
+    <fragment
+        android:id="@+id/fNotifierDrawer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/flIconContainer"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"/>
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/tvNextSweepingAbs"
+        class="com.sfsweep.android.fragments.NotifierDrawerFragment"
+        tools:layout="@layout/fragment_notifier_drawer" />
+
 </RelativeLayout>

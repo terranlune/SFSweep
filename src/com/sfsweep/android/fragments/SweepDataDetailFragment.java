@@ -21,9 +21,6 @@ import com.sfsweep.android.R;
 import com.sfsweep.android.models.StreetSweeperData;
 import com.sfsweep.android.models.StreetSweeperData.DateInterval;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class SweepDataDetailFragment extends Fragment {
 
 	private TextView tvStreetName;
@@ -40,6 +37,7 @@ public class SweepDataDetailFragment extends Fragment {
 	private ImageView ivParkAction;
 	private OnClickParkActionListener listener;
 	private ImageView ivUnParkAction;
+	private View fNotifierDrawer;
 
 	public SweepDataDetailFragment() {
 	}
@@ -109,16 +107,21 @@ public class SweepDataDetailFragment extends Fragment {
 		tvSweepingInProgress = (TextView) rootView
 				.findViewById(R.id.tvSweepingInProgress);
 		tvSweepingInProgress.setTypeface(mTypeface);
+		
+		fNotifierDrawer = rootView.findViewById(R.id.fNotifierDrawer);
+		
 		return rootView;
 	}
 
-	protected void updateButtonVisibility(boolean parked) {
+	protected void updateViewVisibility(boolean parked) {
 		if (parked) {
 			ivParkAction.setVisibility(View.INVISIBLE);
 			ivUnParkAction.setVisibility(View.VISIBLE);
+			fNotifierDrawer.setVisibility(View.VISIBLE);
 		} else {
 			ivParkAction.setVisibility(View.VISIBLE);
 			ivUnParkAction.setVisibility(View.INVISIBLE);
+			fNotifierDrawer.setVisibility(View.GONE);
 		}
 	}
 
@@ -142,7 +145,7 @@ public class SweepDataDetailFragment extends Fragment {
 
 		this.data = d;
 		
-		updateButtonVisibility(parked);
+		updateViewVisibility(parked);
 
 		if (d.BlockSide.equals("")) {
 			tvStreetName.setText(d.Corridor);
