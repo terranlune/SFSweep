@@ -44,8 +44,8 @@ public class SweepDataDetailFragment extends Fragment {
 	}
 
 	public interface OnClickParkActionListener {
-		public void onClickParkAction();
-		public void onClickUnParkAction();
+		public void onClickParkAction(StreetSweeperData d);
+		public void onClickUnParkAction(StreetSweeperData d);
 	}
 
 	@Override
@@ -117,13 +117,13 @@ public class SweepDataDetailFragment extends Fragment {
 	
 	protected void onClickParkAction() {
 		if (listener != null) {
-			listener.onClickParkAction();
+			listener.onClickParkAction(this.data);
 		}
 	}
 
 	protected void onClickUnParkAction() {
 		if (listener != null) {
-			listener.onClickUnParkAction();
+			listener.onClickUnParkAction(this.data);
 		}
 	}
 

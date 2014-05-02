@@ -40,6 +40,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -62,7 +63,8 @@ public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
 		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmListener,
-		OnNotifierIconClickListener, OnClickParkActionListener {
+		OnNotifierIconClickListener, OnClickParkActionListener,
+		OnMarkerClickListener {
 
 	private static final LatLng SF = new LatLng(37.7577, -122.4376);
 
@@ -103,8 +105,6 @@ public class MapActivity extends FragmentActivity implements
 	private ImageView ivZoomToParked;
 
 	private StreetSweeperData clickedData;
-	private LatLng clickedPoint;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -203,6 +203,7 @@ public class MapActivity extends FragmentActivity implements
 
 				map.setOnCameraChangeListener(this);
 				map.setOnMapClickListener(this);
+				map.setOnMarkerClickListener(this);
 
 				mapAdapter = new StreetSweeperDataMapAdapter(map);
 
@@ -254,9 +255,8 @@ public class MapActivity extends FragmentActivity implements
 
 	protected void zoomToParked() {
 		if (parkedMarker != null) {
-			map.animateCamera(CameraUpdateFactory.newLatLng(parkedMarker.getPosition()));
-			// sweepDataDetailFragment.setData(data);
-			// TODO: Show drawer
+			StreetSweeperData d = getParkedData();
+			showSweepDetail(parkedMarker.getPosition(), d, true);
 		}
 	}
 
@@ -327,8 +327,7 @@ public class MapActivity extends FragmentActivity implements
 				.add(R.id.flIconContainer, niFragment,
 						NOTIFIER_ICON_FRAGMENT_TAG)
 				.add(R.id.flNotifierContainer, ndFragment,
-						NOTIFIER_DRAWER_FRAGMENT_TAG).hide(ndFragment)
-				.commit();
+						NOTIFIER_DRAWER_FRAGMENT_TAG).hide(ndFragment).commit();
 	}
 
 	/*
@@ -502,49 +501,51 @@ public class MapActivity extends FragmentActivity implements
 	public void onMapClick(LatLng p) {
 
 		Pair<StreetSweeperData, LatLng> pair = mapAdapter.findNearestData(p);
-		clickedPoint = pair.second;
+		LatLng clickedPoint = pair.second;
 		clickedData = pair.first;
 
 		if (clickedData == null)
 			return;
 
 		if (expanded) {
-			// Remove the marker
-			if (clickedMarker != null)
-				clickedMarker.remove();
-
+			removeClickedMarker();
 			showMapControls();
+			hideSweepDetail();
 		} else {
-
-			sweepDataDetailFragment.setData(clickedData, false);
-
-			// Set the marker
-			clickedMarker = map.addMarker(new MarkerOptions()
-					.position(clickedPoint));
-
+			Marker marker = placeClickedMarker(clickedPoint);
 			hideMapControls();
-
-			// Zoom to the click
-			CameraUpdate cameraUpdate = CameraUpdateFactory
-					.newLatLng(clickedPoint);
-			map.animateCamera(cameraUpdate, animDuration, null);
+			showSweepDetail(marker.getPosition(), clickedData, false);
 		}
+	}
 
+	private void hideSweepDetail() {
 		View v = findViewById(R.id.sweepDetail);
-		HeightAnimation a;
-		if (expanded) {
-			a = new HeightAnimation(v, 0);
-		} else {
-			int height = Math
-					.round(this.getWindow().getDecorView().getBottom() * 0.24f); // For
-																					// reference:
-																					// originally
-																					// 0.6f
-			a = new HeightAnimation(v, height);
-		}
+		HeightAnimation a = new HeightAnimation(v, 0);
 		a.setDuration(animDuration);
 		v.startAnimation(a);
-		expanded = !expanded;
+
+		expanded = false;
+	}
+
+	private void showSweepDetail(LatLng point, StreetSweeperData data,
+			Boolean parked) {
+
+		// Zoom to the click
+		CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(point);
+		map.animateCamera(cameraUpdate, animDuration, null);
+
+		// Set the data
+		sweepDataDetailFragment.setData(data, parked);
+
+		// Animate the view's visibility
+		View v = findViewById(R.id.sweepDetail);
+		int height = Math
+				.round(this.getWindow().getDecorView().getBottom() * 0.24f);
+		HeightAnimation a = new HeightAnimation(v, height);
+		a.setDuration(animDuration);
+		v.startAnimation(a);
+
+		expanded = true;
 	}
 
 	private void hideMapControls() {
@@ -564,12 +565,11 @@ public class MapActivity extends FragmentActivity implements
 
 	@Override
 	public long onScheduleAlarm() {
-		long sweepStartDate =  PreferenceManager
-				.getDefaultSharedPreferences(this)
-				.getLong(PARKED_SWEEP_DATA_DATE, 0);
+		long sweepStartDate = PreferenceManager.getDefaultSharedPreferences(
+				this).getLong(PARKED_SWEEP_DATA_DATE, 0);
 		return sweepStartDate;
 	}
-	
+
 	@Override
 	public void onNotifierIconClick() {
 		// Bump drawer to show notifiers
@@ -588,52 +588,94 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public void onClickParkAction() {
-		onPark();
+	public void onClickParkAction(StreetSweeperData d) {
+		onPark(d);
 	}
 
 	@Override
-	public void onClickUnParkAction() {
-		onUnPark();
+	public void onClickUnParkAction(StreetSweeperData d) {
+		onUnPark(d);
 	}
 
-	protected void onPark() {
-		// [John: I reversed the order of the call to setData() and the shared preferences transaction below,
-		// as I needed to access the relevant parking data strings produced by setData() and didn't want to
+	protected void onPark(StreetSweeperData d) {
+		// [John: I reversed the order of the call to setData() and the shared
+		// preferences transaction below,
+		// as I needed to access the relevant parking data strings produced by
+		// setData() and didn't want to
 		// split up the shared preferences transaction]
+
+		LatLng p = clickedMarker.getPosition();
+		
+		placeParkedMarker(p);
+		showSweepDetail(p, d, false);
+		removeClickedMarker();
 		
 		this.sweepDataDetailFragment.setData(clickedData, true);
 		Date sweepStartDate = this.sweepDataDetailFragment.getSweepStartDate();
-		
+
 		PreferenceManager
 				.getDefaultSharedPreferences(this)
 				.edit()
 				.putLong(PARKED_SWEEP_DATA_ID, clickedData.getId())
-				.putFloat(PARKED_SWEEP_DATA_LAT, (float) clickedPoint.latitude)
-				.putFloat(PARKED_SWEEP_DATA_LNG, (float) clickedPoint.longitude)
+				.putFloat(PARKED_SWEEP_DATA_LAT, (float) p.latitude)
+				.putFloat(PARKED_SWEEP_DATA_LNG, (float) p.longitude)
 				.putLong(PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
 				.commit();
-		
-		clickedMarker.remove();
-		placeParkedMarker(clickedPoint);
+	}
+	
+	protected void onUnPark(StreetSweeperData d) {
+		clickedData = d;
+		LatLng p = parkedMarker.getPosition();
+		placeClickedMarker(p);
+		removeParkedMarker();
+		showSweepDetail(p, d, false);
 	}
 
-	private void placeParkedMarker(LatLng p) {
-		if (parkedMarker != null) {
-			parkedMarker.remove();
-		}
+	private Marker placeParkedMarker(LatLng p) {
+		removeParkedMarker();
 		parkedMarker = map.addMarker(new MarkerOptions().position(p).icon(
 				BitmapDescriptorFactory
 						.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+		return parkedMarker;
 	}
 
-	protected void onUnPark() {
-		PreferenceManager.getDefaultSharedPreferences(this).edit()
-				.remove(PARKED_SWEEP_DATA_ID).remove(PARKED_SWEEP_DATA_LAT)
-				.remove(PARKED_SWEEP_DATA_LNG).commit();
-		parkedMarker.remove();
+	private void removeParkedMarker() {
+		if (parkedMarker != null) {
+			PreferenceManager.getDefaultSharedPreferences(this).edit()
+					.remove(PARKED_SWEEP_DATA_ID).remove(PARKED_SWEEP_DATA_LAT)
+					.remove(PARKED_SWEEP_DATA_LNG).commit();
+			parkedMarker.remove();
+		}
+	}
 
-		// TODO: Hide detail fragment
-		this.sweepDataDetailFragment.setData(clickedData, false);
+	private Marker placeClickedMarker(LatLng point) {
+		removeClickedMarker();
+		clickedMarker = map.addMarker(new MarkerOptions().position(point));
+		return clickedMarker;
+	}
+
+	private void removeClickedMarker() {
+		if (clickedMarker != null)
+			clickedMarker.remove();
+	}
+
+	@Override
+	public boolean onMarkerClick(Marker marker) {
+		if (clickedMarker != null
+				&& marker.getId().equals(clickedMarker.getId())) {
+			showSweepDetail(clickedMarker.getPosition(), clickedData, false);
+		} else if (parkedMarker != null
+				&& marker.getId().equals(parkedMarker.getId())) {
+			StreetSweeperData d = getParkedData();
+			showSweepDetail(parkedMarker.getPosition(), d, true);
+		}
+		return true;
+	}
+
+	private StreetSweeperData getParkedData() {
+		long parkedDataId = PreferenceManager.getDefaultSharedPreferences(this)
+				.getLong(PARKED_SWEEP_DATA_ID, -1);
+		StreetSweeperData d = StreetSweeperData.getById(parkedDataId);
+		return d;
 	}
 }
