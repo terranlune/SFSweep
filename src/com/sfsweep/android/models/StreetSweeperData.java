@@ -259,4 +259,5 @@ public class StreetSweeperData extends Model implements Serializable {
 				- (P.longitude - A.longitude) * (B.latitude - A.latitude))
 				/ normalLength;
 	}
+	
 }

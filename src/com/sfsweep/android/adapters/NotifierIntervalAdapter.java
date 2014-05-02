@@ -11,7 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.sfsweep.android.R;
-import com.sfsweep.android.fragments.NotifierFragment;
+import com.sfsweep.android.views.Notifier;
 
 /**
  * Class implements an ArrayAdpater for notification intervals (viz., minutes, hours, days) displayed
@@ -20,15 +20,15 @@ import com.sfsweep.android.fragments.NotifierFragment;
  */
 public class NotifierIntervalAdapter extends ArrayAdapter<CharSequence> {
 
-	private Context          mContext; 
-	private NotifierFragment mNotifier;
-	private TextView         mTvSpnItem; 
+	private Context mContext; 
+	private Notifier mNotifier;
+	private TextView mTvSpnItem; 
 	
-	private String   mFont = "Roboto-Light.ttf"; 
+	private String mFont = "Roboto-Light.ttf"; 
 	private Typeface mTypeface;
 	
 	
-	public NotifierIntervalAdapter(Context context, List<CharSequence> intervalList, NotifierFragment notifier) {
+	public NotifierIntervalAdapter(Context context, List<CharSequence> intervalList, Notifier notifier) {
 		super(context, 0, intervalList);
 		mNotifier = notifier;
 		mTypeface = Typeface.createFromAsset(context.getAssets(), mFont); 
