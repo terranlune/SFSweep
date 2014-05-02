@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.sfsweep.android.views.Notifier xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:id="@+id/notifier" 
     android:layout_width="match_parent"
-    android:layout_height="match_parent" 
-    android:background="@color/white" >
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_centerHorizontal="true"
+    android:background="@color/white"
+    android:gravity="center"
+    android:orientation="horizontal" > 
     
-    <LinearLayout
-        android:id="@+id/llNotifierContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"
-        android:orientation="horizontal" > 
-     
-	  	<Spinner
+    	<ImageButton
+	        android:id="@+id/btnDeleteNotifier"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/lvNotifierList"
+	        android:layout_marginRight="10dp"
+	        android:background="@color/white"
+	        android:alpha="0.8"
+	        android:scaleType="matrix"
+	        android:src="@drawable/ic_minus_14dpx10dppad_gunmetal" />
+    
+        <Spinner
 	        android:id="@+id/spnNumber"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
@@ -27,15 +34,18 @@
 	        android:id="@+id/spnInterval"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
+	        android:layout_marginRight="10dp"
 	        android:dropDownVerticalOffset="20dp"
 	        android:gravity="left"
 	        android:background="@color/white" 
 	        android:popupBackground="@color/white" />
-	    
+	   
 	     <CheckBox
 	        android:id="@+id/cbActivateNotifier"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content" />
+	
+</com.sfsweep.android.views.Notifier>
 	     
 <!-- 
 Centering modifications for spinner text:
@@ -78,6 +88,4 @@ Baseline values for spinner text:
 	        android:textSize="16sp" />
    -->
 
-	</LinearLayout>
-     
-</RelativeLayout>
+	

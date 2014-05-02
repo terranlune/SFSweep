@@ -11,7 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.sfsweep.android.R;
-import com.sfsweep.android.fragments.NotifierFragment;
 
 /**
  * Class implements an ArrayAdpater for notification intervals (viz., minutes, hours, days) displayed
@@ -28,7 +27,7 @@ public class NotifierNumberAdapter extends ArrayAdapter<CharSequence> {
 	private Typeface mTypeface;
 	
 	
-	public NotifierNumberAdapter(Context context, List<CharSequence> numberList, NotifierFragment notifier) {
+	public NotifierNumberAdapter(Context context, List<CharSequence> numberList) {
 		super(context, 0, numberList);
 		mNumberList = numberList; 
 		mTypeface = Typeface.createFromAsset(context.getAssets(), mFont); 

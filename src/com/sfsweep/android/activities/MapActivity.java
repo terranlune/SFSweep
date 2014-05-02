@@ -50,13 +50,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
 import com.sfsweep.android.fragments.NotifierDrawerFragment;
-import com.sfsweep.android.fragments.NotifierFragment.OnScheduleAlarmListener;
 import com.sfsweep.android.fragments.NotifierIconFragment;
 import com.sfsweep.android.fragments.NotifierIconFragment.OnNotifierIconClickListener;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
 import com.sfsweep.android.fragments.SweepDataDetailFragment.OnClickParkActionListener;
 import com.sfsweep.android.helpers.HeightAnimation;
 import com.sfsweep.android.models.StreetSweeperData;
+import com.sfsweep.android.views.Notifier.OnScheduleAlarmListener;
 
 public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
@@ -76,7 +76,7 @@ public class MapActivity extends FragmentActivity implements
 	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	private static final int HUB_REQUEST = 1;
 	private static final String NOTIFIER_ICON_FRAGMENT_TAG = "notifier_icon_fragment_tag";
-	private static final String NOTIFIER_CONTAINER_FRAGMENT_TAG = "notifier_container_fragment_tag";
+	private static final String NOTIFIER_DRAWER_FRAGMENT_TAG = "notifier_drawer_fragment_tag";
 
 	private static final String PARKED_SWEEP_DATA_ID = "parked_sweep_data_id";
 	private static final String PARKED_SWEEP_DATA_LAT = "parked_sweep_data_lat";
@@ -320,14 +320,14 @@ public class MapActivity extends FragmentActivity implements
 
 	private void setupFragments() {
 		NotifierIconFragment niFragment = new NotifierIconFragment();
-		NotifierDrawerFragment ncFragment = new NotifierDrawerFragment();
+		NotifierDrawerFragment ndFragment = new NotifierDrawerFragment();
 
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction()
 				.add(R.id.flIconContainer, niFragment,
 						NOTIFIER_ICON_FRAGMENT_TAG)
-				.add(R.id.flNotifierContainer, ncFragment,
-						NOTIFIER_CONTAINER_FRAGMENT_TAG).hide(ncFragment)
+				.add(R.id.flNotifierContainer, ndFragment,
+						NOTIFIER_DRAWER_FRAGMENT_TAG).hide(ndFragment)
 				.commit();
 	}
 
@@ -580,11 +580,11 @@ public class MapActivity extends FragmentActivity implements
 		a.setDuration(animDuration);
 		v.startAnimation(a);
 
-		// Show notifier container fragment
+		// Show notifier drawer fragment
 		FragmentManager fm = getSupportFragmentManager();
-		NotifierDrawerFragment ncFragment = (NotifierDrawerFragment) fm
-				.findFragmentByTag(NOTIFIER_CONTAINER_FRAGMENT_TAG);
-		fm.beginTransaction().show(ncFragment).commit();
+		NotifierDrawerFragment ndFragment = (NotifierDrawerFragment) fm
+				.findFragmentByTag(NOTIFIER_DRAWER_FRAGMENT_TAG);
+		fm.beginTransaction().show(ndFragment).commit();
 	}
 
 	@Override
