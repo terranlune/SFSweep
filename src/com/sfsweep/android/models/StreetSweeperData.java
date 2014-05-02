@@ -12,6 +12,7 @@ import java.util.Locale;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
 import com.google.android.gms.maps.model.LatLng;
 
 @Table(name = "street_sweeper_data")
@@ -251,13 +252,9 @@ public class StreetSweeperData extends Model implements Serializable {
 		return new LatLng(a.latitude + abx * t, a.longitude + aby * t);
 	}
 
-	private double pointToLineDistance(LatLng A, LatLng B, LatLng P) {
-		double normalLength = Math.sqrt((B.latitude - A.latitude)
-				* (B.latitude - A.latitude) + (B.longitude - A.longitude)
-				* (B.longitude - A.longitude));
-		return Math.abs((P.latitude - A.latitude) * (B.longitude - A.longitude)
-				- (P.longitude - A.longitude) * (B.latitude - A.latitude))
-				/ normalLength;
+	public static StreetSweeperData getById(long parkedDataId) {
+		return new Select().from(StreetSweeperData.class).where("id = ?", parkedDataId)
+				.limit(1).executeSingle();	
 	}
 	
 }
