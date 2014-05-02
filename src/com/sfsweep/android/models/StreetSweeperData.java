@@ -107,6 +107,8 @@ public class StreetSweeperData extends Model implements Serializable {
 	@Column(name = "DISTRICT")
 	public String DISTRICT;
 
+	private DateInterval nextSweeping;
+
 	public List<LatLng> getCoordinates() {
 		List<LatLng> result = new ArrayList<LatLng>();
 		for (String i : coordinates.split(" ")) {
@@ -169,7 +171,9 @@ public class StreetSweeperData extends Model implements Serializable {
 	}
 
 	public DateInterval nextSweeping(boolean includeInProgress) {
-		DateInterval nextSweeping;
+		if (nextSweeping != null && nextSweeping.start.after(new Date())) {
+			return nextSweeping;
+		}
 		List<DateInterval> upcomingSweepings = upcomingSweepings();
 		try {
 			nextSweeping = upcomingSweepings.get(0);
