@@ -2,6 +2,7 @@ package com.sfsweep.android.activities;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
@@ -22,8 +23,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -51,14 +50,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
 import com.sfsweep.android.fragments.NotifierDrawerFragment;
-import com.sfsweep.android.fragments.NotifierFragment.OnScheduleAlarmCallbacks;
 import com.sfsweep.android.fragments.NotifierIconFragment;
 import com.sfsweep.android.fragments.NotifierIconFragment.OnNotifierIconClickListener;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
 import com.sfsweep.android.fragments.SweepDataDetailFragment.OnClickParkActionListener;
 import com.sfsweep.android.helpers.HeightAnimation;
 import com.sfsweep.android.models.StreetSweeperData;
-import com.sfsweep.android.views.Notifier.OnScheduleAlarmListener;
+import com.sfsweep.android.views.AlarmNotifier.OnScheduleAlarmListener;
 
 public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
@@ -85,6 +83,7 @@ public class MapActivity extends FragmentActivity implements
 	private static final String PARKED_SWEEP_DATA_LAT = "parked_sweep_data_lat";
 	private static final String PARKED_SWEEP_DATA_LNG = "parked_sweep_data_lng";
 	private static final String PARKED_SWEEP_DATA_DATE = "parked_sweep_data_date";
+	private static final String MOVE_BY_DAY = "move_by_day"; 
 
 	private boolean expanded = false;
 	private int animDuration;
@@ -96,6 +95,7 @@ public class MapActivity extends FragmentActivity implements
 	private Button mBtnMoveBy;
 	private TextView mTvMoveBy;
 	private TextView mTvDay;
+	private String mMoveByDay; 
 
 	private String mFont = "Roboto-Light.ttf";
 	private Typeface mTypeface;
@@ -135,78 +135,78 @@ public class MapActivity extends FragmentActivity implements
 		// ************************************************************************
 		// Mimi objects
 		// R always refers to xml data
-		Spinner spinner1 = (Spinner) findViewById(R.id.spinner1); // find
-																	// spinner1
-																	// in xml
-																	// and
-																	// attach it
-																	// to
-																	// spinner1
-																	// java
-		ArrayAdapter<CharSequence> spinnerAdapter1 = ArrayAdapter
-				.createFromResource(this, R.array.spinner1_opt,
-						android.R.layout.simple_spinner_dropdown_item); // spinner1_opt
-																		// is
-																		// array
-																		// list
-																		// of
-																		// positions
-																		// in
-																		// drop
-																		// down
-																		// Sun-Sat
-		readItems(); // reads whatever is in the file that is written (which was
-						// the current position at the time (last selection)
-						// into spinneritem
-		spinner1.setSelection(spinnerItem); // use initial spinner position from
-											// text file. Use this position to
-											// set current value of spinner
-		spinner1.setAdapter(spinnerAdapter1); // have spinner in place and
-												// keeping track of what
-												// position it is in
-		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() { // Have
-																			// spinner
-																			// do
-																			// something
-																			// when
-																			// you
-																			// select
-																			// item
-
-			public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
-					long arg3) {
-				Spinner spinner1 = (Spinner) findViewById(R.id.spinner1); // Get
-																			// handle
-																			// to
-																			// spinner1
-																			// in
-																			// xml
-																			// file
-				spinnerItem = pos;// store user selection in spinnerItem
-									// variable
-				writeItems();// write user selection to file save value of
-								// spinner item which is position to a file
-				if (pos == 0) { // conditional: based on selected spinner value
-								// it will execute different code. If position
-								// =0
-								// then it is first option in spinner menu=>
-								// heatmap mode
-					Log.d("DEBUG", "Hello from on if_heatmap");
-					mapAdapter.setModeHeatmap(); // calls
-				} else {
-					mapAdapter.setModeWeekday(spinner1.getSelectedItem()
-							.toString());
-					Log.d("DEBUG", "Hello from weekdayMode");
-				}
-				Log.d("DEBUG", "Hello from on item selected");
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
-
-			}
-		});
+//		Spinner spinner1 = (Spinner) findViewById(R.id.spinner1); // find
+//																	// spinner1
+//																	// in xml
+//																	// and
+//																	// attach it
+//																	// to
+//																	// spinner1
+//																	// java
+//		ArrayAdapter<CharSequence> spinnerAdapter1 = ArrayAdapter
+//				.createFromResource(this, R.array.spinner1_opt,
+//						android.R.layout.simple_spinner_dropdown_item); // spinner1_opt
+//																		// is
+//																		// array
+//																		// list
+//																		// of
+//																		// positions
+//																		// in
+//																		// drop
+//																		// down
+//																		// Sun-Sat
+//		readItems(); // reads whatever is in the file that is written (which was
+//						// the current position at the time (last selection)
+//						// into spinneritem
+//		spinner1.setSelection(spinnerItem); // use initial spinner position from
+//											// text file. Use this position to
+//											// set current value of spinner
+//		spinner1.setAdapter(spinnerAdapter1); // have spinner in place and
+//												// keeping track of what
+//												// position it is in
+//		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() { // Have
+//																			// spinner
+//																			// do
+//																			// something
+//																			// when
+//																			// you
+//																			// select
+//																			// item
+//
+//			public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
+//					long arg3) {
+//				Spinner spinner1 = (Spinner) findViewById(R.id.spinner1); // Get
+//																			// handle
+//																			// to
+//																			// spinner1
+//																			// in
+//																			// xml
+//																			// file
+//				spinnerItem = pos;// store user selection in spinnerItem
+//									// variable
+//				writeItems();// write user selection to file save value of
+//								// spinner item which is position to a file
+//				if (pos == 0) { // conditional: based on selected spinner value
+//								// it will execute different code. If position
+//								// =0
+//								// then it is first option in spinner menu=>
+//								// heatmap mode
+//					Log.d("DEBUG", "Hello from on if_heatmap");
+//					mapAdapter.setModeHeatmap(); // calls
+//				} else {
+//					mapAdapter.setModeWeekday(spinner1.getSelectedItem()
+//							.toString());
+//					Log.d("DEBUG", "Hello from weekdayMode");
+//				}
+//				Log.d("DEBUG", "Hello from on item selected");
+//			}
+//
+//			@Override
+//			public void onNothingSelected(AdapterView<?> arg0) {
+//				// TODO Auto-generated method stub
+//
+//			}
+//		});
 
 		mLocationClient = new LocationClient(this, this, this);
 		mapFragment = ((SupportMapFragment) getSupportFragmentManager()
@@ -244,8 +244,8 @@ public class MapActivity extends FragmentActivity implements
 
 		setupZoomToParked();
 		showMapControls();
-		setupMoveByButton();
 		setupFragments();
+		setupMoveByButton();
 
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
 
@@ -319,26 +319,6 @@ public class MapActivity extends FragmentActivity implements
 
 	// ********************************************************************************************
 
-	private void setupMoveByButton() {
-		mTypeface = Typeface.createFromAsset(getAssets(), mFont);
-
-		mTvMoveBy = (TextView) findViewById(R.id.tvMoveBy);
-		mTvMoveBy.setTypeface(mTypeface);
-
-		mTvDay = (TextView) findViewById(R.id.tvDay);
-		mTvDay.setTypeface(mTypeface);
-
-		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy);
-		mBtnMoveBy.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent i = new Intent(MapActivity.this,
-						com.sfsweep.android.zdeprecated.HubActivity.class);
-				startActivityForResult(i, HUB_REQUEST);
-			}
-		});
-	}
-
 	private void setupFragments() {
 		NotifierIconFragment niFragment = new NotifierIconFragment();
 		NotifierDrawerFragment ndFragment = new NotifierDrawerFragment();
@@ -349,6 +329,38 @@ public class MapActivity extends FragmentActivity implements
 						NOTIFIER_ICON_FRAGMENT_TAG)
 				.add(R.id.flNotifierContainer, ndFragment,
 						NOTIFIER_DRAWER_FRAGMENT_TAG).hide(ndFragment).commit();
+	}
+
+	
+	private void setupMoveByButton() {
+		mTypeface = Typeface.createFromAsset(getAssets(), mFont);
+
+		mTvMoveBy = (TextView) findViewById(R.id.tvMoveBy);
+		mTvMoveBy.setTypeface(mTypeface);
+
+		mTvDay = (TextView) findViewById(R.id.tvDay);
+		mTvDay.setTypeface(mTypeface);
+		mTvDay.setText(restoreMoveByDay());
+		
+		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy);
+		mBtnMoveBy.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(MapActivity.this,
+						com.sfsweep.android.zdeprecated.HubActivity.class);
+				startActivityForResult(i, HUB_REQUEST);
+			}
+		});
+	}
+	
+	private String restoreMoveByDay() {
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		String moveByDay = prefs.getString(MOVE_BY_DAY, null); 
+		if (moveByDay == null) {
+			moveByDay = "TBD";
+		}
+		return moveByDay;
 	}
 
 	/*
@@ -369,6 +381,13 @@ public class MapActivity extends FragmentActivity implements
 	 */
 	@Override
 	protected void onStop() {
+		// Save MoveByDay
+		PreferenceManager
+			.getDefaultSharedPreferences(this)
+			.edit()
+			.putString(MOVE_BY_DAY, mMoveByDay)
+			.commit(); 
+		
 		// Disconnecting the client invalidates it.
 		mLocationClient.disconnect();
 		super.onStop();
@@ -633,7 +652,11 @@ public class MapActivity extends FragmentActivity implements
 		
 		this.sweepDataDetailFragment.setData(clickedData, true);
 		Date sweepStartDate = this.sweepDataDetailFragment.getSweepStartDate();
-
+		
+		// Extract day of week for MoveBy button
+		mMoveByDay = getMoveByDay(sweepStartDate); 
+		mTvMoveBy.setText(mMoveByDay); 
+		
 		PreferenceManager
 				.getDefaultSharedPreferences(this)
 				.edit()
@@ -644,11 +667,50 @@ public class MapActivity extends FragmentActivity implements
 				.commit();
 	}
 	
+	private String getMoveByDay(Date sweepStartDate) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(sweepStartDate); 
+		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+		
+		String moveByDay; 
+		switch (dayOfWeek) {
+		case 0: 
+			moveByDay = "Sun";
+			break;
+		case 1:
+			moveByDay = "Mon";
+			break;
+		case 2:
+			moveByDay = "Tues";
+			break;
+		case 3: 
+			moveByDay = "Wed";
+			break;
+		case 4:
+			moveByDay = "Thur";
+			break;
+		case 5: 
+			moveByDay = "Fri";
+			break;
+		case 6: 
+			moveByDay = "Sat";
+			break;
+		default:
+			moveByDay = "Sun";
+		}
+		return moveByDay;
+	}
+	
 	protected void onUnPark(StreetSweeperData d) {
 		clickedData = d;
 		LatLng p = parkedMarker.getPosition();
 		placeClickedMarker(p);
 		removeParkedMarker();
+		
+		// Void MoveBy button day
+		mMoveByDay = "TBD";
+		mTvMoveBy.setText(mMoveByDay); 
+		
 		showSweepDetail(p, d, false);
 	}
 

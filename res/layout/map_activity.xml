@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginTop="12dp"
-            android:text="Move by"
+            android:text="@string/tv_move_by"
             android:textColor="@color/white"
             android:textSize="10sp" />
 
