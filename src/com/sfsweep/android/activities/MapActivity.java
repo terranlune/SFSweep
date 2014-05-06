@@ -97,7 +97,6 @@ public class MapActivity extends FragmentActivity implements
 	private Typeface mTypeface;
 
 	private StreetSweeperDataMapAdapter mapAdapter;
-	private int spinnerItem;
 
 	private ImageView ivZoomToParked;
 
@@ -108,6 +107,50 @@ public class MapActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_activity);
 
+		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.sweepDetail);
+		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
+		
+		setupSpinner();
+		setupMap();
+		restoreParkedMarker();
+		setupZoomToParked();
+		showMapControls();
+		setupMoveByButton();
+	}
+
+	private void setupMap() {
+		mLocationClient = new LocationClient(this, this, this);
+		mapFragment = ((SupportMapFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.map));
+		if (mapFragment != null) {
+			map = mapFragment.getMap();
+			if (map != null) {
+				Toast.makeText(this, "Map Fragment was loaded properly!",
+						Toast.LENGTH_SHORT).show();
+				map.setMyLocationEnabled(true);
+				map.getUiSettings().setZoomControlsEnabled(false);
+				map.setIndoorEnabled(false);
+
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(SF, 18));
+
+				map.setOnCameraChangeListener(this);
+				map.setOnMapClickListener(this);
+				map.setOnMarkerClickListener(this);
+
+				mapAdapter = new StreetSweeperDataMapAdapter(map);
+
+			} else {
+				Toast.makeText(this, "Error - Map was null!!",
+						Toast.LENGTH_SHORT).show();
+			}
+		} else {
+			Toast.makeText(this, "Error - Map Fragment was null!!",
+					Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	private void setupSpinner() {
 		// R always refers to xml data
 		// find spinner1 in xml and attach it to spinner1 in java
 		final Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
@@ -161,47 +204,6 @@ public class MapActivity extends FragmentActivity implements
 
 			}
 		});
-
-		mLocationClient = new LocationClient(this, this, this);
-		mapFragment = ((SupportMapFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.map));
-		if (mapFragment != null) {
-			map = mapFragment.getMap();
-			if (map != null) {
-				Toast.makeText(this, "Map Fragment was loaded properly!",
-						Toast.LENGTH_SHORT).show();
-				map.setMyLocationEnabled(true);
-				map.getUiSettings().setZoomControlsEnabled(false);
-				map.setIndoorEnabled(false);
-
-				map.moveCamera(CameraUpdateFactory.newLatLngZoom(SF, 18));
-
-				map.setOnCameraChangeListener(this);
-				map.setOnMapClickListener(this);
-				map.setOnMarkerClickListener(this);
-
-				mapAdapter = new StreetSweeperDataMapAdapter(map);
-
-			} else {
-				Toast.makeText(this, "Error - Map was null!!",
-						Toast.LENGTH_SHORT).show();
-			}
-		} else {
-			Toast.makeText(this, "Error - Map Fragment was null!!",
-					Toast.LENGTH_SHORT).show();
-		}
-
-		restoreParkedMarker();
-
-		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.sweepDetail);
-
-		setupZoomToParked();
-		showMapControls();
-		setupMoveByButton();
-
-		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
-
 	}
 
 	private void setupZoomToParked() {
