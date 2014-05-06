@@ -1,16 +1,13 @@
 package com.sfsweep.android.activities;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Date;
-
-import org.apache.commons.io.FileUtils;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
@@ -51,7 +48,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
 import com.sfsweep.android.fragments.NotifierDrawerFragment;
-import com.sfsweep.android.fragments.NotifierFragment.OnScheduleAlarmCallbacks;
 import com.sfsweep.android.fragments.NotifierIconFragment;
 import com.sfsweep.android.fragments.NotifierIconFragment.OnNotifierIconClickListener;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
@@ -59,6 +55,8 @@ import com.sfsweep.android.fragments.SweepDataDetailFragment.OnClickParkActionLi
 import com.sfsweep.android.helpers.HeightAnimation;
 import com.sfsweep.android.models.StreetSweeperData;
 import com.sfsweep.android.views.Notifier.OnScheduleAlarmListener;
+
+//import com.sfsweep.android.fragments.NotifierFragment.OnScheduleAlarmCallbacks;
 
 public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
@@ -111,86 +109,44 @@ public class MapActivity extends FragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_activity);
-		
-		//************************************************************************
-				//Mimi objects
-				//R always refers to xml data
-					final Spinner spinner1= (Spinner) findViewById(R.id.spinner1); // find spinner1 in xml and attach it to spinner1 java
-						ArrayAdapter<CharSequence> spinnerAdapter1 = ArrayAdapter.createFromResource( // got  ahandle to the adapter
-								this, R.array.spinner1_opt, android.R.layout.simple_spinner_item); //spinner1_opt is array list of positions in drop down Sun-Sat
-					
-						spinnerAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); //associating the adapter with the spinner
-						spinner1.setAdapter(spinnerAdapter1); 
-						//readItems(); //reads whatever is in the file that is written (which was the current position at the time (last selection) into spinneritem
-						  SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( getBaseContext());//declare prefs as a variable
-			              // above: give me the handle
-						
-						int spinselection = prefs.getInt("savedValue", 0); //RHS = get the retrieved value and LHS creates a variable to save the retrieved value
-						// "saved value" is the key that the int is the value is associated with
-						
-						spinner1.setSelection(spinselection); // use initial spinner position from text file. Use this position to set current value of spinner
-						spinner1.setAdapter(spinnerAdapter1); // have spinner in place and keeping track of what position it is in
-						//Have spinner do something when you select item
 
-		// ************************************************************************
-		// Mimi objects
 		// R always refers to xml data
-		Spinner spinner1 = (Spinner) findViewById(R.id.spinner1); // find
-																	// spinner1
-																	// in xml
-																	// and
-																	// attach it
-																	// to
-																	// spinner1
-																	// java
+		// find spinner1 in xml and attach it to spinner1 in java
+		final Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
 		ArrayAdapter<CharSequence> spinnerAdapter1 = ArrayAdapter
-				.createFromResource(this, R.array.spinner1_opt,
-						android.R.layout.simple_spinner_dropdown_item); // spinner1_opt
-																		// is
-																		// array
-																		// list
-																		// of
-																		// positions
-																		// in
-																		// drop
-																		// down
-																		// Sun-Sat
-		readItems(); // reads whatever is in the file that is written (which was
-						// the current position at the time (last selection)
-						// into spinneritem
-		spinner1.setSelection(spinnerItem); // use initial spinner position from
-											// text file. Use this position to
-											// set current value of spinner
-		spinner1.setAdapter(spinnerAdapter1); // have spinner in place and
-												// keeping track of what
-												// position it is in
-		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() { // Have
-																			// spinner
-																			// do
-																			// something
-																			// when
-																			// you
-																			// select
-																			// item
+				.createFromResource(
+				// got A handle to the adapter
+						this, R.array.spinner1_opt,
+						// spinner1_opt is array list of positions in dropdown
+						// Sun-Sat
+						android.R.layout.simple_spinner_item);
 
-			public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
-					long arg3) {
-				Spinner spinner1 = (Spinner) findViewById(R.id.spinner1); // Get
-																			// handle
-																			// to
-																			// spinner1
-																			// in
-																			// xml
-																			// file
-				spinnerItem = pos;// store user selection in spinnerItem
-									// variable
-				writeItems();// write user selection to file save value of
-								// spinner item which is position to a file
-				if (pos == 0) { // conditional: based on selected spinner value
-								// it will execute different code. If position
-								// =0
-								// then it is first option in spinner menu=>
-								// heatmap mode
+		// associating the adapter with the spinner
+		spinnerAdapter1
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+		spinner1.setAdapter(spinnerAdapter1);
+		// declare prefs as a variable: give me the handle
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(getBaseContext());
+		
+		//Next two lines restoring my saved value
+		int spinselection = prefs.getInt("position", 0); 
+		spinner1.setSelection(spinselection); 
+		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+
+				SharedPreferences pref = PreferenceManager
+						.getDefaultSharedPreferences(getBaseContext());
+				Editor edit = pref.edit();
+				edit.putInt("position", position);
+				edit.commit();
+
+				// If position =0 =>heatmap, else weekday
+				if (position == 0) {
 					Log.d("DEBUG", "Hello from on if_heatmap");
 					mapAdapter.setModeHeatmap(); // calls
 				} else {
@@ -199,11 +155,11 @@ public class MapActivity extends FragmentActivity implements
 					Log.d("DEBUG", "Hello from weekdayMode");
 				}
 				Log.d("DEBUG", "Hello from on item selected");
+
 			}
 
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
 
 			}
 		});
@@ -280,44 +236,6 @@ public class MapActivity extends FragmentActivity implements
 			showSweepDetail(parkedMarker.getPosition(), d, true);
 		}
 	}
-
-	// *******************************************************************************
-	public class Spinner1Activity extends Activity {
-
-	}
-
-	private void readItems() {
-		File filesDir = getFilesDir();
-		File spinnerFile = new File(filesDir, "spinner.tx"); // open the file on
-																// device
-
-		try {
-			// read the text from file and puts it in the spinneritems variable.
-			// which is an int showing currently selected value of the spinner
-			spinnerItem = Integer.parseInt(FileUtils
-					.readFileToString(spinnerFile));
-		} catch (IOException e) {
-			spinnerItem = 7; // set an arbitrary default value...
-			// spinnerItem = new String(); //left is what is getting assigned.
-			// right is what you are putting there
-
-		}
-
-	}
-
-	private void writeItems() {
-		File filesDir = getFilesDir();
-		File spinnerFile = new File(filesDir, "spinner.tx"); // opening a file
-																// on the device
-		try {
-			FileUtils.writeStringToFile(spinnerFile,
-					String.valueOf(spinnerItem)); // writing text to the file
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	// ********************************************************************************************
 
 	private void setupMoveByButton() {
 		mTypeface = Typeface.createFromAsset(getAssets(), mFont);
@@ -626,24 +544,22 @@ public class MapActivity extends FragmentActivity implements
 		// split up the shared preferences transaction]
 
 		LatLng p = clickedMarker.getPosition();
-		
+
 		placeParkedMarker(p);
 		showSweepDetail(p, d, false);
 		removeClickedMarker();
-		
+
 		this.sweepDataDetailFragment.setData(clickedData, true);
 		Date sweepStartDate = this.sweepDataDetailFragment.getSweepStartDate();
 
-		PreferenceManager
-				.getDefaultSharedPreferences(this)
-				.edit()
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
 				.putLong(PARKED_SWEEP_DATA_ID, clickedData.getId())
 				.putFloat(PARKED_SWEEP_DATA_LAT, (float) p.latitude)
 				.putFloat(PARKED_SWEEP_DATA_LNG, (float) p.longitude)
 				.putLong(PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
 				.commit();
 	}
-	
+
 	protected void onUnPark(StreetSweeperData d) {
 		clickedData = d;
 		LatLng p = parkedMarker.getPosition();
