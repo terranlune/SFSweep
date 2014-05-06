@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -39,6 +38,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -48,20 +48,18 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
-import com.sfsweep.android.fragments.NotifierDrawerFragment;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
 import com.sfsweep.android.fragments.SweepDataDetailFragment.OnClickParkActionListener;
 import com.sfsweep.android.helpers.HeightAnimation;
 import com.sfsweep.android.models.StreetSweeperData;
 import com.sfsweep.android.views.Notifier.OnScheduleAlarmListener;
 
-//import com.sfsweep.android.fragments.NotifierFragment.OnScheduleAlarmCallbacks;
-
 public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
 		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmListener,
-		OnClickParkActionListener, OnMarkerClickListener {
+		OnClickParkActionListener, OnMarkerClickListener,
+		OnMyLocationButtonClickListener {
 
 	private static final LatLng DEFAULT_LATLNG = new LatLng(37.7577, -122.4376); // SF
 	private static final int DEFAULT_ZOOM = 18;
@@ -75,13 +73,13 @@ public class MapActivity extends FragmentActivity implements
 	 */
 	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	private static final int HUB_REQUEST = 1;
-	private static final String NOTIFIER_ICON_FRAGMENT_TAG = "notifier_icon_fragment_tag";
-	private static final String NOTIFIER_DRAWER_FRAGMENT_TAG = "notifier_drawer_fragment_tag";
 
-	private static final String PARKED_SWEEP_DATA_ID = "parked_sweep_data_id";
-	private static final String PARKED_SWEEP_DATA_LAT = "parked_sweep_data_lat";
-	private static final String PARKED_SWEEP_DATA_LNG = "parked_sweep_data_lng";
-	private static final String PARKED_SWEEP_DATA_DATE = "parked_sweep_data_date";
+	private static final String PREF_PARKED_SWEEP_DATA_ID = "parked_sweep_data_id";
+	private static final String PREF_PARKED_SWEEP_DATA_LAT = "parked_sweep_data_lat";
+	private static final String PREF_PARKED_SWEEP_DATA_LNG = "parked_sweep_data_lng";
+	private static final String PREF_PARKED_SWEEP_DATA_DATE = "parked_sweep_data_date";
+	private static final String PREF_LAST_LAT = "last_lat";
+	private static final String PREF_LAST_LNG = "last_lon";
 
 	private boolean expanded = false;
 	private int animDuration;
@@ -102,6 +100,7 @@ public class MapActivity extends FragmentActivity implements
 	private ImageView ivZoomToParked;
 
 	private StreetSweeperData clickedData;
+	private boolean myLocationButtonClicked;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +110,7 @@ public class MapActivity extends FragmentActivity implements
 		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.sweepDetail);
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
+		myLocationButtonClicked = false;
 
 		setupSpinner();
 		setupMap();
@@ -118,6 +118,7 @@ public class MapActivity extends FragmentActivity implements
 		setupZoomToParked();
 		showMapControls();
 		setupMoveByButton();
+		setInitialCamera();
 	}
 
 	private void setupMap() {
@@ -127,28 +128,45 @@ public class MapActivity extends FragmentActivity implements
 		if (mapFragment != null) {
 			map = mapFragment.getMap();
 			if (map != null) {
-				Toast.makeText(this, "Map Fragment was loaded properly!",
-						Toast.LENGTH_SHORT).show();
 				map.setMyLocationEnabled(true);
 				map.getUiSettings().setZoomControlsEnabled(false);
 				map.setIndoorEnabled(false);
 
-				map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-						DEFAULT_LATLNG, DEFAULT_ZOOM));
-
 				map.setOnCameraChangeListener(this);
 				map.setOnMapClickListener(this);
 				map.setOnMarkerClickListener(this);
+				map.setOnMyLocationButtonClickListener(this);
 
 				mapAdapter = new StreetSweeperDataMapAdapter(map);
 
 			} else {
-				Toast.makeText(this, "Error - Map was null!!",
+				Toast.makeText(this, "Error - Unable to load map",
 						Toast.LENGTH_SHORT).show();
 			}
 		} else {
-			Toast.makeText(this, "Error - Map Fragment was null!!",
+			Toast.makeText(this, "Error - Unable to load map fragment",
 					Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	private void setInitialCamera() {
+		if (parkedMarker != null) {
+			map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+					parkedMarker.getPosition(), DEFAULT_ZOOM));
+		} else {
+
+			// Get last location
+			SharedPreferences prefs = PreferenceManager
+					.getDefaultSharedPreferences(this);
+			if (prefs.contains(PREF_LAST_LAT)) {
+				LatLng last = new LatLng(prefs.getFloat(PREF_LAST_LAT, 0),
+						prefs.getFloat(PREF_LAST_LNG, 0));
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(last,
+						DEFAULT_ZOOM));
+			} else {
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+						DEFAULT_LATLNG, DEFAULT_ZOOM));
+			}
 		}
 	}
 
@@ -223,9 +241,9 @@ public class MapActivity extends FragmentActivity implements
 	private void restoreParkedMarker() {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		if (prefs.contains(PARKED_SWEEP_DATA_ID)) {
-			float lat = prefs.getFloat(PARKED_SWEEP_DATA_LAT, 0);
-			float lng = prefs.getFloat(PARKED_SWEEP_DATA_LNG, 0);
+		if (prefs.contains(PREF_PARKED_SWEEP_DATA_ID)) {
+			float lat = prefs.getFloat(PREF_PARKED_SWEEP_DATA_LAT, 0);
+			float lng = prefs.getFloat(PREF_PARKED_SWEEP_DATA_LNG, 0);
 			LatLng p = new LatLng(lat, lng);
 			placeParkedMarker(p);
 		}
@@ -339,15 +357,15 @@ public class MapActivity extends FragmentActivity implements
 		// Display the connection status
 		Location location = mLocationClient.getLastLocation();
 		if (location != null) {
-			Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT)
-					.show();
-			LatLng latLng = new LatLng(location.getLatitude(),
-					location.getLongitude());
-			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
-			map.animateCamera(cameraUpdate);
+			if (myLocationButtonClicked) {
+				LatLng latLng = new LatLng(location.getLatitude(),
+						location.getLongitude());
+				CameraUpdate cameraUpdate = CameraUpdateFactory
+						.newLatLng(latLng);
+				map.animateCamera(cameraUpdate);
+			}
 		} else {
-			Toast.makeText(this,
-					"Current location was null, enable GPS on emulator!",
+			Toast.makeText(this, "Current location was null; enable GPS!",
 					Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -422,6 +440,11 @@ public class MapActivity extends FragmentActivity implements
 		LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
 		Log.e("onCameraChange", bounds.toString());
 		mapAdapter.fetchData(bounds);
+
+		// Save the last location
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+				.putFloat(PREF_LAST_LAT, (float) pos.target.latitude)
+				.putFloat(PREF_LAST_LNG, (float) pos.target.longitude).commit();
 	}
 
 	@Override
@@ -490,7 +513,7 @@ public class MapActivity extends FragmentActivity implements
 	private void showMapControls() {
 		map.setMyLocationEnabled(true);
 		if (PreferenceManager.getDefaultSharedPreferences(this).contains(
-				PARKED_SWEEP_DATA_ID)) {
+				PREF_PARKED_SWEEP_DATA_ID)) {
 			ivZoomToParked.setVisibility(View.VISIBLE);
 		} else {
 			ivZoomToParked.setVisibility(View.GONE);
@@ -500,7 +523,7 @@ public class MapActivity extends FragmentActivity implements
 	@Override
 	public long onScheduleAlarm() {
 		long sweepStartDate = PreferenceManager.getDefaultSharedPreferences(
-				this).getLong(PARKED_SWEEP_DATA_DATE, 0);
+				this).getLong(PREF_PARKED_SWEEP_DATA_DATE, 0);
 		return sweepStartDate;
 	}
 
@@ -531,10 +554,10 @@ public class MapActivity extends FragmentActivity implements
 		Date sweepStartDate = this.sweepDataDetailFragment.getSweepStartDate();
 
 		PreferenceManager.getDefaultSharedPreferences(this).edit()
-				.putLong(PARKED_SWEEP_DATA_ID, clickedData.getId())
-				.putFloat(PARKED_SWEEP_DATA_LAT, (float) p.latitude)
-				.putFloat(PARKED_SWEEP_DATA_LNG, (float) p.longitude)
-				.putLong(PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
+				.putLong(PREF_PARKED_SWEEP_DATA_ID, clickedData.getId())
+				.putFloat(PREF_PARKED_SWEEP_DATA_LAT, (float) p.latitude)
+				.putFloat(PREF_PARKED_SWEEP_DATA_LNG, (float) p.longitude)
+				.putLong(PREF_PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
 				.commit();
 	}
 
@@ -557,8 +580,8 @@ public class MapActivity extends FragmentActivity implements
 	private void removeParkedMarker() {
 		if (parkedMarker != null) {
 			PreferenceManager.getDefaultSharedPreferences(this).edit()
-					.remove(PARKED_SWEEP_DATA_ID).remove(PARKED_SWEEP_DATA_LAT)
-					.remove(PARKED_SWEEP_DATA_LNG).commit();
+					.remove(PREF_PARKED_SWEEP_DATA_ID).remove(PREF_PARKED_SWEEP_DATA_LAT)
+					.remove(PREF_PARKED_SWEEP_DATA_LNG).commit();
 			parkedMarker.remove();
 		}
 	}
@@ -589,8 +612,14 @@ public class MapActivity extends FragmentActivity implements
 
 	private StreetSweeperData getParkedData() {
 		long parkedDataId = PreferenceManager.getDefaultSharedPreferences(this)
-				.getLong(PARKED_SWEEP_DATA_ID, -1);
+				.getLong(PREF_PARKED_SWEEP_DATA_ID, -1);
 		StreetSweeperData d = StreetSweeperData.getById(parkedDataId);
 		return d;
+	}
+
+	@Override
+	public boolean onMyLocationButtonClick() {
+		myLocationButtonClicked = true;
+		return false;
 	}
 }
