@@ -1,28 +1,27 @@
 package com.sfsweep.android.activities;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
-
-import org.apache.commons.io.FileUtils;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -40,6 +39,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -49,9 +49,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
-import com.sfsweep.android.fragments.NotifierDrawerFragment;
-import com.sfsweep.android.fragments.NotifierIconFragment;
-import com.sfsweep.android.fragments.NotifierIconFragment.OnNotifierIconClickListener;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
 import com.sfsweep.android.fragments.SweepDataDetailFragment.OnClickParkActionListener;
 import com.sfsweep.android.helpers.HeightAnimation;
@@ -62,10 +59,11 @@ public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
 		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmListener,
-		OnNotifierIconClickListener, OnClickParkActionListener,
-		OnMarkerClickListener {
+		OnClickParkActionListener, OnMarkerClickListener,
+		OnMyLocationButtonClickListener {
 
-	private static final LatLng SF = new LatLng(37.7577, -122.4376);
+	private static final LatLng DEFAULT_LATLNG = new LatLng(37.7577, -122.4376); // SF
+	private static final int DEFAULT_ZOOM = 18;
 
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
@@ -76,14 +74,14 @@ public class MapActivity extends FragmentActivity implements
 	 */
 	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	private static final int HUB_REQUEST = 1;
-	private static final String NOTIFIER_ICON_FRAGMENT_TAG = "notifier_icon_fragment_tag";
-	private static final String NOTIFIER_DRAWER_FRAGMENT_TAG = "notifier_drawer_fragment_tag";
 
-	private static final String PARKED_SWEEP_DATA_ID = "parked_sweep_data_id";
-	private static final String PARKED_SWEEP_DATA_LAT = "parked_sweep_data_lat";
-	private static final String PARKED_SWEEP_DATA_LNG = "parked_sweep_data_lng";
-	private static final String PARKED_SWEEP_DATA_DATE = "parked_sweep_data_date";
-	private static final String MOVE_BY_DAY = "move_by_day"; 
+	private static final String PREF_PARKED_SWEEP_DATA_ID = "parked_sweep_data_id";
+	private static final String PREF_PARKED_SWEEP_DATA_LAT = "parked_sweep_data_lat";
+	private static final String PREF_PARKED_SWEEP_DATA_LNG = "parked_sweep_data_lng";
+	private static final String PREF_PARKED_SWEEP_DATA_DATE = "parked_sweep_data_date";
+	private static final String PREF_MOVE_BY_DAY = "move_by_day";
+	private static final String PREF_LAST_LAT = "last_lat";
+	private static final String PREF_LAST_LNG = "last_lon";
 
 	private boolean expanded = false;
 	private int animDuration;
@@ -101,154 +99,134 @@ public class MapActivity extends FragmentActivity implements
 	private Typeface mTypeface;
 
 	private StreetSweeperDataMapAdapter mapAdapter;
-	private int spinnerItem;
 
 	private ImageView ivZoomToParked;
 
 	private StreetSweeperData clickedData;
+	private boolean myLocationButtonClicked;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map_activity);
-		
-		//************************************************************************
-				//Mimi objects
-				//R always refers to xml data
-					final Spinner spinner1= (Spinner) findViewById(R.id.spinner1); // find spinner1 in xml and attach it to spinner1 java
-						ArrayAdapter<CharSequence> spinnerAdapter1 = ArrayAdapter.createFromResource( // got  ahandle to the adapter
-								this, R.array.spinner1_opt, android.R.layout.simple_spinner_item); //spinner1_opt is array list of positions in drop down Sun-Sat
-					
-						spinnerAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); //associating the adapter with the spinner
-						spinner1.setAdapter(spinnerAdapter1); 
-						//readItems(); //reads whatever is in the file that is written (which was the current position at the time (last selection) into spinneritem
-						  SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( getBaseContext());//declare prefs as a variable
-			              // above: give me the handle
-						
-						int spinselection = prefs.getInt("savedValue", 0); //RHS = get the retrieved value and LHS creates a variable to save the retrieved value
-						// "saved value" is the key that the int is the value is associated with
-						
-						spinner1.setSelection(spinselection); // use initial spinner position from text file. Use this position to set current value of spinner
-						spinner1.setAdapter(spinnerAdapter1); // have spinner in place and keeping track of what position it is in
-						//Have spinner do something when you select item
 
-		// ************************************************************************
-		// Mimi objects
-		// R always refers to xml data
-//		Spinner spinner1 = (Spinner) findViewById(R.id.spinner1); // find
-//																	// spinner1
-//																	// in xml
-//																	// and
-//																	// attach it
-//																	// to
-//																	// spinner1
-//																	// java
-//		ArrayAdapter<CharSequence> spinnerAdapter1 = ArrayAdapter
-//				.createFromResource(this, R.array.spinner1_opt,
-//						android.R.layout.simple_spinner_dropdown_item); // spinner1_opt
-//																		// is
-//																		// array
-//																		// list
-//																		// of
-//																		// positions
-//																		// in
-//																		// drop
-//																		// down
-//																		// Sun-Sat
-//		readItems(); // reads whatever is in the file that is written (which was
-//						// the current position at the time (last selection)
-//						// into spinneritem
-//		spinner1.setSelection(spinnerItem); // use initial spinner position from
-//											// text file. Use this position to
-//											// set current value of spinner
-//		spinner1.setAdapter(spinnerAdapter1); // have spinner in place and
-//												// keeping track of what
-//												// position it is in
-//		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() { // Have
-//																			// spinner
-//																			// do
-//																			// something
-//																			// when
-//																			// you
-//																			// select
-//																			// item
-//
-//			public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
-//					long arg3) {
-//				Spinner spinner1 = (Spinner) findViewById(R.id.spinner1); // Get
-//																			// handle
-//																			// to
-//																			// spinner1
-//																			// in
-//																			// xml
-//																			// file
-//				spinnerItem = pos;// store user selection in spinnerItem
-//									// variable
-//				writeItems();// write user selection to file save value of
-//								// spinner item which is position to a file
-//				if (pos == 0) { // conditional: based on selected spinner value
-//								// it will execute different code. If position
-//								// =0
-//								// then it is first option in spinner menu=>
-//								// heatmap mode
-//					Log.d("DEBUG", "Hello from on if_heatmap");
-//					mapAdapter.setModeHeatmap(); // calls
-//				} else {
-//					mapAdapter.setModeWeekday(spinner1.getSelectedItem()
-//							.toString());
-//					Log.d("DEBUG", "Hello from weekdayMode");
-//				}
-//				Log.d("DEBUG", "Hello from on item selected");
-//			}
-//
-//			@Override
-//			public void onNothingSelected(AdapterView<?> arg0) {
-//				// TODO Auto-generated method stub
-//
-//			}
-//		});
+		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.sweepDetail);
+		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
+		myLocationButtonClicked = false;
 
+		setupSpinner();
+		setupMap();
+		restoreParkedMarker();
+		setupZoomToParked();
+		showMapControls();
+		setupMoveByButton();
+		setInitialCamera();
+	}
+
+	private void setupMap() {
 		mLocationClient = new LocationClient(this, this, this);
 		mapFragment = ((SupportMapFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.map));
 		if (mapFragment != null) {
 			map = mapFragment.getMap();
 			if (map != null) {
-				Toast.makeText(this, "Map Fragment was loaded properly!",
-						Toast.LENGTH_SHORT).show();
 				map.setMyLocationEnabled(true);
 				map.getUiSettings().setZoomControlsEnabled(false);
 				map.setIndoorEnabled(false);
 
-				map.moveCamera(CameraUpdateFactory.newLatLngZoom(SF, 18));
-
 				map.setOnCameraChangeListener(this);
 				map.setOnMapClickListener(this);
 				map.setOnMarkerClickListener(this);
+				map.setOnMyLocationButtonClickListener(this);
 
 				mapAdapter = new StreetSweeperDataMapAdapter(map);
 
 			} else {
-				Toast.makeText(this, "Error - Map was null!!",
+				Toast.makeText(this, "Error - Unable to load map",
 						Toast.LENGTH_SHORT).show();
 			}
 		} else {
-			Toast.makeText(this, "Error - Map Fragment was null!!",
+			Toast.makeText(this, "Error - Unable to load map fragment",
 					Toast.LENGTH_SHORT).show();
 		}
+	}
 
-		restoreParkedMarker();
+	private void setInitialCamera() {
+		if (parkedMarker != null) {
+			map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+					parkedMarker.getPosition(), DEFAULT_ZOOM));
+		} else {
 
-		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
-				.findFragmentById(R.id.sweepDetail);
+			// Get last location
+			SharedPreferences prefs = PreferenceManager
+					.getDefaultSharedPreferences(this);
+			if (prefs.contains(PREF_LAST_LAT)) {
+				LatLng last = new LatLng(prefs.getFloat(PREF_LAST_LAT, 0),
+						prefs.getFloat(PREF_LAST_LNG, 0));
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(last,
+						DEFAULT_ZOOM));
+			} else {
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+						DEFAULT_LATLNG, DEFAULT_ZOOM));
+			}
+		}
+	}
 
-		setupZoomToParked();
-		showMapControls();
-		setupFragments();
-		setupMoveByButton();
+	private void setupSpinner() {
+		// R always refers to xml data
+		// find spinner1 in xml and attach it to spinner1 in java
+		final Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
+		ArrayAdapter<CharSequence> spinnerAdapter1 = ArrayAdapter
+				.createFromResource(
+				// got A handle to the adapter
+						this, R.array.spinner1_opt,
+						// spinner1_opt is array list of positions in dropdown
+						// Sun-Sat
+						android.R.layout.simple_spinner_item);
 
-		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
+		// associating the adapter with the spinner
+		spinnerAdapter1
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
+		spinner1.setAdapter(spinnerAdapter1);
+		// declare prefs as a variable: give me the handle
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(getBaseContext());
+
+		// Next two lines restoring my saved value
+		int spinselection = prefs.getInt("position", 0);
+		spinner1.setSelection(spinselection);
+		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+
+				SharedPreferences pref = PreferenceManager
+						.getDefaultSharedPreferences(getBaseContext());
+				Editor edit = pref.edit();
+				edit.putInt("position", position);
+				edit.commit();
+
+				// If position =0 =>heatmap, else weekday
+				if (position == 0) {
+					Log.d("DEBUG", "Hello from on if_heatmap");
+					mapAdapter.setModeHeatmap(); // calls
+				} else {
+					mapAdapter.setModeWeekday(spinner1.getSelectedItem()
+							.toString());
+					Log.d("DEBUG", "Hello from weekdayMode");
+				}
+				Log.d("DEBUG", "Hello from on item selected");
+
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+
+			}
+		});
 	}
 
 	private void setupZoomToParked() {
@@ -266,9 +244,9 @@ public class MapActivity extends FragmentActivity implements
 	private void restoreParkedMarker() {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		if (prefs.contains(PARKED_SWEEP_DATA_ID)) {
-			float lat = prefs.getFloat(PARKED_SWEEP_DATA_LAT, 0);
-			float lng = prefs.getFloat(PARKED_SWEEP_DATA_LNG, 0);
+		if (prefs.contains(PREF_PARKED_SWEEP_DATA_ID)) {
+			float lat = prefs.getFloat(PREF_PARKED_SWEEP_DATA_LAT, 0);
+			float lng = prefs.getFloat(PREF_PARKED_SWEEP_DATA_LNG, 0);
 			LatLng p = new LatLng(lat, lng);
 			placeParkedMarker(p);
 		}
@@ -281,57 +259,6 @@ public class MapActivity extends FragmentActivity implements
 		}
 	}
 
-	// *******************************************************************************
-	public class Spinner1Activity extends Activity {
-
-	}
-
-	private void readItems() {
-		File filesDir = getFilesDir();
-		File spinnerFile = new File(filesDir, "spinner.tx"); // open the file on
-																// device
-
-		try {
-			// read the text from file and puts it in the spinneritems variable.
-			// which is an int showing currently selected value of the spinner
-			spinnerItem = Integer.parseInt(FileUtils
-					.readFileToString(spinnerFile));
-		} catch (IOException e) {
-			spinnerItem = 7; // set an arbitrary default value...
-			// spinnerItem = new String(); //left is what is getting assigned.
-			// right is what you are putting there
-
-		}
-
-	}
-
-	private void writeItems() {
-		File filesDir = getFilesDir();
-		File spinnerFile = new File(filesDir, "spinner.tx"); // opening a file
-																// on the device
-		try {
-			FileUtils.writeStringToFile(spinnerFile,
-					String.valueOf(spinnerItem)); // writing text to the file
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	// ********************************************************************************************
-
-	private void setupFragments() {
-		NotifierIconFragment niFragment = new NotifierIconFragment();
-		NotifierDrawerFragment ndFragment = new NotifierDrawerFragment();
-
-		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction()
-				.add(R.id.flIconContainer, niFragment,
-						NOTIFIER_ICON_FRAGMENT_TAG)
-				.add(R.id.flNotifierContainer, ndFragment,
-						NOTIFIER_DRAWER_FRAGMENT_TAG).hide(ndFragment).commit();
-	}
-
-	
 	private void setupMoveByButton() {
 		mTypeface = Typeface.createFromAsset(getAssets(), mFont);
 
@@ -356,7 +283,7 @@ public class MapActivity extends FragmentActivity implements
 	private String restoreMoveByDay() {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		String moveByDay = prefs.getString(MOVE_BY_DAY, null); 
+		String moveByDay = prefs.getString(PREF_MOVE_BY_DAY, null); 
 		if (moveByDay == null) {
 			moveByDay = "TBD";
 		}
@@ -385,7 +312,7 @@ public class MapActivity extends FragmentActivity implements
 		PreferenceManager
 			.getDefaultSharedPreferences(this)
 			.edit()
-			.putString(MOVE_BY_DAY, mMoveByDay)
+			.putString(PREF_MOVE_BY_DAY, mMoveByDay)
 			.commit(); 
 		
 		// Disconnecting the client invalidates it.
@@ -451,16 +378,15 @@ public class MapActivity extends FragmentActivity implements
 		// Display the connection status
 		Location location = mLocationClient.getLastLocation();
 		if (location != null) {
-			Toast.makeText(this, "GPS location was found!", Toast.LENGTH_SHORT)
-					.show();
-			LatLng latLng = new LatLng(location.getLatitude(),
-					location.getLongitude());
-			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-					latLng, 18);
-			map.animateCamera(cameraUpdate);
+			if (myLocationButtonClicked) {
+				LatLng latLng = new LatLng(location.getLatitude(),
+						location.getLongitude());
+				CameraUpdate cameraUpdate = CameraUpdateFactory
+						.newLatLng(latLng);
+				map.animateCamera(cameraUpdate);
+			}
 		} else {
-			Toast.makeText(this,
-					"Current location was null, enable GPS on emulator!",
+			Toast.makeText(this, "Current location was null; enable GPS!",
 					Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -535,6 +461,11 @@ public class MapActivity extends FragmentActivity implements
 		LatLngBounds bounds = map.getProjection().getVisibleRegion().latLngBounds;
 		Log.e("onCameraChange", bounds.toString());
 		mapAdapter.fetchData(bounds);
+
+		// Save the last location
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+				.putFloat(PREF_LAST_LAT, (float) pos.target.latitude)
+				.putFloat(PREF_LAST_LNG, (float) pos.target.longitude).commit();
 	}
 
 	@Override
@@ -553,7 +484,6 @@ public class MapActivity extends FragmentActivity implements
 			hideSweepDetail();
 		} else {
 			Marker marker = placeClickedMarker(clickedPoint);
-			hideMapControls();
 			showSweepDetail(marker.getPosition(), clickedData, false);
 		}
 	}
@@ -570,6 +500,8 @@ public class MapActivity extends FragmentActivity implements
 	private void showSweepDetail(LatLng point, StreetSweeperData data,
 			Boolean parked) {
 
+		hideMapControls();
+
 		// Zoom to the click
 		CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(point);
 		map.animateCamera(cameraUpdate, animDuration, null);
@@ -579,8 +511,14 @@ public class MapActivity extends FragmentActivity implements
 
 		// Animate the view's visibility
 		View v = findViewById(R.id.sweepDetail);
-		int height = Math
-				.round(this.getWindow().getDecorView().getBottom() * 0.24f);
+		v.measure(
+				MeasureSpec.makeMeasureSpec(this.getWindow().getDecorView()
+						.getWidth(), MeasureSpec.AT_MOST),
+				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+		int height = v.getMeasuredHeight();
+
+		// int height = Math
+		// .round(this.getWindow().getDecorView().getBottom() * 0.14f);
 		HeightAnimation a = new HeightAnimation(v, height);
 		a.setDuration(animDuration);
 		v.startAnimation(a);
@@ -596,7 +534,7 @@ public class MapActivity extends FragmentActivity implements
 	private void showMapControls() {
 		map.setMyLocationEnabled(true);
 		if (PreferenceManager.getDefaultSharedPreferences(this).contains(
-				PARKED_SWEEP_DATA_ID)) {
+				PREF_PARKED_SWEEP_DATA_ID)) {
 			ivZoomToParked.setVisibility(View.VISIBLE);
 		} else {
 			ivZoomToParked.setVisibility(View.GONE);
@@ -606,25 +544,8 @@ public class MapActivity extends FragmentActivity implements
 	@Override
 	public long onScheduleAlarm() {
 		long sweepStartDate = PreferenceManager.getDefaultSharedPreferences(
-				this).getLong(PARKED_SWEEP_DATA_DATE, 0);
+				this).getLong(PREF_PARKED_SWEEP_DATA_DATE, 0);
 		return sweepStartDate;
-	}
-
-	@Override
-	public void onNotifierIconClick() {
-		// Bump drawer to show notifiers
-		View v = findViewById(R.id.sweepDetail);
-		int height = Math
-				.round(this.getWindow().getDecorView().getBottom() * 0.60f);
-		HeightAnimation a = new HeightAnimation(v, height);
-		a.setDuration(animDuration);
-		v.startAnimation(a);
-
-		// Show notifier drawer fragment
-		FragmentManager fm = getSupportFragmentManager();
-		NotifierDrawerFragment ndFragment = (NotifierDrawerFragment) fm
-				.findFragmentByTag(NOTIFIER_DRAWER_FRAGMENT_TAG);
-		fm.beginTransaction().show(ndFragment).commit();
 	}
 
 	@Override
@@ -645,25 +566,19 @@ public class MapActivity extends FragmentActivity implements
 		// split up the shared preferences transaction]
 
 		LatLng p = clickedMarker.getPosition();
-		
+
 		placeParkedMarker(p);
-		showSweepDetail(p, d, false);
+		showSweepDetail(p, d, true);
 		removeClickedMarker();
-		
+
 		this.sweepDataDetailFragment.setData(clickedData, true);
 		Date sweepStartDate = this.sweepDataDetailFragment.getSweepStartDate();
-		
-		// Extract day of week for MoveBy button
-		mMoveByDay = getMoveByDay(sweepStartDate); 
-		mTvMoveBy.setText(mMoveByDay); 
-		
-		PreferenceManager
-				.getDefaultSharedPreferences(this)
-				.edit()
-				.putLong(PARKED_SWEEP_DATA_ID, clickedData.getId())
-				.putFloat(PARKED_SWEEP_DATA_LAT, (float) p.latitude)
-				.putFloat(PARKED_SWEEP_DATA_LNG, (float) p.longitude)
-				.putLong(PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
+
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+				.putLong(PREF_PARKED_SWEEP_DATA_ID, clickedData.getId())
+				.putFloat(PREF_PARKED_SWEEP_DATA_LAT, (float) p.latitude)
+				.putFloat(PREF_PARKED_SWEEP_DATA_LNG, (float) p.longitude)
+				.putLong(PREF_PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
 				.commit();
 	}
 	
@@ -725,8 +640,8 @@ public class MapActivity extends FragmentActivity implements
 	private void removeParkedMarker() {
 		if (parkedMarker != null) {
 			PreferenceManager.getDefaultSharedPreferences(this).edit()
-					.remove(PARKED_SWEEP_DATA_ID).remove(PARKED_SWEEP_DATA_LAT)
-					.remove(PARKED_SWEEP_DATA_LNG).commit();
+					.remove(PREF_PARKED_SWEEP_DATA_ID).remove(PREF_PARKED_SWEEP_DATA_LAT)
+					.remove(PREF_PARKED_SWEEP_DATA_LNG).commit();
 			parkedMarker.remove();
 		}
 	}
@@ -757,8 +672,14 @@ public class MapActivity extends FragmentActivity implements
 
 	private StreetSweeperData getParkedData() {
 		long parkedDataId = PreferenceManager.getDefaultSharedPreferences(this)
-				.getLong(PARKED_SWEEP_DATA_ID, -1);
+				.getLong(PREF_PARKED_SWEEP_DATA_ID, -1);
 		StreetSweeperData d = StreetSweeperData.getById(parkedDataId);
 		return d;
+	}
+
+	@Override
+	public boolean onMyLocationButtonClick() {
+		myLocationButtonClicked = true;
+		return false;
 	}
 }

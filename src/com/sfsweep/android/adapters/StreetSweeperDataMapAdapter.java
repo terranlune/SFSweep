@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Pair;
 
@@ -40,11 +41,22 @@ public class StreetSweeperDataMapAdapter {
 	}
 
 	public void fetchData(LatLngBounds bounds) {
-		List<StreetSweeperData> l = getDataFromDb(bounds);
-		updateCache(l);
-		stylePolylines();
+		 new FetchDataTask().execute(bounds);
 	}
 
+	private class FetchDataTask extends AsyncTask<LatLngBounds, Void, List<StreetSweeperData>> {
+		@Override
+		protected List<StreetSweeperData> doInBackground(LatLngBounds... bounds) {
+ 			return getDataFromDb(bounds[0]);
+		}
+		
+		@Override
+		protected void onPostExecute(List<StreetSweeperData> result) {
+ 			updateCache(result);
+ 			stylePolylines();
+		}
+	}
+	
 	private void stylePolylines() {
 		if (mode == MODE_HEAT_MAP) {
 			stylePolylinesHeatmap();

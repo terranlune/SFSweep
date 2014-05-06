@@ -21,17 +21,15 @@ import com.sfsweep.android.R;
 import com.sfsweep.android.models.StreetSweeperData;
 import com.sfsweep.android.models.StreetSweeperData.DateInterval;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class SweepDataDetailFragment extends Fragment {
 
 	private TextView tvStreetName;
-	private TextView tvNextSweeping;
+	private TextView tvNextSweepingAbs;
+	private TextView tvNextSweepingRel;
 	private TextView tvSweepingInProgress;
 	private StreetSweeperData data;
 	private Date mSweepStartDate;
-	private String mSweepTimeRange; 
+	private String mSweepTimeRange;
 	private String mDaysToNextSweep;
 
 	private String mFont = "Roboto-Light.ttf";
@@ -39,12 +37,14 @@ public class SweepDataDetailFragment extends Fragment {
 	private ImageView ivParkAction;
 	private OnClickParkActionListener listener;
 	private ImageView ivUnParkAction;
+	private View fNotifierDrawer;
 
 	public SweepDataDetailFragment() {
 	}
 
 	public interface OnClickParkActionListener {
 		public void onClickParkAction(StreetSweeperData d);
+
 		public void onClickUnParkAction(StreetSweeperData d);
 	}
 
@@ -77,8 +77,13 @@ public class SweepDataDetailFragment extends Fragment {
 		tvStreetName = (TextView) rootView.findViewById(R.id.tvStreetName);
 		tvStreetName.setTypeface(mTypeface);
 
-		tvNextSweeping = (TextView) rootView.findViewById(R.id.tvNextSweeping);
-		tvNextSweeping.setTypeface(mTypeface);
+		tvNextSweepingAbs = (TextView) rootView
+				.findViewById(R.id.tvNextSweepingAbs);
+		tvNextSweepingAbs.setTypeface(mTypeface);
+
+		tvNextSweepingRel = (TextView) rootView
+				.findViewById(R.id.tvNextSweepingRel);
+		tvNextSweepingRel.setTypeface(mTypeface);
 
 		ivParkAction = (ImageView) rootView.findViewById(R.id.ivParkAction);
 		ivParkAction.setOnClickListener(new OnClickListener() {
@@ -102,19 +107,24 @@ public class SweepDataDetailFragment extends Fragment {
 		tvSweepingInProgress = (TextView) rootView
 				.findViewById(R.id.tvSweepingInProgress);
 		tvSweepingInProgress.setTypeface(mTypeface);
+		
+		fNotifierDrawer = rootView.findViewById(R.id.fNotifierDrawer);
+		
 		return rootView;
 	}
 
-	protected void updateButtonVisibility(boolean parked) {
+	protected void updateViewVisibility(boolean parked) {
 		if (parked) {
 			ivParkAction.setVisibility(View.INVISIBLE);
 			ivUnParkAction.setVisibility(View.VISIBLE);
-		}else{
+			fNotifierDrawer.setVisibility(View.VISIBLE);
+		} else {
 			ivParkAction.setVisibility(View.VISIBLE);
 			ivUnParkAction.setVisibility(View.INVISIBLE);
+			fNotifierDrawer.setVisibility(View.GONE);
 		}
 	}
-	
+
 	protected void onClickParkAction() {
 		if (listener != null) {
 			listener.onClickParkAction(this.data);
@@ -135,7 +145,7 @@ public class SweepDataDetailFragment extends Fragment {
 
 		this.data = d;
 		
-		updateButtonVisibility(parked);
+		updateViewVisibility(parked);
 
 		if (d.BlockSide.equals("")) {
 			tvStreetName.setText(d.Corridor);
@@ -180,12 +190,12 @@ public class SweepDataDetailFragment extends Fragment {
 				nextSweeping.start.getTime(), new Date().getTime(),
 				DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_SHOW_DATE);
 
-		tvNextSweeping.setText(String.format("%s (%s)", mSweepTimeRange,
-				mDaysToNextSweep));
+		tvNextSweepingAbs.setText(mSweepTimeRange);
+		tvNextSweepingRel.setText(mDaysToNextSweep);
 	}
 
 	public Date getSweepStartDate() {
 		return mSweepStartDate;
 	}
-	
+
 }
