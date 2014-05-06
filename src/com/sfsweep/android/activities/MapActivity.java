@@ -63,7 +63,8 @@ public class MapActivity extends FragmentActivity implements
 		OnCameraChangeListener, OnMapClickListener, OnScheduleAlarmListener,
 		OnClickParkActionListener, OnMarkerClickListener {
 
-	private static final LatLng SF = new LatLng(37.7577, -122.4376);
+	private static final LatLng DEFAULT_LATLNG = new LatLng(37.7577, -122.4376); // SF
+	private static final int DEFAULT_ZOOM = 18;
 
 	private SupportMapFragment mapFragment;
 	private GoogleMap map;
@@ -110,7 +111,7 @@ public class MapActivity extends FragmentActivity implements
 		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.sweepDetail);
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
-		
+
 		setupSpinner();
 		setupMap();
 		restoreParkedMarker();
@@ -132,7 +133,8 @@ public class MapActivity extends FragmentActivity implements
 				map.getUiSettings().setZoomControlsEnabled(false);
 				map.setIndoorEnabled(false);
 
-				map.moveCamera(CameraUpdateFactory.newLatLngZoom(SF, 18));
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+						DEFAULT_LATLNG, DEFAULT_ZOOM));
 
 				map.setOnCameraChangeListener(this);
 				map.setOnMapClickListener(this);
@@ -170,10 +172,10 @@ public class MapActivity extends FragmentActivity implements
 		// declare prefs as a variable: give me the handle
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(getBaseContext());
-		
-		//Next two lines restoring my saved value
-		int spinselection = prefs.getInt("position", 0); 
-		spinner1.setSelection(spinselection); 
+
+		// Next two lines restoring my saved value
+		int spinselection = prefs.getInt("position", 0);
+		spinner1.setSelection(spinselection);
 		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 			@Override
@@ -341,8 +343,7 @@ public class MapActivity extends FragmentActivity implements
 					.show();
 			LatLng latLng = new LatLng(location.getLatitude(),
 					location.getLongitude());
-			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-					latLng, 18);
+			CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
 			map.animateCamera(cameraUpdate);
 		} else {
 			Toast.makeText(this,
