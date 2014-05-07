@@ -14,12 +14,16 @@
 
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
+
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-	<item name="android:spinnerStyle">@style/spinnerStyle</item>
-		<item name="android:spinnerDropDownItemStyle">@style/spinnerDropDownItemStyle</item>
-		<item name="android:dropDownListViewStyle">@style/spinnerDropDownListStyle</item>
+        <!-- 
+        <item name="android:spinnerStyle">@style/spinnerStyle</item>
+        <item name="android:spinnerDropDownItemStyle">@style/spinnerDropDownItemStyle</item>
+        <item name="android:dropDownListViewStyle">@style/spinnerDropDownListStyle</item>
+        -->
     </style>
-    
+
+    <!-- 
     <style name="spinnerStyle" parent="@android:style/Widget.Spinner">
         <item name="android:background">@color/white</item>
     </style>
@@ -27,10 +31,11 @@
     <style name="spinnerDropDownItemStyle" parent="@android:style/Widget.DropDownItem.Spinner">
         <item name="android:background">@color/white</item>
     </style>
-    
+
     <style name="spinnerDropDownListStyle" parent="@android:style/Widget.ListView.DropDown">
         <item name="android:dividerHeight">10dp</item>
-        <item name="android:divider">@color/white</item> 
+        <item name="android:divider">@color/white</item>
     </style>
-    
+    -->
+
 </resources>
