@@ -1,67 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp" >
     
-    <TextView
-        android:id="@+id/tvNotificationHead"
-        android:layout_width="wrap_content"
+    <com.sfsweep.android.views.ReversedSeekBar
+        android:id="@+id/sbAlarm"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="14dp"
-        android:background="@color/white"
-        android:text="@string/tv_notification_head"
-        android:textColor="@color/gunmetal"
-        android:textSize="16sp" />
+        android:thumb="@drawable/ic_alarmclock_20dpx3dppad_gunmetal" />
     
-    <com.sfsweep.android.views.AlarmNotifier  
-	    android:id="@+id/notifier"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_below="@+id/tvNotificationHead"
-	    android:layout_centerHorizontal="true"
-	    android:layout_marginRight="10dp"
-	    android:background="@color/white"
-	    android:gravity="center"
-	    android:orientation="horizontal" > 
-    
-    	<CheckBox
-	        android:id="@+id/cbActivateNotifier"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" />
-    
-        <Spinner
-	        android:id="@+id/spnNumber"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_marginRight="4sp"
-	        android:layout_marginLeft="0sp"
-	        android:dropDownVerticalOffset="20dp"
-	        android:background="@color/white" 
-	        android:popupBackground="@color/white" />
-	    
-	    <Spinner
-	        android:id="@+id/spnInterval"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:dropDownVerticalOffset="20dp"
-	        android:gravity="left"
-	        android:background="@color/white" 
-	        android:popupBackground="@color/white" />
-	
-	</com.sfsweep.android.views.AlarmNotifier>  
-     
     <TextView
         android:id="@+id/tvNotificationTail"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/notifier"
-        android:layout_centerHorizontal="true" 
-        android:layout_marginTop="12dp"
-        android:background="@color/white"
         android:text="@string/tv_notification_tail"
-        android:textColor="@color/gunmetal"
+        android:layout_gravity="right"
+        android:gravity="right"
         android:textSize="16sp" />
-    
-</RelativeLayout>
+
+
+</LinearLayout>

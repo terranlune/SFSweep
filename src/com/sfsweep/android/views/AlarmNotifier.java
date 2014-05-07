@@ -6,20 +6,23 @@ import java.util.Date;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import com.sfsweep.android.R;
 import com.sfsweep.android.activities.MapActivity;
-import com.sfsweep.android.broadcastreceivers.DeviceBootReceiver;
 
 public class AlarmNotifier extends Notifier {
+
+	public static final String EXTRA_FROM_ALARM = "fromAlarm";
+	public static final String EXTRA_NEXT_SWEEPING = "nextSweeping";
 
 	public static final int ALARM_REQUEST = 1; 	
 	
@@ -54,18 +57,19 @@ public class AlarmNotifier extends Notifier {
 		super.initializeNotifier(activity, v); 
 		mActivity = activity; 
 		
-		mCbActivateNotifier = (CheckBox) v.findViewById(R.id.cbActivateNotifier); 
-		mCbActivateNotifier.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				updateActivationStatus(isChecked);
-				if (isChecked) scheduleSystemAlarm();
-				else           cancelSystemAlarm();
-			}
-		});
+//		mCbActivateNotifier = (CheckBox) v.findViewById(R.id.cbActivateNotifier); 
+//		mCbActivateNotifier.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//			@Override
+//			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//				updateActivationStatus(isChecked);
+//				if (isChecked) scheduleSystemAlarm();
+//				else           cancelSystemAlarm();
+//			}
+//		});
 	}
 	
 	private void scheduleSystemAlarm() {		
+			Log.d("DEBUG", "\n\n************* In scheduleSystemAlarm() *************");
 	
 		// Get and parse street sweeping data
 		long sweepStartDateInMillis;
@@ -77,12 +81,17 @@ public class AlarmNotifier extends Notifier {
 					+ e.getMessage());
 		}
 		if (sweepStartDateInMillis == 0) return; 	// Abort if no parking history
+//			Log.d("DEBUG", "sweepStartDateInMillis: " + sweepStartDateInMillis); 
 		Date sweepStartDate = new Date(sweepStartDateInMillis); 
+//			Log.d("DEBUG", "sweepStartDate: " + sweepStartDate); 
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(sweepStartDate);
 		int sweepHour = calendar.get(Calendar.HOUR_OF_DAY); 
 		int sweepDay  = calendar.get(Calendar.DAY_OF_YEAR);
 		
+//			Log.d("DEBUG", "Calendar initially set at next sweep time: " + calendar.toString()); 
+		
+//			Log.d("DEBUG", "sweepHour is: " + sweepHour + ", and sweepDay is: " + sweepDay); 
 		
 		// Calculate actual value selected from number spinner (i.e., convert from index value)
 		int selectedMinute = getSelectedMinutes() + 1,
@@ -123,38 +132,56 @@ public class AlarmNotifier extends Notifier {
 			alarmHour   = defaultHour;					
 			alarmDay    = sweepDay - selectedDay; 
 		}
+//			Log.d("DEBUG", "getSelectedMinutes(): " + getSelectedMinutes() + ", getSelectedHours(): " + getSelectedHours() + ", getSelectedDays(): " + getSelectedDays()); 
+//			Log.d("DEBUG", "selectedMinute: " + selectedMinute + ", selectedHour: " + selectedHour + ", selectedDay: " + selectedDay); 
+			Log.d("DEBUG", "sweepMinute (=defaultMinute): " + defaultMinute + ", sweepHour: " + sweepHour + ", sweepDay: " + sweepDay); 
+			Log.d("DEBUG", "alarmMinute: " + alarmMinute + ", alarmHour: " + alarmHour + ", alarmDay: " + alarmDay); 
 		
 		// Schedule system alarm 
 			mAlarmManager = (AlarmManager) mActivity.getSystemService(Context.ALARM_SERVICE); 
 			Intent intent = new Intent(mActivity, MapActivity.class); 
 			intent.setAction(Intent.ACTION_MAIN); 
-			intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); 
-			mAlarmIntent = PendingIntent.getBroadcast(mActivity, ALARM_REQUEST, intent,
+			intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			intent.putExtra(EXTRA_FROM_ALARM, true);
+			intent.putExtra(EXTRA_NEXT_SWEEPING, sweepStartDateInMillis);
+			mAlarmIntent = PendingIntent.getActivity(mActivity, ALARM_REQUEST, intent,
 					PendingIntent.FLAG_ONE_SHOT); 
 			
 			calendar.set(Calendar.DAY_OF_YEAR, alarmDay); 
 			calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
 			calendar.set(Calendar.MINUTE, alarmMinute); 
 			
+//			Log.d("DEBUG", "Alarm set at: " + calendar.toString()); 
+			
+			// Test with an alarm 30 seconds from now
+			calendar = Calendar.getInstance();
+			calendar.add(Calendar.SECOND, 10);
+			Log.d("New time",calendar.toString());
+			
+			
+			
+			
+			// FIXME: For some reason, Eclipse refuses to recognize alarmMgr.setExact(...), which
+			// is the minSdkTarget API 19 update to alarmMgr.set(...). Unlike set(...), setExact(...) 
+			// does not allow the system to adjust delivery time.
 			mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), mAlarmIntent); 
 			
-			// Create broadcast receiver to ensure system alarm persists if device is shut down
-			ComponentName receiver = new ComponentName(mActivity, DeviceBootReceiver.class);
-			PackageManager pm = mActivity.getPackageManager(); 
-			pm.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-					PackageManager.DONT_KILL_APP); 
+			Toast.makeText(this.getContext(), "Alarm " + DateUtils
+					.getRelativeTimeSpanString(
+							calendar.getTime().getTime(),
+							new Date().getTime(),
+							DateUtils.SECOND_IN_MILLIS), Toast.LENGTH_SHORT).show();
+			
+			Log.d("DEBUG", "***********************************\n\n");
 	}
 	
 	private void cancelSystemAlarm() {
+		Log.d("DEBUG", "\n\n************* In cancelSystemAlarm() *************");
 		if (mAlarmManager != null) {
 			mAlarmManager.cancel(mAlarmIntent); 
 		}
 		
-		// Disable broadcast receiver
-		ComponentName receiver = new ComponentName(mActivity, DeviceBootReceiver.class); 
-		PackageManager pm = mActivity.getPackageManager();
-		pm.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-				PackageManager.DONT_KILL_APP); 
+		Log.d("DEBUG", "***********************************\n\n");
 	}	
 	
 	public void setOnScheduleAlarmListener(OnScheduleAlarmListener scheduleListener) {

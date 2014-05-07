@@ -5,35 +5,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity" >
 
-    <FrameLayout
-        android:id="@+id/flMoveBy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
-
-        <TextView
-            android:id="@+id/tvMoveBy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="12dp"
-            android:text="@string/tv_move_by"
-            android:textColor="@color/white"
-            android:textSize="10sp" />
-
-        <TextView
-            android:id="@+id/tvDay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginTop="25dp"
-            android:text="Thurs"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-    </FrameLayout>
-
     <fragment
         android:id="@+id/map"
         android:layout_width="match_parent"
@@ -72,16 +43,45 @@
         android:layout_alignTop="@+id/map"
         android:background="@drawable/btn_move_by" />
 
+    <FrameLayout
+        android:id="@+id/flMoveBy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/map" >
+
+        <TextView
+            android:id="@+id/tvMoveBy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/tv_move_by"
+            android:textColor="@color/white"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/tvDay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="25dp"
+            android:text="Thurs"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
     <ImageView
         android:id="@+id/ivZoomToParked"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignRight="@+id/map"
         android:layout_alignTop="@+id/map"
-        android:layout_marginTop="11dp"
         android:layout_marginRight="60dp"
-        android:padding="2dp"
+        android:layout_marginTop="11dp"
         android:background="@drawable/button_background"
+        android:padding="2dp"
         android:src="@drawable/park" />
 
 </RelativeLayout>

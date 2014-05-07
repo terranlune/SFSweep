@@ -65,20 +65,20 @@ public class Notifier extends LinearLayout {
 	}
 	
 	private void setupWidgets(View v) {
-		// Set up interval spinner 
-		mSpnInterval = (Spinner) v.findViewById(R.id.spnInterval); 
-		ArrayList<CharSequence> list = createAdapterArray(R.array.spn_options_intervals);     	// Use of ArrayList enables mutability (e.g., changing interval label from singular to plural)
-		mNotifierIntervalAdapter = new NotifierIntervalAdapter(mActivity, list, this); 
-		mNotifierIntervalAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
-		mSpnInterval.setAdapter(mNotifierIntervalAdapter); 
-		
-		// Set up number spinner 
-		mSpnNumber = (Spinner) v.findViewById(R.id.spnNumber); 
-		updateNumberSpinner(); 				// Number spinner adjusted to reflect interval selection (viz., minutes, hours, days)
-		
-		// Set up check box
-		mCbActivateNotifier = (CheckBox) v.findViewById(R.id.cbActivateNotifier); 
-		mCbActivateNotifier.setChecked(false); 
+//		// Set up interval spinner 
+//		mSpnInterval = (Spinner) v.findViewById(R.id.spnInterval); 
+//		ArrayList<CharSequence> list = createAdapterArray(R.array.spn_options_intervals);     	// Use of ArrayList enables mutability (e.g., changing interval label from singular to plural)
+//		mNotifierIntervalAdapter = new NotifierIntervalAdapter(mActivity, list, this); 
+//		mNotifierIntervalAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
+//		mSpnInterval.setAdapter(mNotifierIntervalAdapter); 
+//		
+//		// Set up number spinner 
+//		mSpnNumber = (Spinner) v.findViewById(R.id.spnNumber); 
+//		updateNumberSpinner(); 				// Number spinner adjusted to reflect interval selection (viz., minutes, hours, days)
+//		
+//		// Set up check box
+//		mCbActivateNotifier = (CheckBox) v.findViewById(R.id.cbActivateNotifier); 
+//		mCbActivateNotifier.setChecked(false); 
 	}
 	
 	private ArrayList<CharSequence> createAdapterArray(int resourceId) {
