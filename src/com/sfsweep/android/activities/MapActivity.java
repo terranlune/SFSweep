@@ -26,7 +26,6 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -77,7 +76,6 @@ public class MapActivity extends FragmentActivity implements
 	 * returned in Activity.onActivityResult
 	 */
 	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-	private static final int HUB_REQUEST = 1;
 
 	private static final String PREF_PARKED_SWEEP_DATA_ID = "parked_sweep_data_id";
 	private static final String PREF_PARKED_SWEEP_DATA_LAT = "parked_sweep_data_lat";
@@ -94,7 +92,6 @@ public class MapActivity extends FragmentActivity implements
 
 	private SweepDataDetailFragment sweepDataDetailFragment;
 
-	private Button mBtnMoveBy;
 	private TextView mTvMoveBy;
 	private TextView mTvDay;
 	private String mMoveByDay;
@@ -301,16 +298,6 @@ public class MapActivity extends FragmentActivity implements
 		mTvDay = (TextView) findViewById(R.id.tvDay);
 		mTvDay.setTypeface(mTypeface);
 		mTvDay.setText(restoreMoveByDay());
-
-		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy);
-		mBtnMoveBy.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent i = new Intent(MapActivity.this,
-						com.sfsweep.android.zdeprecated.HubActivity.class);
-				startActivityForResult(i, HUB_REQUEST);
-			}
-		});
 	}
 
 	private String restoreMoveByDay() {
@@ -589,12 +576,6 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	protected void onPark(StreetSweeperData d) {
-		// [John: I reversed the order of the call to setData() and the shared
-		// preferences transaction below,
-		// as I needed to access the relevant parking data strings produced by
-		// setData() and didn't want to
-		// split up the shared preferences transaction]
-
 		LatLng p = clickedMarker.getPosition();
 
 		placeParkedMarker(p);
