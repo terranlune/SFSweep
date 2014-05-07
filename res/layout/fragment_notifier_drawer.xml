@@ -32,14 +32,14 @@
 	        android:layout_height="wrap_content" />
     
         <Spinner
-	        android:id="@+id/spnNumber"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_marginRight="4sp"
-	        android:layout_marginLeft="0sp"
-	        android:dropDownVerticalOffset="20dp"
-	        android:background="@color/white" 
-	        android:popupBackground="@color/white" />
+            android:id="@+id/spnNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0sp"
+            android:layout_marginRight="4sp"
+            android:background="@color/yale_blue"
+            android:dropDownVerticalOffset="20dp"
+            android:popupBackground="@color/white" />
 	    
 	    <Spinner
 	        android:id="@+id/spnInterval"
