@@ -121,7 +121,7 @@ public class MapActivity extends FragmentActivity implements
 		restoreParkedMarker();
 		setupZoomToParked();
 		showMapControls();
-		setupMoveByButton();
+		setupMoveByTab();
 		setInitialCamera();
 
 		showAlarm(getIntent());
@@ -289,11 +289,12 @@ public class MapActivity extends FragmentActivity implements
 		}
 	}
 
-	private void setupMoveByButton() {
+	private void setupMoveByTab() {
 		mTypeface = Typeface.createFromAsset(getAssets(), mFont);
 
 		mTvMoveBy = (TextView) findViewById(R.id.tvMoveBy);
 		mTvMoveBy.setTypeface(mTypeface);
+		mTvMoveBy.setText(R.string.tv_move_by);  
 
 		mTvDay = (TextView) findViewById(R.id.tvDay);
 		mTvDay.setTypeface(mTypeface);
@@ -305,7 +306,7 @@ public class MapActivity extends FragmentActivity implements
 				.getDefaultSharedPreferences(this);
 		String moveByDay = prefs.getString(PREF_MOVE_BY_DAY, null);
 		if (moveByDay == null) {
-			moveByDay = "TBD";
+			moveByDay = "n/a";
 		}
 		return moveByDay;
 	}
@@ -622,7 +623,7 @@ public class MapActivity extends FragmentActivity implements
 			moveByDay = "Sat";
 			break;
 		default:
-			moveByDay = "TBD";
+			moveByDay = "n/a";
 		}
 		return moveByDay;
 	}
@@ -634,7 +635,7 @@ public class MapActivity extends FragmentActivity implements
 		removeParkedMarker();
 
 		// Void MoveBy button day
-		mMoveByDay = "TBD";
+		mMoveByDay = "n/a";
 		mTvMoveBy.setText(mMoveByDay);
 
 		showSweepDetail(p, d, false);
