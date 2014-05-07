@@ -57,15 +57,15 @@ public class AlarmNotifier extends Notifier {
 		super.initializeNotifier(activity, v); 
 		mActivity = activity; 
 		
-		mCbActivateNotifier = (CheckBox) v.findViewById(R.id.cbActivateNotifier); 
-		mCbActivateNotifier.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				updateActivationStatus(isChecked);
-				if (isChecked) scheduleSystemAlarm();
-				else           cancelSystemAlarm();
-			}
-		});
+//		mCbActivateNotifier = (CheckBox) v.findViewById(R.id.cbActivateNotifier); 
+//		mCbActivateNotifier.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//			@Override
+//			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//				updateActivationStatus(isChecked);
+//				if (isChecked) scheduleSystemAlarm();
+//				else           cancelSystemAlarm();
+//			}
+//		});
 	}
 	
 	private void scheduleSystemAlarm() {		
