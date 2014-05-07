@@ -19,6 +19,9 @@ import com.sfsweep.android.activities.MapActivity;
 
 public class AlarmNotifier extends Notifier {
 
+	public static final String EXTRA_FROM_ALARM = "fromAlarm";
+	public static final String EXTRA_NEXT_SWEEPING = "nextSweeping";
+
 	public static final int ALARM_REQUEST = 1; 	
 	
 	private Activity mActivity; 
@@ -136,8 +139,10 @@ public class AlarmNotifier extends Notifier {
 			mAlarmManager = (AlarmManager) mActivity.getSystemService(Context.ALARM_SERVICE); 
 			Intent intent = new Intent(mActivity, MapActivity.class); 
 			intent.setAction(Intent.ACTION_MAIN); 
-			intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT); 
-			mAlarmIntent = PendingIntent.getBroadcast(mActivity, ALARM_REQUEST, intent,
+			intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			intent.putExtra(EXTRA_FROM_ALARM, true);
+			intent.putExtra(EXTRA_NEXT_SWEEPING, sweepStartDateInMillis);
+			mAlarmIntent = PendingIntent.getActivity(mActivity, ALARM_REQUEST, intent,
 					PendingIntent.FLAG_ONE_SHOT); 
 			
 			calendar.set(Calendar.DAY_OF_YEAR, alarmDay); 
@@ -145,6 +150,14 @@ public class AlarmNotifier extends Notifier {
 			calendar.set(Calendar.MINUTE, alarmMinute); 
 			
 //			Log.d("DEBUG", "Alarm set at: " + calendar.toString()); 
+			
+			// Test with an alarm 30 seconds from now
+			calendar = Calendar.getInstance();
+			calendar.add(Calendar.SECOND, 10);
+			Log.d("New time",calendar.toString());
+			
+			
+			
 			
 			// FIXME: For some reason, Eclipse refuses to recognize alarmMgr.setExact(...), which
 			// is the minSdkTarget API 19 update to alarmMgr.set(...). Unlike set(...), setExact(...) 

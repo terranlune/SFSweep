@@ -4,7 +4,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -15,6 +17,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -53,6 +56,7 @@ import com.sfsweep.android.fragments.SweepDataDetailFragment;
 import com.sfsweep.android.fragments.SweepDataDetailFragment.OnClickParkActionListener;
 import com.sfsweep.android.helpers.HeightAnimation;
 import com.sfsweep.android.models.StreetSweeperData;
+import com.sfsweep.android.views.AlarmNotifier;
 import com.sfsweep.android.views.AlarmNotifier.OnScheduleAlarmListener;
 
 public class MapActivity extends FragmentActivity implements
@@ -93,7 +97,7 @@ public class MapActivity extends FragmentActivity implements
 	private Button mBtnMoveBy;
 	private TextView mTvMoveBy;
 	private TextView mTvDay;
-	private String mMoveByDay; 
+	private String mMoveByDay;
 
 	private String mFont = "Roboto-Light.ttf";
 	private Typeface mTypeface;
@@ -122,6 +126,35 @@ public class MapActivity extends FragmentActivity implements
 		showMapControls();
 		setupMoveByButton();
 		setInitialCamera();
+
+		showAlarm(getIntent());
+	}
+
+	private void showAlarm(Intent intent) {
+
+		if(!intent.hasExtra(AlarmNotifier.EXTRA_FROM_ALARM)) { return; }
+		
+		Date nextSweeping = new Date(intent.getLongExtra(AlarmNotifier.EXTRA_NEXT_SWEEPING, 0));
+		
+		new AlertDialog.Builder(this)
+	    .setTitle("Move your car!")
+	    
+	    .setMessage("Street sweeping " + DateUtils
+				.getRelativeTimeSpanString(
+						nextSweeping.getTime(),
+						new Date().getTime(),
+						DateUtils.MINUTE_IN_MILLIS))
+//	    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//	        public void onClick(DialogInterface dialog, int which) { 
+//	            // continue with delete
+//	        }
+//	     })
+	    .setNegativeButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int which) { 
+	        }
+	     })
+	    .setIcon(android.R.drawable.ic_dialog_alert)
+	     .show();
 	}
 
 	private void setupMap() {
@@ -268,7 +301,7 @@ public class MapActivity extends FragmentActivity implements
 		mTvDay = (TextView) findViewById(R.id.tvDay);
 		mTvDay.setTypeface(mTypeface);
 		mTvDay.setText(restoreMoveByDay());
-		
+
 		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy);
 		mBtnMoveBy.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -279,11 +312,11 @@ public class MapActivity extends FragmentActivity implements
 			}
 		});
 	}
-	
+
 	private String restoreMoveByDay() {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		String moveByDay = prefs.getString(PREF_MOVE_BY_DAY, null); 
+		String moveByDay = prefs.getString(PREF_MOVE_BY_DAY, null);
 		if (moveByDay == null) {
 			moveByDay = "TBD";
 		}
@@ -309,12 +342,9 @@ public class MapActivity extends FragmentActivity implements
 	@Override
 	protected void onStop() {
 		// Save MoveByDay
-		PreferenceManager
-			.getDefaultSharedPreferences(this)
-			.edit()
-			.putString(PREF_MOVE_BY_DAY, mMoveByDay)
-			.commit(); 
-		
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+				.putString(PREF_MOVE_BY_DAY, mMoveByDay).commit();
+
 		// Disconnecting the client invalidates it.
 		mLocationClient.disconnect();
 		super.onStop();
@@ -581,15 +611,15 @@ public class MapActivity extends FragmentActivity implements
 				.putLong(PREF_PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
 				.commit();
 	}
-	
+
 	private String getMoveByDay(Date sweepStartDate) {
 		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(sweepStartDate); 
+		calendar.setTime(sweepStartDate);
 		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-		
-		String moveByDay; 
+
+		String moveByDay;
 		switch (dayOfWeek) {
-		case 0: 
+		case 0:
 			moveByDay = "Sun";
 			break;
 		case 1:
@@ -598,16 +628,16 @@ public class MapActivity extends FragmentActivity implements
 		case 2:
 			moveByDay = "Tues";
 			break;
-		case 3: 
+		case 3:
 			moveByDay = "Wed";
 			break;
 		case 4:
 			moveByDay = "Thur";
 			break;
-		case 5: 
+		case 5:
 			moveByDay = "Fri";
 			break;
-		case 6: 
+		case 6:
 			moveByDay = "Sat";
 			break;
 		default:
@@ -615,17 +645,17 @@ public class MapActivity extends FragmentActivity implements
 		}
 		return moveByDay;
 	}
-	
+
 	protected void onUnPark(StreetSweeperData d) {
 		clickedData = d;
 		LatLng p = parkedMarker.getPosition();
 		placeClickedMarker(p);
 		removeParkedMarker();
-		
+
 		// Void MoveBy button day
 		mMoveByDay = "TBD";
-		mTvMoveBy.setText(mMoveByDay); 
-		
+		mTvMoveBy.setText(mMoveByDay);
+
 		showSweepDetail(p, d, false);
 	}
 
@@ -640,7 +670,8 @@ public class MapActivity extends FragmentActivity implements
 	private void removeParkedMarker() {
 		if (parkedMarker != null) {
 			PreferenceManager.getDefaultSharedPreferences(this).edit()
-					.remove(PREF_PARKED_SWEEP_DATA_ID).remove(PREF_PARKED_SWEEP_DATA_LAT)
+					.remove(PREF_PARKED_SWEEP_DATA_ID)
+					.remove(PREF_PARKED_SWEEP_DATA_LAT)
 					.remove(PREF_PARKED_SWEEP_DATA_LNG).commit();
 			parkedMarker.remove();
 		}
