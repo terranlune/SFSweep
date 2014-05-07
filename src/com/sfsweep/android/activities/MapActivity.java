@@ -237,7 +237,6 @@ public class MapActivity extends FragmentActivity implements
 
 				@Override
 				public boolean onNavigationItemSelected(int position, long id) {
-					Log.d("DEBUG", "In onNavigationItemSelected. position is: " + position); 
 					if (position == 0) {
 						mapAdapter.setModeHeatmap(); // calls
 					} else {
@@ -246,12 +245,27 @@ public class MapActivity extends FragmentActivity implements
 								.toString()); 
 					}
 
+					// Save spinner position
+					PreferenceManager
+							.getDefaultSharedPreferences(getBaseContext())
+							.edit()
+							.putInt("position", position)
+							.commit(); 
+					
 					return true;
 				}
 		};
 		
 		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		ab.setListNavigationCallbacks(mSpnAdapter, mNavigationListener); 
+		
+		// Restore saved spinner selection, if any
+		int spinSelection = PreferenceManager
+							.getDefaultSharedPreferences(getBaseContext())
+							.getInt("position", 0);
+		ab.setSelectedNavigationItem(spinSelection); 
+
+		
 	}
 	
 	private void setupZoomToParked() {
