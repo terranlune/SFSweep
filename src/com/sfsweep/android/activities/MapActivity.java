@@ -51,12 +51,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sfsweep.android.R;
 import com.sfsweep.android.adapters.StreetSweeperDataMapAdapter;
+import com.sfsweep.android.fragments.NotifierDrawerFragment;
+import com.sfsweep.android.fragments.NotifierDrawerFragment.OnScheduleAlarmListener;
 import com.sfsweep.android.fragments.SweepDataDetailFragment;
 import com.sfsweep.android.fragments.SweepDataDetailFragment.OnClickParkActionListener;
 import com.sfsweep.android.helpers.HeightAnimation;
 import com.sfsweep.android.models.StreetSweeperData;
-import com.sfsweep.android.views.AlarmNotifier;
-import com.sfsweep.android.views.AlarmNotifier.OnScheduleAlarmListener;
 
 public class MapActivity extends FragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
@@ -129,9 +129,9 @@ public class MapActivity extends FragmentActivity implements
 
 	private void showAlarm(Intent intent) {
 
-		if(!intent.hasExtra(AlarmNotifier.EXTRA_FROM_ALARM)) { return; }
+		if(!intent.hasExtra(NotifierDrawerFragment.EXTRA_FROM_ALARM)) { return; }
 		
-		Date nextSweeping = new Date(intent.getLongExtra(AlarmNotifier.EXTRA_NEXT_SWEEPING, 0));
+		Date nextSweeping = new Date(intent.getLongExtra(NotifierDrawerFragment.EXTRA_NEXT_SWEEPING, 0));
 		
 		new AlertDialog.Builder(this)
 	    .setTitle("Move your car!")

@@ -13,29 +13,21 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
-import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.sfsweep.android.R;
 import com.sfsweep.android.activities.MapActivity;
-import com.sfsweep.android.views.AlarmNotifier;
-import com.sfsweep.android.views.AlarmNotifier.OnScheduleAlarmListener;
 
 public class NotifierDrawerFragment extends Fragment implements
 		OnSeekBarChangeListener {
 
 	private static final String NOTIFIER_PREFERENCES = "com.sfsweep.android.fragments.notifier_preferences";
-	private static final String SELECTED_INTERVAL = "com.sfsweep.android.fragments.selected_interval";
-	private static final String SELECTED_MINUTES = "com.sfsweep.android.fragments.selected_minutes";
-	private static final String SELECTED_HOURS = "com.sfsweep.android.fragments.selected_hours";
-	private static final String SELECTED_DAYS = "com.sfsweep.android.fragments.selected_days";
 	private static final String MILLIS_BEFORE_SWEEPING = "millis_before_sweeping";
 	private static final String PROGRESS_BEFORE_SWEEPING = "progress_before_sweeping";
 
@@ -46,7 +38,6 @@ public class NotifierDrawerFragment extends Fragment implements
 
 	private TextView mTvNotificationHead;
 	private TextView mTvNotificationTail;
-	private AlarmNotifier mNotifier;
 	private OnScheduleAlarmListener mScheduleListener;
 	private SharedPreferences mPrefs;
 
@@ -56,6 +47,11 @@ public class NotifierDrawerFragment extends Fragment implements
 	private PendingIntent mAlarmIntent;
 	private AlarmManager mAlarmManager;
 	private long millisBeforeSweeping;
+	
+	
+	public interface OnScheduleAlarmListener {
+		public long onScheduleAlarm(); 
+	}
 
 	@Override
 	public void onAttach(Activity activity) {
@@ -166,14 +162,7 @@ public class NotifierDrawerFragment extends Fragment implements
 
 		// Get and parse street sweeping data
 		long sweepStartDateInMillis;
-		try {
-			sweepStartDateInMillis = mScheduleListener.onScheduleAlarm();
-		} catch (NullPointerException e) {
-			throw new NullPointerException(
-					"Must call setOnScheduleAlarmListener(...) "
-							+ "on AlarmNotifier prior to attempting to schedule system alarm. "
-							+ e.getMessage());
-		}
+		sweepStartDateInMillis = mScheduleListener.onScheduleAlarm();
 		if (sweepStartDateInMillis == 0)
 			return; // Abort if no parking history
 		Date sweepStartDate = new Date(sweepStartDateInMillis);
