@@ -64,4 +64,24 @@
     <string name="tv_notification_tail">5 minutes before sweep</string>
     <string name="tv_move_by">Move by</string>
 
+    <string name="alarm_off">Alarm off</string>
+    <plurals
+        name="minutes_before_sweep">
+        <item quantity="zero">@string/alarm_off</item>
+        <item quantity="one">1 minute before sweep</item>
+        <item quantity="other">%d minutes before sweep</item>
+    </plurals>
+    <plurals
+        name="hours_before_sweep">
+        <item quantity="zero">@string/alarm_off</item>
+        <item quantity="one">1 hour before sweep</item>
+        <item quantity="other">%d hours before sweep</item>
+    </plurals>
+    <plurals
+        name="days_before_sweep">
+        <item quantity="zero">@string/alarm_off</item>
+        <item quantity="one">1 day before sweep</item>
+        <item quantity="other">%d days before sweep</item>
+    </plurals>
+    
 </resources>

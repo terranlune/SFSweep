@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -115,22 +116,25 @@ public class NotifierDrawerFragment extends Fragment implements
 		double g = 0.0001 + Math.pow(x, 5);
 		millisBeforeSweeping = Math.round(g * 1000 * 60 * 60 * 24 * 7);
 
+		Resources res = getResources();
 		if (progress == 0) {
 			millisBeforeSweeping = 0;
-			mTvNotificationTail.setText("Alarm off");
+			mTvNotificationTail.setText(R.string.alarm_off);
 		} else if (millisBeforeSweeping < 1000 * 60 * 60) {
 			long minutes = millisBeforeSweeping / 1000 / 60;
-			mTvNotificationTail.setText(minutes + " minutes before sweeping");
+			mTvNotificationTail.setText(res.getQuantityString(
+					R.plurals.minutes_before_sweep, (int) minutes,
+					(int) minutes));
 		} else if (millisBeforeSweeping < 1000 * 60 * 60 * 24) {
 			long hours = millisBeforeSweeping / 1000 / 60 / 60;
 			millisBeforeSweeping = hours * 1000 * 60 * 60;
-			mTvNotificationTail.setText(hours + " hours before sweeping");
+			mTvNotificationTail.setText(res.getQuantityString(
+					R.plurals.hours_before_sweep, (int) hours, (int) hours));
 		} else {
 			long days = millisBeforeSweeping / 1000 / 60 / 60 / 24;
-			Log.e("Before millis", "" + millisBeforeSweeping);
 			millisBeforeSweeping = days * 1000 * 60 * 60 * 24;
-			Log.e("After millis", "" + millisBeforeSweeping);
-			mTvNotificationTail.setText(days + " days before sweeping");
+			mTvNotificationTail.setText(res.getQuantityString(
+					R.plurals.days_before_sweep, (int) days, (int) days));
 		}
 
 	}
@@ -144,8 +148,10 @@ public class NotifierDrawerFragment extends Fragment implements
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
 
-		mPrefs.edit().putLong(PROGRESS_BEFORE_SWEEPING, seekBar.getProgress()).commit();
-		mPrefs.edit().putLong(MILLIS_BEFORE_SWEEPING, millisBeforeSweeping).commit();
+		mPrefs.edit().putLong(PROGRESS_BEFORE_SWEEPING, seekBar.getProgress())
+				.commit();
+		mPrefs.edit().putLong(MILLIS_BEFORE_SWEEPING, millisBeforeSweeping)
+				.commit();
 
 		if (millisBeforeSweeping < 1000) {
 			cancelSystemAlarm();
