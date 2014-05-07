@@ -328,10 +328,6 @@ public class MapActivity extends FragmentActivity implements
 	 */
 	@Override
 	protected void onStop() {
-		// Save MoveByDay
-		PreferenceManager.getDefaultSharedPreferences(this).edit()
-				.putString(PREF_MOVE_BY_DAY, mMoveByDay).commit();
-
 		// Disconnecting the client invalidates it.
 		mLocationClient.disconnect();
 		super.onStop();
@@ -584,12 +580,16 @@ public class MapActivity extends FragmentActivity implements
 
 		this.sweepDataDetailFragment.setData(clickedData, true);
 		Date sweepStartDate = this.sweepDataDetailFragment.getSweepStartDate();
+		
+		String moveByDay = getMoveByDay(sweepStartDate); 
+		mTvDay.setText(moveByDay);
 
 		PreferenceManager.getDefaultSharedPreferences(this).edit()
 				.putLong(PREF_PARKED_SWEEP_DATA_ID, clickedData.getId())
 				.putFloat(PREF_PARKED_SWEEP_DATA_LAT, (float) p.latitude)
 				.putFloat(PREF_PARKED_SWEEP_DATA_LNG, (float) p.longitude)
 				.putLong(PREF_PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
+				.putString(PREF_MOVE_BY_DAY, moveByDay)
 				.commit();
 	}
 
@@ -600,29 +600,29 @@ public class MapActivity extends FragmentActivity implements
 
 		String moveByDay;
 		switch (dayOfWeek) {
-		case 0:
+		case 1:
 			moveByDay = "Sun";
 			break;
-		case 1:
+		case 2:
 			moveByDay = "Mon";
 			break;
-		case 2:
+		case 3:
 			moveByDay = "Tues";
 			break;
-		case 3:
+		case 4:
 			moveByDay = "Wed";
 			break;
-		case 4:
+		case 5:
 			moveByDay = "Thur";
 			break;
-		case 5:
+		case 6:
 			moveByDay = "Fri";
 			break;
-		case 6:
+		case 7:
 			moveByDay = "Sat";
 			break;
 		default:
-			moveByDay = "Sun";
+			moveByDay = "TBD";
 		}
 		return moveByDay;
 	}
