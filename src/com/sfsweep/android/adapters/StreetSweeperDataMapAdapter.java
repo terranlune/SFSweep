@@ -69,12 +69,13 @@ public class StreetSweeperDataMapAdapter {
 		mode = MODE_HEAT_MAP;
 		stylePolylines();
 	}
+	
 	public void setModeWeekday(String weekday) {
 		mode = MODE_WEEKDAY;
 		mode_weekday_filter = weekday;
 		stylePolylines();
 	}
-
+	
 	private void stylePolylinesWeekday(String weekDay) {
 		for (StreetSweeperData d : cache.keySet()) {
 			Polyline l = cache.get(d);
@@ -86,7 +87,7 @@ public class StreetSweeperDataMapAdapter {
 			}
 		}
 	}
-
+	
 	private void stylePolylinesHeatmap() {
 
 		for (String CNN : cnnCache.keySet()) {

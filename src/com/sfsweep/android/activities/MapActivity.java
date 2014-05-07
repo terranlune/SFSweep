@@ -3,9 +3,12 @@ package com.sfsweep.android.activities;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -20,14 +23,15 @@ import android.support.v4.app.FragmentActivity;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -84,7 +88,16 @@ public class MapActivity extends FragmentActivity implements
 	private static final String PREF_MOVE_BY_DAY = "move_by_day";
 	private static final String PREF_LAST_LAT = "last_lat";
 	private static final String PREF_LAST_LNG = "last_lon";
-
+	
+	private final String DAY_OF_WEEK_1 = "Sun";
+	private final String DAY_OF_WEEK_2 = "Mon";
+	private final String DAY_OF_WEEK_3 = "Tues";
+	private final String DAY_OF_WEEK_4 = "Wed";
+	private final String DAY_OF_WEEK_5 = "Thurs";
+	private final String DAY_OF_WEEK_6 = "Fri";
+	private final String DAY_OF_WEEK_7 = "Sat";
+	private final String DAY_OF_WEEK_DEFAULT = "n/a";
+	
 	private boolean expanded = false;
 	private int animDuration;
 	private Marker clickedMarker;
@@ -94,17 +107,19 @@ public class MapActivity extends FragmentActivity implements
 
 	private TextView mTvMoveBy;
 	private TextView mTvDay;
-	private String mMoveByDay;
-
 	private String mFont = "Roboto-Light.ttf";
 	private Typeface mTypeface;
 
 	private StreetSweeperDataMapAdapter mapAdapter;
-
+	
 	private ImageView ivZoomToParked;
 
 	private StreetSweeperData clickedData;
 	private boolean myLocationButtonClicked;
+	private OnNavigationListener mNavigationListener;
+	private Spinner mSpnModeSelector;
+	private SpinnerAdapter mSpnAdapter; 
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +131,7 @@ public class MapActivity extends FragmentActivity implements
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
 		myLocationButtonClicked = false;
 
-		setupSpinner();
+		setupActionBar();
 		setupMap();
 		restoreParkedMarker();
 		setupZoomToParked();
@@ -202,63 +217,43 @@ public class MapActivity extends FragmentActivity implements
 			}
 		}
 	}
+	
+	private void setupActionBar() {
+		mTypeface = Typeface.createFromAsset(getAssets(), mFont); 
+		
+		ActionBar ab = getActionBar(); 
+		LayoutInflater inflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
+		View v = inflater.inflate(R.layout.actionbar_custom, null); 
+		
+		// Set up spinner and adapter
+		mSpnModeSelector = (Spinner) v.findViewById(R.id.spnModeSelector); 
+				
+		mSpnAdapter = ArrayAdapter.createFromResource(this, R.array.spn_options_modes,
+						R.layout.spinner_item_custom);
 
-	private void setupSpinner() {
-		// R always refers to xml data
-		// find spinner1 in xml and attach it to spinner1 in java
-		final Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
-		ArrayAdapter<CharSequence> spinnerAdapter1 = ArrayAdapter
-				.createFromResource(
-				// got A handle to the adapter
-						this, R.array.spinner1_opt,
-						// spinner1_opt is array list of positions in dropdown
-						// Sun-Sat
-						android.R.layout.simple_spinner_item);
+		mSpnModeSelector.setAdapter(mSpnAdapter); 
+		mNavigationListener = new OnNavigationListener() {
 
-		// associating the adapter with the spinner
-		spinnerAdapter1
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				@Override
+				public boolean onNavigationItemSelected(int position, long id) {
+					Log.d("DEBUG", "In onNavigationItemSelected. position is: " + position); 
+					if (position == 0) {
+						mapAdapter.setModeHeatmap(); // calls
+					} else {
+						mapAdapter.setModeWeekday(mSpnModeSelector
+								.getItemAtPosition(position)
+								.toString()); 
+					}
 
-		spinner1.setAdapter(spinnerAdapter1);
-		// declare prefs as a variable: give me the handle
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-
-		// Next two lines restoring my saved value
-		int spinselection = prefs.getInt("position", 0);
-		spinner1.setSelection(spinselection);
-		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-
-				SharedPreferences pref = PreferenceManager
-						.getDefaultSharedPreferences(getBaseContext());
-				Editor edit = pref.edit();
-				edit.putInt("position", position);
-				edit.commit();
-
-				// If position =0 =>heatmap, else weekday
-				if (position == 0) {
-					Log.d("DEBUG", "Hello from on if_heatmap");
-					mapAdapter.setModeHeatmap(); // calls
-				} else {
-					mapAdapter.setModeWeekday(spinner1.getSelectedItem()
-							.toString());
-					Log.d("DEBUG", "Hello from weekdayMode");
+					return true;
 				}
-				Log.d("DEBUG", "Hello from on item selected");
-
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-
-			}
-		});
+		};
+		
+		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		ab.setListNavigationCallbacks(mSpnAdapter, mNavigationListener); 
 	}
-
+	
 	private void setupZoomToParked() {
 		ivZoomToParked = (ImageView) findViewById(R.id.ivZoomToParked);
 		ivZoomToParked.setOnClickListener(new OnClickListener() {
@@ -290,8 +285,6 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	private void setupMoveByTab() {
-		mTypeface = Typeface.createFromAsset(getAssets(), mFont);
-
 		mTvMoveBy = (TextView) findViewById(R.id.tvMoveBy);
 		mTvMoveBy.setTypeface(mTypeface);
 		mTvMoveBy.setText(R.string.tv_move_by);  
@@ -306,7 +299,7 @@ public class MapActivity extends FragmentActivity implements
 				.getDefaultSharedPreferences(this);
 		String moveByDay = prefs.getString(PREF_MOVE_BY_DAY, null);
 		if (moveByDay == null) {
-			moveByDay = "n/a";
+			moveByDay = DAY_OF_WEEK_DEFAULT;
 		}
 		return moveByDay;
 	}
@@ -602,28 +595,28 @@ public class MapActivity extends FragmentActivity implements
 		String moveByDay;
 		switch (dayOfWeek) {
 		case 1:
-			moveByDay = "Sun";
+			moveByDay = DAY_OF_WEEK_1;
 			break;
 		case 2:
-			moveByDay = "Mon";
+			moveByDay = DAY_OF_WEEK_2;
 			break;
 		case 3:
-			moveByDay = "Tues";
+			moveByDay = DAY_OF_WEEK_3;
 			break;
 		case 4:
-			moveByDay = "Wed";
+			moveByDay = DAY_OF_WEEK_4;
 			break;
 		case 5:
-			moveByDay = "Thur";
+			moveByDay = DAY_OF_WEEK_5;
 			break;
 		case 6:
-			moveByDay = "Fri";
+			moveByDay = DAY_OF_WEEK_6;
 			break;
 		case 7:
-			moveByDay = "Sat";
+			moveByDay = DAY_OF_WEEK_7;
 			break;
 		default:
-			moveByDay = "n/a";
+			moveByDay = DAY_OF_WEEK_DEFAULT;
 		}
 		return moveByDay;
 	}
@@ -634,9 +627,11 @@ public class MapActivity extends FragmentActivity implements
 		placeClickedMarker(p);
 		removeParkedMarker();
 
-		// Void MoveBy button day
-		mMoveByDay = "n/a";
-		mTvMoveBy.setText(mMoveByDay);
+		// Void move-by day and save update
+		mTvDay.setText(DAY_OF_WEEK_DEFAULT);
+		PreferenceManager.getDefaultSharedPreferences(this).edit()
+				.putString(PREF_MOVE_BY_DAY, DAY_OF_WEEK_DEFAULT)
+				.commit();
 
 		showSweepDetail(p, d, false);
 	}
@@ -695,4 +690,5 @@ public class MapActivity extends FragmentActivity implements
 		myLocationButtonClicked = true;
 		return false;
 	}
+
 }

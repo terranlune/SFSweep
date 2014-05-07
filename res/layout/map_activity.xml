@@ -27,13 +27,13 @@
         android:layout_alignParentBottom="true"
         class="com.sfsweep.android.fragments.SweepDataDetailFragment" />
 
-    <Spinner
+   <!--  <Spinner
         android:id="@+id/spinner1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:prompt="@color/android_deep_red" />
+        android:prompt="@color/android_deep_red" /> -->
 
     <Button
         android:id="@+id/btnMoveBy"
