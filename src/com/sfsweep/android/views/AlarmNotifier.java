@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -67,7 +66,6 @@ public class AlarmNotifier extends Notifier {
 	}
 	
 	private void scheduleSystemAlarm() {		
-			Log.d("DEBUG", "\n\n************* In scheduleSystemAlarm() *************");
 	
 		// Get and parse street sweeping data
 		long sweepStartDateInMillis;
@@ -79,17 +77,12 @@ public class AlarmNotifier extends Notifier {
 					+ e.getMessage());
 		}
 		if (sweepStartDateInMillis == 0) return; 	// Abort if no parking history
-//			Log.d("DEBUG", "sweepStartDateInMillis: " + sweepStartDateInMillis); 
 		Date sweepStartDate = new Date(sweepStartDateInMillis); 
-//			Log.d("DEBUG", "sweepStartDate: " + sweepStartDate); 
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(sweepStartDate);
 		int sweepHour = calendar.get(Calendar.HOUR_OF_DAY); 
 		int sweepDay  = calendar.get(Calendar.DAY_OF_YEAR);
 		
-//			Log.d("DEBUG", "Calendar initially set at next sweep time: " + calendar.toString()); 
-		
-//			Log.d("DEBUG", "sweepHour is: " + sweepHour + ", and sweepDay is: " + sweepDay); 
 		
 		// Calculate actual value selected from number spinner (i.e., convert from index value)
 		int selectedMinute = getSelectedMinutes() + 1,
@@ -130,10 +123,6 @@ public class AlarmNotifier extends Notifier {
 			alarmHour   = defaultHour;					
 			alarmDay    = sweepDay - selectedDay; 
 		}
-//			Log.d("DEBUG", "getSelectedMinutes(): " + getSelectedMinutes() + ", getSelectedHours(): " + getSelectedHours() + ", getSelectedDays(): " + getSelectedDays()); 
-//			Log.d("DEBUG", "selectedMinute: " + selectedMinute + ", selectedHour: " + selectedHour + ", selectedDay: " + selectedDay); 
-			Log.d("DEBUG", "sweepMinute (=defaultMinute): " + defaultMinute + ", sweepHour: " + sweepHour + ", sweepDay: " + sweepDay); 
-			Log.d("DEBUG", "alarmMinute: " + alarmMinute + ", alarmHour: " + alarmHour + ", alarmDay: " + alarmDay); 
 		
 		// Schedule system alarm 
 			mAlarmManager = (AlarmManager) mActivity.getSystemService(Context.ALARM_SERVICE); 
@@ -147,11 +136,6 @@ public class AlarmNotifier extends Notifier {
 			calendar.set(Calendar.HOUR_OF_DAY, alarmHour);
 			calendar.set(Calendar.MINUTE, alarmMinute); 
 			
-//			Log.d("DEBUG", "Alarm set at: " + calendar.toString()); 
-			
-			// FIXME: For some reason, Eclipse refuses to recognize alarmMgr.setExact(...), which
-			// is the minSdkTarget API 19 update to alarmMgr.set(...). Unlike set(...), setExact(...) 
-			// does not allow the system to adjust delivery time.
 			mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), mAlarmIntent); 
 			
 			// Create broadcast receiver to ensure system alarm persists if device is shut down
@@ -159,12 +143,9 @@ public class AlarmNotifier extends Notifier {
 			PackageManager pm = mActivity.getPackageManager(); 
 			pm.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
 					PackageManager.DONT_KILL_APP); 
-
-			Log.d("DEBUG", "***********************************\n\n");
 	}
 	
 	private void cancelSystemAlarm() {
-		Log.d("DEBUG", "\n\n************* In cancelSystemAlarm() *************");
 		if (mAlarmManager != null) {
 			mAlarmManager.cancel(mAlarmIntent); 
 		}
@@ -174,7 +155,6 @@ public class AlarmNotifier extends Notifier {
 		PackageManager pm = mActivity.getPackageManager();
 		pm.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
 				PackageManager.DONT_KILL_APP); 
-		Log.d("DEBUG", "***********************************\n\n");
 	}	
 	
 	public void setOnScheduleAlarmListener(OnScheduleAlarmListener scheduleListener) {
