@@ -73,13 +73,6 @@
             android:name="com.sfsweep.android.zdeprecated.AlarmActivity"
             android:label="@string/title_activity_alarm" >
         </activity>
-        
-        <receiver android:name="com.sfsweep.android.broadcastreceivers.DeviceBootReceiver" 
-            android:enabled="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter> 
-       	</receiver> 
        	
     </application>
     

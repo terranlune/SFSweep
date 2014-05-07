@@ -6,10 +6,8 @@ import java.util.Date;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +16,6 @@ import android.widget.CompoundButton;
 
 import com.sfsweep.android.R;
 import com.sfsweep.android.activities.MapActivity;
-import com.sfsweep.android.broadcastreceivers.DeviceBootReceiver;
 
 public class AlarmNotifier extends Notifier {
 
@@ -154,12 +151,6 @@ public class AlarmNotifier extends Notifier {
 			// does not allow the system to adjust delivery time.
 			mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), mAlarmIntent); 
 			
-			// Create broadcast receiver to ensure system alarm persists if device is shut down
-			ComponentName receiver = new ComponentName(mActivity, DeviceBootReceiver.class);
-			PackageManager pm = mActivity.getPackageManager(); 
-			pm.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-					PackageManager.DONT_KILL_APP); 
-
 			Log.d("DEBUG", "***********************************\n\n");
 	}
 	
@@ -169,11 +160,6 @@ public class AlarmNotifier extends Notifier {
 			mAlarmManager.cancel(mAlarmIntent); 
 		}
 		
-		// Disable broadcast receiver
-		ComponentName receiver = new ComponentName(mActivity, DeviceBootReceiver.class); 
-		PackageManager pm = mActivity.getPackageManager();
-		pm.setComponentEnabledSetting(receiver, PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-				PackageManager.DONT_KILL_APP); 
 		Log.d("DEBUG", "***********************************\n\n");
 	}	
 	
