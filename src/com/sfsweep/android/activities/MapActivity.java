@@ -8,28 +8,29 @@ import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.MenuItemCompat;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
-import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -124,14 +125,13 @@ public class MapActivity extends FragmentActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.map_activity);
+		setContentView(R.layout.activity_map);
 
 		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.sweepDetail);
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
 		myLocationButtonClicked = false;
 
-		setupActionBar();
 		setupMap();
 		restoreParkedMarker();
 		setupZoomToParked();
@@ -218,54 +218,56 @@ public class MapActivity extends FragmentActivity implements
 		}
 	}
 	
-	private void setupActionBar() {
-		mTypeface = Typeface.createFromAsset(getAssets(), mFont); 
-		
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_actionbar, menu); 
 		ActionBar ab = getActionBar(); 
-		LayoutInflater inflater = (LayoutInflater) this
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
-		View v = inflater.inflate(R.layout.actionbar_custom, null); 
-		
-		// Set up spinner and adapter
-		mSpnModeSelector = (Spinner) v.findViewById(R.id.spnModeSelector); 
-				
-		mSpnAdapter = ArrayAdapter.createFromResource(this, R.array.spn_options_modes,
-						R.layout.spinner_item_custom);
+		ab.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+		ab.setCustomView(R.layout.action_title); 
+		setupSpinner(menu); 
+		return true;
+	}
 
-		mSpnModeSelector.setAdapter(mSpnAdapter); 
-		mNavigationListener = new OnNavigationListener() {
-
-				@Override
-				public boolean onNavigationItemSelected(int position, long id) {
-					if (position == 0) {
-						mapAdapter.setModeHeatmap(); // calls
-					} else {
-						mapAdapter.setModeWeekday(mSpnModeSelector
-								.getItemAtPosition(position)
-								.toString()); 
-					}
-
-					// Save spinner position
-					PreferenceManager
-							.getDefaultSharedPreferences(getBaseContext())
-							.edit()
-							.putInt("position", position)
-							.commit(); 
-					
-					return true;
+	private void setupSpinner(Menu menu) {
+		MenuItem spnModeSelectorMenuItem = menu.findItem(R.id.spnModeSelectorMenuItem); 
+		RelativeLayout rlContainer = (RelativeLayout) MenuItemCompat.getActionView(spnModeSelectorMenuItem); 
+		mSpnModeSelector = (Spinner) rlContainer.findViewById(R.id.spnModeSelector); 
+		mSpnModeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				if (position == 0) {
+					mapAdapter.setModeHeatmap(); 
+				} else {
+					mapAdapter.setModeWeekday(mSpnModeSelector
+							.getItemAtPosition(position)
+							.toString()); 
 				}
-		};
+
+				// Save spinner position
+				PreferenceManager
+						.getDefaultSharedPreferences(getBaseContext())
+						.edit()
+						.putInt("position", position)
+						.commit(); 
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) { }
+		});
 		
-		ab.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		ab.setListNavigationCallbacks(mSpnAdapter, mNavigationListener); 
+		// Set up and attach spinner adapter
+		ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.spn_options_modes,
+				R.layout.spinner_item_custom); 
+		adapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
+		mSpnAdapter = adapter; 
+		mSpnModeSelector.setAdapter(mSpnAdapter); 
 		
 		// Restore saved spinner selection, if any
 		int spinSelection = PreferenceManager
 							.getDefaultSharedPreferences(getBaseContext())
 							.getInt("position", 0);
-		ab.setSelectedNavigationItem(spinSelection); 
-
-		
+		mSpnModeSelector.setSelection(spinSelection);
 	}
 	
 	private void setupZoomToParked() {
@@ -299,6 +301,8 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	private void setupMoveByTab() {
+		mTypeface = Typeface.createFromAsset(getAssets(), mFont); 
+		
 		mTvMoveBy = (TextView) findViewById(R.id.tvMoveBy);
 		mTvMoveBy.setTypeface(mTypeface);
 		mTvMoveBy.setText(R.string.tv_move_by);  

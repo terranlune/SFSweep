@@ -5,6 +5,8 @@
 		<item>Heat map</item> <item>Sun</item> <item>Mon</item> <item>Tues</item>
 		<item>Wed</item>     <item>Thur</item> <item>Fri</item> <item>Sat</item>
 	</string-array>
+	
+	<string name="day_of_week_1">Sunday</string>
    	
 	 <plurals
         name="minutes_before_sweep">
@@ -32,6 +34,7 @@
     <string name="tv_notification_tail">5 minutes before sweep</string>
     <string name="tv_move_by">Move by</string>
     <string name="alarm_off">Alarm off</string>
+    <string name="tv_title">Sweep Victory</string>
     
    
     

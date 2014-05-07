@@ -11,7 +11,6 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/sweepDetail"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/spinner1"
         class="com.google.android.gms.maps.SupportMapFragment" />
 
     <View
@@ -26,14 +25,6 @@
         android:layout_height="0dp"
         android:layout_alignParentBottom="true"
         class="com.sfsweep.android.fragments.SweepDataDetailFragment" />
-
-   <!--  <Spinner
-        android:id="@+id/spinner1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:prompt="@color/android_deep_red" /> -->
 
     <Button
         android:id="@+id/btnMoveBy"
