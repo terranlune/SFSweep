@@ -196,9 +196,6 @@ public class NotifierDrawerFragment extends Fragment implements
 		mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
 				mAlarmIntent);
 
-		Toast.makeText(getActivity(), "Alarm at " + calendar.getTime().toLocaleString(),
-				Toast.LENGTH_SHORT).show();
-
 		Log.d("DEBUG", "***********************************\n\n");
 	}
 

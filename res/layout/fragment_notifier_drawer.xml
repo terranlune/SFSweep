@@ -6,7 +6,12 @@
     android:orientation="vertical"
     android:padding="20dp" >
     
-
+    <SeekBar
+        android:id="@+id/sbAlarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:thumb="@drawable/ic_alarmclock_20dpx3dppad_gunmetal" />
+    
     <TextView
         android:id="@+id/tvNotificationTail"
         android:layout_width="fill_parent"
@@ -15,12 +20,6 @@
         android:layout_gravity="right"
         android:gravity="right"
         android:textSize="16sp" />
-    
-    <SeekBar
-        android:id="@+id/sbAlarm"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:thumb="@drawable/ic_alarmclock_20dpx3dppad_gunmetal" />
 
 
 </LinearLayout>
