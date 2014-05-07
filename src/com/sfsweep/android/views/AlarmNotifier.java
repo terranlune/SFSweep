@@ -8,11 +8,13 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import com.sfsweep.android.R;
 import com.sfsweep.android.activities.MapActivity;
@@ -163,6 +165,12 @@ public class AlarmNotifier extends Notifier {
 			// is the minSdkTarget API 19 update to alarmMgr.set(...). Unlike set(...), setExact(...) 
 			// does not allow the system to adjust delivery time.
 			mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), mAlarmIntent); 
+			
+			Toast.makeText(this.getContext(), "Alarm " + DateUtils
+					.getRelativeTimeSpanString(
+							calendar.getTime().getTime(),
+							new Date().getTime(),
+							DateUtils.SECOND_IN_MILLIS), Toast.LENGTH_SHORT).show();
 			
 			Log.d("DEBUG", "***********************************\n\n");
 	}
