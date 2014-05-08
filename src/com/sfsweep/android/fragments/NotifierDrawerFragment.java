@@ -184,9 +184,9 @@ public class NotifierDrawerFragment extends Fragment implements
 				intent, PendingIntent.FLAG_ONE_SHOT);
 
 		// Test with an alarm 30 seconds from now
-		// calendar = Calendar.getInstance();
-		// calendar.add(Calendar.SECOND, 10);
-		// Log.d("New time", calendar.toString());
+		 calendar = Calendar.getInstance();
+		 calendar.add(Calendar.SECOND, 10);
+		 Log.d("New time", calendar.toString());
 
 		mAlarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
 				mAlarmIntent);
