@@ -657,8 +657,8 @@ public class MapActivity extends FragmentActivity implements
 	private Marker placeParkedMarker(LatLng p) {
 		removeParkedMarker();
 		parkedMarker = map.addMarker(new MarkerOptions().position(p).icon(
-				BitmapDescriptorFactory
-						.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+				BitmapDescriptorFactory.fromResource(R.drawable.ic_parkedmarker)));
+						//.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 		return parkedMarker;
 	}
 
