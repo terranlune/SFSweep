@@ -99,7 +99,7 @@ public class MapActivity extends FragmentActivity implements
 	private final String DAY_OF_WEEK_2 = "Mon";
 	private final String DAY_OF_WEEK_3 = "Tues";
 	private final String DAY_OF_WEEK_4 = "Wed";
-	private final String DAY_OF_WEEK_5 = "Thurs";
+	private final String DAY_OF_WEEK_5 = "Thur";
 	private final String DAY_OF_WEEK_6 = "Fri";
 	private final String DAY_OF_WEEK_7 = "Sat";
 	private final String DAY_OF_WEEK_DEFAULT = "n/a";
