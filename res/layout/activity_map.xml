@@ -62,6 +62,14 @@
             android:textStyle="bold" />
     </FrameLayout>
 
+    
+    <ImageView
+    android:id="@+id/ivGif"
+    android:contentDescription="Gif"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />
+   
+    
     <ImageView
         android:id="@+id/ivZoomToParked"
         android:layout_width="40dp"

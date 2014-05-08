@@ -1,5 +1,6 @@
 package com.sfsweep.android.activities;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -12,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
@@ -27,6 +29,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -90,7 +94,7 @@ public class MapActivity extends FragmentActivity implements
 	private static final String PREF_MOVE_BY_DAY = "move_by_day";
 	private static final String PREF_LAST_LAT = "last_lat";
 	private static final String PREF_LAST_LNG = "last_lon";
-	
+
 	private final String DAY_OF_WEEK_1 = "Sun";
 	private final String DAY_OF_WEEK_2 = "Mon";
 	private final String DAY_OF_WEEK_3 = "Tues";
@@ -99,7 +103,7 @@ public class MapActivity extends FragmentActivity implements
 	private final String DAY_OF_WEEK_6 = "Fri";
 	private final String DAY_OF_WEEK_7 = "Sat";
 	private final String DAY_OF_WEEK_DEFAULT = "n/a";
-	
+
 	private boolean expanded = false;
 	private int animDuration;
 	private Marker clickedMarker;
@@ -109,25 +113,26 @@ public class MapActivity extends FragmentActivity implements
 
 	private TextView mTvMoveBy;
 	private TextView mTvDay;
-	private Button mBtnMoveBy; 
+	private Button mBtnMoveBy;
 	private String mFont = "Roboto-Light.ttf";
 	private Typeface mTypeface;
 
 	private StreetSweeperDataMapAdapter mapAdapter;
-	
+
 	private ImageView ivZoomToParked;
 
 	private StreetSweeperData clickedData;
 	private boolean myLocationButtonClicked;
 	private OnNavigationListener mNavigationListener;
 	private Spinner mSpnModeSelector;
-	private SpinnerAdapter mSpnAdapter; 
-	
+	private SpinnerAdapter mSpnAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
+
+		
 
 		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.sweepDetail);
@@ -144,31 +149,61 @@ public class MapActivity extends FragmentActivity implements
 		showAlarm(getIntent());
 	}
 
+	// Loads a GIF from the specified raw resource folder into an ImageView
+	protected void loadGifIntoImageView(ImageView ivImage, int rawId) {
+		try {
+			GifAnimationDrawable anim = new GifAnimationDrawable(getResources()
+					.openRawResource(rawId));
+			ivImage.setImageDrawable(anim);
+			((GifAnimationDrawable) ivImage.getDrawable()).setVisible(true,
+					true);
+		} catch (NotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private void showAlarm(Intent intent) {
 
-		if(!intent.hasExtra(NotifierDrawerFragment.EXTRA_FROM_ALARM)) { return; }
+		if (!intent.hasExtra(NotifierDrawerFragment.EXTRA_FROM_ALARM)) {
+			return;
+		}
+
+		Date nextSweeping = new Date(intent.getLongExtra(
+				NotifierDrawerFragment.EXTRA_NEXT_SWEEPING, 0));
+		//**************************************************************************************
 		
-		Date nextSweeping = new Date(intent.getLongExtra(NotifierDrawerFragment.EXTRA_NEXT_SWEEPING, 0));
+		//loadGifIntoImageView.start();
+		// Find the ImageView to display the GIF
+				ImageView ivGif = (ImageView) findViewById(R.id.ivGif);
+				// Display the GIF (from raw resource) into the ImageView
+				loadGifIntoImageView(ivGif, R.raw.sweeparoundalarm);
+				Animation animation = AnimationUtils.loadAnimation(this, R.anim.translateimage);
+				ivGif.startAnimation(animation);
 		
+
 		new AlertDialog.Builder(this)
-	    .setTitle("Move your car!")
-	    
-	    .setMessage("Street sweeping " + DateUtils
-				.getRelativeTimeSpanString(
-						nextSweeping.getTime(),
-						new Date().getTime(),
-						DateUtils.MINUTE_IN_MILLIS))
-//	    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-//	        public void onClick(DialogInterface dialog, int which) { 
-//	            // continue with delete
-//	        }
-//	     })
-	    .setNegativeButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-	        public void onClick(DialogInterface dialog, int which) { 
-	        }
-	     })
-	    .setIcon(android.R.drawable.ic_dialog_alert)
-	     .show();
+				.setTitle("Move your car!")
+
+				.setMessage(
+						"Street sweeping "
+								+ DateUtils.getRelativeTimeSpanString(
+										nextSweeping.getTime(),
+										new Date().getTime(),
+										DateUtils.MINUTE_IN_MILLIS))
+				// .setPositiveButton(android.R.string.yes, new
+				// DialogInterface.OnClickListener() {
+				// public void onClick(DialogInterface dialog, int which) {
+				// // continue with delete
+				// }
+				// })
+				.setNegativeButton(android.R.string.ok,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+							}
+						}).setIcon(android.R.drawable.ic_dialog_alert).show();
 	}
 
 	private void setupMap() {
@@ -219,59 +254,60 @@ public class MapActivity extends FragmentActivity implements
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.menu_actionbar, menu); 
-		ActionBar ab = getActionBar(); 
+		getMenuInflater().inflate(R.menu.menu_actionbar, menu);
+		ActionBar ab = getActionBar();
 		ab.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-		ab.setCustomView(R.layout.action_title); 
-		setupSpinner(menu); 
+		ab.setCustomView(R.layout.action_title);
+		setupSpinner(menu);
 		return true;
 	}
 
 	private void setupSpinner(Menu menu) {
-		MenuItem spnModeSelectorMenuItem = menu.findItem(R.id.spnModeSelectorMenuItem); 
-		RelativeLayout rlContainer = (RelativeLayout) MenuItemCompat.getActionView(spnModeSelectorMenuItem); 
-		mSpnModeSelector = (Spinner) rlContainer.findViewById(R.id.spnModeSelector); 
-		mSpnModeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int position, long id) {
-				if (position == 0) {
-					mapAdapter.setModeHeatmap(); 
-				} else {
-					mapAdapter.setModeWeekday(mSpnModeSelector
-							.getItemAtPosition(position)
-							.toString()); 
-				}
+		MenuItem spnModeSelectorMenuItem = menu
+				.findItem(R.id.spnModeSelectorMenuItem);
+		RelativeLayout rlContainer = (RelativeLayout) MenuItemCompat
+				.getActionView(spnModeSelectorMenuItem);
+		mSpnModeSelector = (Spinner) rlContainer
+				.findViewById(R.id.spnModeSelector);
+		mSpnModeSelector
+				.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+					@Override
+					public void onItemSelected(AdapterView<?> parent,
+							View view, int position, long id) {
+						if (position == 0) {
+							mapAdapter.setModeHeatmap();
+						} else {
+							mapAdapter.setModeWeekday(mSpnModeSelector
+									.getItemAtPosition(position).toString());
+						}
 
-				// Save spinner position
-				PreferenceManager
-						.getDefaultSharedPreferences(getBaseContext())
-						.edit()
-						.putInt("position", position)
-						.commit(); 
-			}
+						// Save spinner position
+						PreferenceManager
+								.getDefaultSharedPreferences(getBaseContext())
+								.edit().putInt("position", position).commit();
+					}
 
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) { }
-		});
-		
+					@Override
+					public void onNothingSelected(AdapterView<?> parent) {
+					}
+				});
+
 		// Set up and attach spinner adapter
-		ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.spn_options_modes,
-				R.layout.spinner_item_custom); 
+		ArrayAdapter adapter = ArrayAdapter.createFromResource(this,
+				R.array.spn_options_modes, R.layout.spinner_item_custom);
 		adapter.setDropDownViewResource(R.layout.spinner_dropdown_item_custom);
-		mSpnAdapter = adapter; 
-		mSpnModeSelector.setAdapter(mSpnAdapter); 
-		
+		mSpnAdapter = adapter;
+		mSpnModeSelector.setAdapter(mSpnAdapter);
+
 		// Restore saved spinner selection, if any
-		int spinSelection = PreferenceManager
-							.getDefaultSharedPreferences(getBaseContext())
-							.getInt("position", 0);
+		int spinSelection = PreferenceManager.getDefaultSharedPreferences(
+				getBaseContext()).getInt("position", 0);
 		mSpnModeSelector.setSelection(spinSelection);
 	}
-	
+
 	private void setupZoomToParked() {
 		ivZoomToParked = (ImageView) findViewById(R.id.ivZoomToParked);
 		ivZoomToParked.setOnClickListener(new OnClickListener() {
@@ -303,16 +339,16 @@ public class MapActivity extends FragmentActivity implements
 	}
 
 	private void setupMoveByTab() {
-		mTypeface = Typeface.createFromAsset(getAssets(), mFont); 
-		
+		mTypeface = Typeface.createFromAsset(getAssets(), mFont);
+
 		mTvMoveBy = (TextView) findViewById(R.id.tvMoveBy);
 		mTvMoveBy.setTypeface(mTypeface);
-		mTvMoveBy.setText(R.string.tv_move_by);  
+		mTvMoveBy.setText(R.string.tv_move_by);
 
 		mTvDay = (TextView) findViewById(R.id.tvDay);
 		mTvDay.setTypeface(mTypeface);
 		mTvDay.setText(restoreMoveByDay());
-		
+
 		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy);
 	}
 
@@ -322,7 +358,7 @@ public class MapActivity extends FragmentActivity implements
 		String moveByDay = prefs.getString(PREF_MOVE_BY_DAY, null);
 		if (moveByDay == null) {
 			moveByDay = DAY_OF_WEEK_DEFAULT;
-			mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_light_gray); 
+			mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_light_gray);
 		}
 		return moveByDay;
 	}
@@ -597,18 +633,17 @@ public class MapActivity extends FragmentActivity implements
 
 		this.sweepDataDetailFragment.setData(clickedData, true);
 		Date sweepStartDate = this.sweepDataDetailFragment.getSweepStartDate();
-		
-		String moveByDay = getMoveByDay(sweepStartDate); 
+
+		String moveByDay = getMoveByDay(sweepStartDate);
 		mTvDay.setText(moveByDay);
-		mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_blue); 
+		mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_blue);
 
 		PreferenceManager.getDefaultSharedPreferences(this).edit()
 				.putLong(PREF_PARKED_SWEEP_DATA_ID, clickedData.getId())
 				.putFloat(PREF_PARKED_SWEEP_DATA_LAT, (float) p.latitude)
 				.putFloat(PREF_PARKED_SWEEP_DATA_LNG, (float) p.longitude)
 				.putLong(PREF_PARKED_SWEEP_DATA_DATE, sweepStartDate.getTime())
-				.putString(PREF_MOVE_BY_DAY, moveByDay)
-				.commit();
+				.putString(PREF_MOVE_BY_DAY, moveByDay).commit();
 	}
 
 	private String getMoveByDay(Date sweepStartDate) {
@@ -655,8 +690,7 @@ public class MapActivity extends FragmentActivity implements
 		mTvDay.setText(DAY_OF_WEEK_DEFAULT);
 		mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_light_gray);
 		PreferenceManager.getDefaultSharedPreferences(this).edit()
-				.putString(PREF_MOVE_BY_DAY, DAY_OF_WEEK_DEFAULT)
-				.commit();
+				.putString(PREF_MOVE_BY_DAY, DAY_OF_WEEK_DEFAULT).commit();
 
 		showSweepDetail(p, d, false);
 	}
@@ -665,7 +699,8 @@ public class MapActivity extends FragmentActivity implements
 		removeParkedMarker();
 		parkedMarker = map.addMarker(new MarkerOptions().position(p).icon(
 				BitmapDescriptorFactory
-						.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+						.fromResource(R.drawable.ic_parkedmarker)));
+		// .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 		return parkedMarker;
 	}
 
