@@ -35,9 +35,10 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/tvStreetName"
         android:layout_below="@+id/tvSweepingInProgress"
+        android:textColor="@color/sfsweep_light_gunmetal"
         android:text="Wednesday 8am-10am" />
 
-    <TextView
+    <!-- <TextView
         android:id="@+id/tvNextSweepingRel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -48,15 +49,38 @@
         android:gravity="center"
         android:text="in 3 days"
         android:textColor="@color/gunmetal"
-        android:textSize="24sp" />
+        android:textSize="24sp" /> -->
 
+    <TextView
+        android:id="@+id/tvNextSweepingRel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignTop="@+id/tvStreetName"
+        android:layout_toLeftOf="@+id/separator"
+        android:layout_toRightOf="@+id/flIconContainer"
+        android:gravity="center"
+        android:text="in 3 days"
+        android:textColor="@color/gunmetal"
+        android:textSize="28sp" />
+    
+    <TextView
+        android:id="@+id/tvToNextSweeping"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvNextSweepingRel"
+        android:layout_toLeftOf="@+id/separator"
+        android:textSize="8sp"
+        android:textColor="@color/sfsweep_light_gunmetal"
+        android:text="@string/tv_to_next_sweep" />
+    
     <View
         android:id="@+id/separator"
         android:layout_width="1dp"
         android:layout_height="1dp"
         android:layout_margin="5dp"
         android:layout_alignParentTop="true"
-        android:layout_alignBottom="@+id/tvNextSweepingRel"
+        android:layout_alignBottom="@+id/tvToNextSweeping"
         android:layout_above="@+id/fNotifierDrawer"
         android:layout_toLeftOf="@+id/ivParkAction"
         android:background="@android:drawable/divider_horizontal_bright" />
@@ -65,7 +89,7 @@
         android:id="@+id/ivParkAction"
         android:layout_width="50dp"
         android:layout_height="40dp"
-        android:layout_alignBottom="@+id/tvNextSweepingRel"
+        android:layout_alignBottom="@+id/tvToNextSweeping"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:src="@drawable/park_action" />

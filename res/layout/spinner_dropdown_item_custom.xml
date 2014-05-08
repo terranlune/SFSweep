@@ -7,5 +7,5 @@
     android:gravity="center_horizontal"
     android:fontFamily="sans-serif-light"
     android:textSize="16sp"
-    android:textColor="@color/sfsweep_icon_gray" />
+    android:textColor="@color/sfsweep_light_gunmetal" />
 
