@@ -27,6 +27,7 @@ public class SweepDataDetailFragment extends Fragment {
 	private TextView tvNextSweepingAbs;
 	private TextView tvNextSweepingRel;
 	private TextView tvSweepingInProgress;
+	private TextView tvToNextSweeping;
 	private StreetSweeperData data;
 	private Date mSweepStartDate;
 	private String mSweepTimeRange;
@@ -84,6 +85,10 @@ public class SweepDataDetailFragment extends Fragment {
 		tvNextSweepingRel = (TextView) rootView
 				.findViewById(R.id.tvNextSweepingRel);
 		tvNextSweepingRel.setTypeface(mTypeface);
+		
+		tvToNextSweeping = (TextView) rootView
+				.findViewById(R.id.tvToNextSweeping);
+		tvToNextSweeping.setTypeface(mTypeface); 
 
 		ivParkAction = (ImageView) rootView.findViewById(R.id.ivParkAction);
 		ivParkAction.setOnClickListener(new OnClickListener() {
@@ -181,17 +186,23 @@ public class SweepDataDetailFragment extends Fragment {
 			mSweepStartDate = sweepStartDate;
 		}
 		mSweepTimeRange = new SimpleDateFormat("cccc ha", Locale.US)
-				.format(sweepStartDate)
-				+ "-"
+				.format(sweepStartDate).replace("AM", "am").replace("PM", "pm")
+				+ " - "
 				+ new SimpleDateFormat("ha", Locale.US)
-						.format(nextSweeping.end);
+						.format(nextSweeping.end).replace("AM", "am").replace("PM", "pm");
 
 		mDaysToNextSweep = (String) DateUtils.getRelativeTimeSpanString(
 				nextSweeping.start.getTime(), new Date().getTime(),
 				DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_SHOW_DATE);
+//		String trimmed = mDaysToNextSweep.trim(); 
+//		int index = trimmed.indexOf(" ");
+//		String number = trimmed.substring(0, index); 
+		String daysToNextWithoutPreposition = mDaysToNextSweep.trim().substring(3); 
+		
 
 		tvNextSweepingAbs.setText(mSweepTimeRange);
-		tvNextSweepingRel.setText(mDaysToNextSweep);
+//		tvNextSweepingRel.setText(mDaysToNextSweep);
+		tvNextSweepingRel.setText(daysToNextWithoutPreposition); 
 	}
 
 	public Date getSweepStartDate() {

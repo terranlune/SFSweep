@@ -1,6 +1,7 @@
 package com.sfsweep.android.adapters;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -28,6 +29,18 @@ public class StreetSweeperDataMapAdapter {
 	private static final int LINE_WIDTH = 20;
 	private static final int MODE_HEAT_MAP = 1;
 	private static final int MODE_WEEKDAY = 2;
+	
+	private static final String COLOR_ORANGE = "#FFD801";
+	private static final String COLOR_BLUE   = "#4788DE";
+	private static final String COLOR_GRAY   = "#8F8F8F";
+	private static final String COLOR_GREEN_DARKNESS_1 = "#61E81B";		// Darker colors have higher DARKNESS integers (e.g., COLOR_GREEN_DARKNESS_7 is darker than COLOR_GREEN_DARKNESS_1).
+	private static final String COLOR_GREEN_DARKNESS_2 = "#52D017";
+	private static final String COLOR_GREEN_DARKNESS_3 = "#399110";
+	private static final String COLOR_GREEN_DARKNESS_4 = "#2D730D";
+	private static final String COLOR_GREEN_DARKNESS_5 = "#1E4C09";
+	private static final String COLOR_GREEN_DARKNESS_6 = "#133006";
+	private static final String COLOR_GREEN_DARKNESS_7 = "#020501";		 
+	
 	private HashMap<StreetSweeperData, Polyline> cache;
 	private HashMap<String, List<StreetSweeperData>> cnnCache;
 	private GoogleMap map;
@@ -79,7 +92,7 @@ public class StreetSweeperDataMapAdapter {
 	private void stylePolylinesWeekday(String weekDay) {
 		for (StreetSweeperData d : cache.keySet()) {
 			Polyline l = cache.get(d);
-			l.setColor(Color.BLUE);
+			l.setColor(Color.parseColor(COLOR_ORANGE));  
 			if (d.WeekDay.equals(weekDay)) {
 				l.setVisible(true);
 			} else {
@@ -100,7 +113,7 @@ public class StreetSweeperDataMapAdapter {
 			StreetSweeperData nextSweepingData = l.get(0);
 			Polyline line = cache.get(nextSweepingData);
 			line.setVisible(true);
-			int color = getHeatmapColor(nextSweepingData, false);
+			int color = getHeatmapColorGrayScale(nextSweepingData, false);	
 			line.setColor(color);
 
 			// Hide the remaining ones
@@ -123,6 +136,68 @@ public class StreetSweeperDataMapAdapter {
 		long diff = nextSweeping.start.getTime() - new Date().getTime();
 		double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
 		int color = Color.rgb(0, Math.min(255, (int) (255 * percent)), 0);
+		return color;
+	}
+	
+	// Alternate heatmap color scheme
+	private int getHeatmapColorGrayScale(StreetSweeperData d, boolean includeInProgress) {
+		if (d == null) {
+			return Color.MAGENTA;
+		}
+		DateInterval nextSweeping = d.nextSweeping(includeInProgress);
+		if (nextSweeping == null) {
+			return Color.MAGENTA;
+		}
+		long diff = nextSweeping.start.getTime() - new Date().getTime();
+		double percent = 1.0 * diff / PARKING_DURATION_MILLIS;
+		int color = Color.rgb(Math.min(255, (int) (255 * percent)), Math.min(255, (int) (255 * percent)), 
+				Math.min(255, (int) (255 * percent)));
+		return color;
+	}
+	
+	// Alternate heatmap color scheme
+	private int getHeatmapColorGreenSelect(StreetSweeperData d, boolean includeInProgress) {
+		if (d == null) {
+			return Color.MAGENTA;
+		}
+		
+		DateInterval nextSweeping = d.nextSweeping(includeInProgress);
+		if (nextSweeping == null) {
+			return Color.MAGENTA;
+		}
+		
+		Calendar sweepCal = Calendar.getInstance();
+		sweepCal.setTime(nextSweeping.start); 
+		int sweepDay = sweepCal.get(Calendar.DAY_OF_YEAR);
+		Calendar currentCal = Calendar.getInstance();
+		int today = currentCal.get(Calendar.DAY_OF_YEAR); 
+		int delta = sweepDay - today; 
+		Log.d("DEBUG", "in getHeatmapColorAlternate(). sweepDay = "
+				+ sweepDay +", and today = " + today + ", and delta = " + delta); 
+		
+		int color; 
+		switch (delta) {
+		case 0: 
+			color = Color.parseColor(COLOR_GREEN_DARKNESS_7); 
+			break;
+		case 1:
+			color = Color.parseColor(COLOR_GREEN_DARKNESS_6); 
+			break;
+		case 2:
+			color = Color.parseColor(COLOR_GREEN_DARKNESS_5);
+			break;
+		case 3:
+			color = Color.parseColor(COLOR_GREEN_DARKNESS_4); 
+			break;
+		case 4:
+			color = Color.parseColor(COLOR_GREEN_DARKNESS_3); 
+			break;
+		case 5:
+			color = Color.parseColor(COLOR_GREEN_DARKNESS_2);
+			break;
+		default:
+			color = Color.parseColor(COLOR_GREEN_DARKNESS_1); 
+		}
 		return color;
 	}
 

@@ -29,4 +29,5 @@ public class ReversedSeekBar extends SeekBar {
 
         return super.onTouchEvent(event);
     }
+    
 }
