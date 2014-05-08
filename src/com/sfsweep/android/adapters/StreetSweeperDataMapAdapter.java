@@ -113,7 +113,7 @@ public class StreetSweeperDataMapAdapter {
 			StreetSweeperData nextSweepingData = l.get(0);
 			Polyline line = cache.get(nextSweepingData);
 			line.setVisible(true);
-			int color = getHeatmapColorGrayScale(nextSweepingData, false);	
+			int color = getHeatmapColor(nextSweepingData, false);	
 			line.setColor(color);
 
 			// Hide the remaining ones
