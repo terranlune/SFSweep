@@ -341,24 +341,28 @@ public class MapActivity extends FragmentActivity implements
 	private void setupMoveByTab() {
 		mTypeface = Typeface.createFromAsset(getAssets(), mFont);
 
+		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy);
+		
 		mTvMoveBy = (TextView) findViewById(R.id.tvMoveBy);
 		mTvMoveBy.setTypeface(mTypeface);
 		mTvMoveBy.setText(R.string.tv_move_by);
 
 		mTvDay = (TextView) findViewById(R.id.tvDay);
 		mTvDay.setTypeface(mTypeface);
-		mTvDay.setText(restoreMoveByDay());
-
-		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy);
+		mTvDay.setText(restoreMoveByDay());				// Note: Must retrieve handle to mBtnMoveBy prior to invocation
 	}
 
 	private String restoreMoveByDay() {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		String moveByDay = prefs.getString(PREF_MOVE_BY_DAY, null);
-		if (moveByDay == null) {
+		if (moveByDay == null) {												// After installation but prior to first park, moveByDay is null
 			moveByDay = DAY_OF_WEEK_DEFAULT;
 			mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_light_gray);
+		} else if (moveByDay.equals(DAY_OF_WEEK_DEFAULT)) {						// After first park, moveByDay is either DAY_OF_WEEK_DEFAULT or a specified day of the week
+			mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_light_gray);
+		} else {
+			mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_blue);
 		}
 		return moveByDay;
 	}
