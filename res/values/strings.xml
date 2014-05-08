@@ -3,7 +3,7 @@
     
 	<string-array name="spn_options_modes">
 		<item>Heat map</item> <item>Sun</item> <item>Mon</item> <item>Tues</item>
-		<item>Wed</item>     <item>Thur</item> <item>Fri</item> <item>Sat</item>
+		<item>Wed</item>     <item>Thu</item> <item>Fri</item> <item>Sat</item>
 	</string-array>
 	
 	<string name="day_of_week_1">Sunday</string>
