@@ -29,6 +29,7 @@ import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -108,6 +109,7 @@ public class MapActivity extends FragmentActivity implements
 
 	private TextView mTvMoveBy;
 	private TextView mTvDay;
+	private Button mBtnMoveBy; 
 	private String mFont = "Roboto-Light.ttf";
 	private Typeface mTypeface;
 
@@ -310,6 +312,8 @@ public class MapActivity extends FragmentActivity implements
 		mTvDay = (TextView) findViewById(R.id.tvDay);
 		mTvDay.setTypeface(mTypeface);
 		mTvDay.setText(restoreMoveByDay());
+		
+		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy);
 	}
 
 	private String restoreMoveByDay() {
@@ -318,6 +322,7 @@ public class MapActivity extends FragmentActivity implements
 		String moveByDay = prefs.getString(PREF_MOVE_BY_DAY, null);
 		if (moveByDay == null) {
 			moveByDay = DAY_OF_WEEK_DEFAULT;
+			mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_light_gray); 
 		}
 		return moveByDay;
 	}
@@ -595,6 +600,7 @@ public class MapActivity extends FragmentActivity implements
 		
 		String moveByDay = getMoveByDay(sweepStartDate); 
 		mTvDay.setText(moveByDay);
+		mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_blue); 
 
 		PreferenceManager.getDefaultSharedPreferences(this).edit()
 				.putLong(PREF_PARKED_SWEEP_DATA_ID, clickedData.getId())
@@ -647,6 +653,7 @@ public class MapActivity extends FragmentActivity implements
 
 		// Void move-by day and save update
 		mTvDay.setText(DAY_OF_WEEK_DEFAULT);
+		mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_light_gray);
 		PreferenceManager.getDefaultSharedPreferences(this).edit()
 				.putString(PREF_MOVE_BY_DAY, DAY_OF_WEEK_DEFAULT)
 				.commit();
