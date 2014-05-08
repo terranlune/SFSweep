@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignTop="@+id/map"
-        android:background="@drawable/btn_move_by" />
+        android:background="@drawable/btn_move_by_ffd801" />
 
     <FrameLayout
         android:id="@+id/flMoveBy"
@@ -45,7 +45,7 @@
             android:id="@+id/tvMoveBy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="7dp"
             android:layout_marginTop="12dp"
             android:text="@string/tv_move_by"
             android:textColor="@color/white"
@@ -55,10 +55,10 @@
             android:id="@+id/tvDay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
+            android:layout_marginLeft="6dp"
             android:layout_marginTop="25dp"
             android:textColor="@color/white"
-            android:textSize="18sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
     </FrameLayout>
 

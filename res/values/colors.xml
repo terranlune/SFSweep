@@ -1057,6 +1057,7 @@ For display of colors next to names, see: http://www.computerhope.com/htmcolor.h
 	<color name="sfsweep_dark_blue">#21518A</color>
 	<color name="sfsweep_orange">#F1941E</color>
 	<color name="sfsweep_icon_gray">#787878</color>
+	<color name="sfsweep_parking_button_blue">#529CFF</color>
 	
 </resources>
 
