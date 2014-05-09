@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.res.Resources.NotFoundException;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
@@ -34,7 +35,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
@@ -132,8 +135,6 @@ public class MapActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
 
-		
-
 		sweepDataDetailFragment = (SweepDataDetailFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.sweepDetail);
 		animDuration = (int) (1000 / getResources().getDisplayMetrics().density);
@@ -172,38 +173,41 @@ public class MapActivity extends FragmentActivity implements
 
 		Date nextSweeping = new Date(intent.getLongExtra(
 				NotifierDrawerFragment.EXTRA_NEXT_SWEEPING, 0));
-		//**************************************************************************************
-		
-		//loadGifIntoImageView.start();
-		// Find the ImageView to display the GIF
-				ImageView ivGif = (ImageView) findViewById(R.id.ivGif);
-				// Display the GIF (from raw resource) into the ImageView
-				loadGifIntoImageView(ivGif, R.raw.sweeparoundalarm);
-				Animation animation = AnimationUtils.loadAnimation(this, R.anim.translateimage);
-				ivGif.startAnimation(animation);
-		
+		// **************************************************************************************
 
-		new AlertDialog.Builder(this)
-				.setTitle("Move your car!")
 
-				.setMessage(
-						"Street sweeping "
-								+ DateUtils.getRelativeTimeSpanString(
-										nextSweeping.getTime(),
-										new Date().getTime(),
-										DateUtils.MINUTE_IN_MILLIS))
-				// .setPositiveButton(android.R.string.yes, new
-				// DialogInterface.OnClickListener() {
-				// public void onClick(DialogInterface dialog, int which) {
-				// // continue with delete
-				// }
-				// })
-				.setNegativeButton(android.R.string.ok,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int which) {
-							}
-						}).setIcon(android.R.drawable.ic_dialog_alert).show();
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Move your car!");
+
+		builder.setMessage("Street sweeping "
+				+ DateUtils.getRelativeTimeSpanString(nextSweeping.getTime(),
+						new Date().getTime(), DateUtils.MINUTE_IN_MILLIS));
+		// .setPositiveButton(android.R.string.yes, new
+		// DialogInterface.OnClickListener() {
+		// public void onClick(DialogInterface dialog, int which) {
+		// // continue with delete
+		// }
+		// })
+		builder.setNegativeButton(android.R.string.ok,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+					}
+				});
+		builder.setIcon(android.R.drawable.ic_dialog_alert);
+
+		AlertDialog alert = builder.create();
+
+		// Add the animating sweeper to the alert dialog
+		LinearLayout l = new LinearLayout(this);
+		l.setOrientation(1);
+		ImageView iv = new ImageView(this);
+		loadGifIntoImageView(iv, R.raw.sweeparoundalarm);
+		Animation a = AnimationUtils.loadAnimation(this, R.anim.translateimage);
+		iv.startAnimation(a);
+		l.addView(iv);
+		alert.setView(l);
+		
+		alert.show();
 	}
 
 	private void setupMap() {
@@ -342,24 +346,31 @@ public class MapActivity extends FragmentActivity implements
 		mTypeface = Typeface.createFromAsset(getAssets(), mFont);
 
 		mBtnMoveBy = (Button) findViewById(R.id.btnMoveBy);
-		
+
 		mTvMoveBy = (TextView) findViewById(R.id.tvMoveBy);
 		mTvMoveBy.setTypeface(mTypeface);
 		mTvMoveBy.setText(R.string.tv_move_by);
 
 		mTvDay = (TextView) findViewById(R.id.tvDay);
 		mTvDay.setTypeface(mTypeface);
-		mTvDay.setText(restoreMoveByDay());				// Note: Must retrieve handle to mBtnMoveBy prior to invocation
+		mTvDay.setText(restoreMoveByDay()); // Note: Must retrieve handle to
+											// mBtnMoveBy prior to invocation
 	}
 
 	private String restoreMoveByDay() {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
 		String moveByDay = prefs.getString(PREF_MOVE_BY_DAY, null);
-		if (moveByDay == null) {												// After installation but prior to first park, moveByDay is null
+		if (moveByDay == null) { // After installation but prior to first park,
+									// moveByDay is null
 			moveByDay = DAY_OF_WEEK_DEFAULT;
 			mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_light_gray);
-		} else if (moveByDay.equals(DAY_OF_WEEK_DEFAULT)) {						// After first park, moveByDay is either DAY_OF_WEEK_DEFAULT or a specified day of the week
+		} else if (moveByDay.equals(DAY_OF_WEEK_DEFAULT)) { // After first park,
+															// moveByDay is
+															// either
+															// DAY_OF_WEEK_DEFAULT
+															// or a specified
+															// day of the week
 			mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_light_gray);
 		} else {
 			mBtnMoveBy.setBackgroundResource(R.drawable.btn_move_by_blue);
