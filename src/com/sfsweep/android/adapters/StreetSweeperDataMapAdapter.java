@@ -109,7 +109,7 @@ public class StreetSweeperDataMapAdapter {
 			List<StreetSweeperData> l = cnnCache.get(CNN);
 			Collections.sort(l, new NextSweepingComparator());
 
-			// Color the first one
+			// Color the first one (which should be the next sweeping)
 			StreetSweeperData nextSweepingData = l.get(0);
 			Polyline line = cache.get(nextSweepingData);
 			line.setVisible(true);
@@ -214,7 +214,7 @@ public class StreetSweeperDataMapAdapter {
 			} else if (di2 == null) {
 				return -1;
 			} else {
-				return -1
+				return 1
 						* d1.nextSweeping(false).start.compareTo(d2
 								.nextSweeping(false).start);
 			}
