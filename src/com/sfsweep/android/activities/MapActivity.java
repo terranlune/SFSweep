@@ -177,7 +177,7 @@ public class MapActivity extends FragmentActivity implements
 
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Move your car!");
+		builder.setTitle("Move your car to ensure sweep victory!");
 
 		builder.setMessage("Street sweeping "
 				+ DateUtils.getRelativeTimeSpanString(nextSweeping.getTime(),

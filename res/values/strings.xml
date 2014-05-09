@@ -27,7 +27,7 @@
         <item quantity="other">%d days before sweep</item>
     </plurals>
      
-    <string name="app_name">SFSweep</string>
+    <string name="app_name">Sweep Around</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_sweep_data_detail">SweepDataDetail</string>
     <string name="tv_alarm_intro">Set alarm for</string>
